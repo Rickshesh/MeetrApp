@@ -1,0 +1,49 @@
+{
+    "displayInfo": {
+        "head": {
+            "identityParameters": "Driver Details",
+            "bankingDetails": "Bank Account Details",
+            "autoDetails": "Vehicle Details",
+            "creditPerformance": "Credit Details"
+        },
+        "body": {
+            "identityParameters": {
+                "firstName": "First Name",
+                "lastName": "Last Name",
+                "phoneNumber": "Phone Number",
+                "dateOfOnboarding": "Date of Onboarding",
+                "activeStatus": "Active Status",
+                "dateOfBirth": "Date of Birth",
+                "emailId": "Email Id"
+            },
+            "creditPerformance": {
+                "drivingScore": "Driving Score",
+                "creditScore": "Credit Score",
+                "totalAmountPending": "Total Pending Amount"
+            },
+            "bankingDetails": {
+                "bankAccountNumber": "Bank Account Number",
+                "bankPhoneNumber": "Bank Registered Phone Number",
+                "bankName": "Bank Name",
+                "upiAddress": "UPI Address"
+            },
+            "autoDetails": {
+                "deviceMac": "Device Id",
+                "autoNumber": "Vehicle Number"
+            },
+            "exceptions": {
+                "identityParameters": {
+                    "adhaar": "Aadhaar Number",
+                    "registerAddress": "Registered Address"
+                },
+                "creditPerformance": {
+                    "paymentsHistory": "Payments History",
+                    "esimtatedEarnings": "Estimated Earnings"
+                },
+                "autoDetails": {
+                    "autoImages": "Vehcile Images"
+                }
+            }
+        }
+    }
+}

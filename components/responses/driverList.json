@@ -1,0 +1,182 @@
+[
+    {
+        "driverId": "00001",
+        "driverName": "Om Shankar",
+        "driverImage": {
+            "uri": "https://testbucketasnyciot.s3.ap-south-1.amazonaws.com/profile.jpg",
+            "id": "213123"
+        },
+        "distanceTravelledToday": "34 kms",
+        "paymentHistory": [
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        "estimatedIncome": "Rs 600",
+        "drivingScore": "90"
+    },
+    {
+        "driverId": "00002",
+        "driverName": "Om Shankar",
+        "driverImage": {
+            "uri": "https://testbucketasnyciot.s3.ap-south-1.amazonaws.com/profile.jpg",
+            "id": "213123"
+        },
+        "distanceTravelledToday": "34 kms",
+        "paymentHistory": [
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        "estimatedIncome": "Rs 600",
+        "drivingScore": "90"
+    },
+    {
+        "driverId": "00003",
+        "driverName": "Om Shankar",
+        "driverImage": {
+            "uri": "https://testbucketasnyciot.s3.ap-south-1.amazonaws.com/profile.jpg",
+            "id": "213123"
+        },
+        "distanceTravelledToday": "34 kms",
+        "paymentHistory": [
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        "estimatedIncome": "Rs 600",
+        "drivingScore": "90"
+    },
+    {
+        "driverId": "00004",
+        "driverName": "Om Shankar",
+        "driverImage": {
+            "uri": "https://testbucketasnyciot.s3.ap-south-1.amazonaws.com/profile.jpg",
+            "id": "213123"
+        },
+        "distanceTravelledToday": "34 kms",
+        "paymentHistory": [
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        "estimatedIncome": "Rs 600",
+        "drivingScore": "90"
+    },
+    {
+        "driverId": "00005",
+        "driverName": "Om Shankar",
+        "driverImage": {
+            "uri": "https://testbucketasnyciot.s3.ap-south-1.amazonaws.com/profile.jpg",
+            "id": "213123"
+        },
+        "distanceTravelledToday": "34 kms",
+        "paymentHistory": [
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        "estimatedIncome": "Rs 600",
+        "drivingScore": "90"
+    },
+    {
+        "driverId": "00006",
+        "driverName": "Om Shankar",
+        "driverImage": {
+            "uri": "https://testbucketasnyciot.s3.ap-south-1.amazonaws.com/profile.jpg",
+            "id": "213123"
+        },
+        "distanceTravelledToday": "34 kms",
+        "paymentHistory": [
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        "estimatedIncome": "Rs 600",
+        "drivingScore": "90"
+    },
+    {
+        "driverId": "00007",
+        "driverName": "Om Shankar",
+        "driverImage": {
+            "uri": "https://testbucketasnyciot.s3.ap-south-1.amazonaws.com/profile.jpg",
+            "id": "213123"
+        },
+        "distanceTravelledToday": "34 kms",
+        "paymentHistory": [
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        "estimatedIncome": "Rs 600",
+        "drivingScore": "90"
+    },
+    {
+        "driverId": "00008",
+        "driverName": "Om Shankar",
+        "driverImage": {
+            "uri": "https://testbucketasnyciot.s3.ap-south-1.amazonaws.com/profile.jpg",
+            "id": "213123"
+        },
+        "distanceTravelledToday": "34 kms",
+        "paymentHistory": [
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        "estimatedIncome": "Rs 600",
+        "drivingScore": "90"
+    },
+    {
+        "driverId": "00009",
+        "driverName": "Om Shankar",
+        "driverImage": {
+            "uri": "https://testbucketasnyciot.s3.ap-south-1.amazonaws.com/profile.jpg",
+            "id": "213123"
+        },
+        "distanceTravelledToday": "34 kms",
+        "paymentHistory": [
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            1
+        ],
+        "estimatedIncome": "Rs 600",
+        "drivingScore": "90"
+    }
+]

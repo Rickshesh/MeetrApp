@@ -1,0 +1,51 @@
+{
+    "driverInformation": {
+        "device_mac": "EC-63-D7-83-BC-01",
+        "first_name": "Rickshesh",
+        "last_name": "Manchanda",
+        "gender": "Male",
+        "mobile": "8447848609",
+        "age": "25",
+        "auto_number": "HR12MH5660",
+        "upi_address": "rickshesh.iitd@okaxis",
+        "aadhar": "2131 2312 3123 2312",
+        "days_onboarded": "29/09/2021 (1 Year, and 1 Month)"
+    },
+    "informationLabels": {
+        "device_mac": {
+            "fieldName": "Driver Id"
+        },
+        "first_name": {
+            "fieldName": "First Name"
+        },
+        "last_name": {
+            "fieldName": "Last Name"
+        },
+        "gender": {
+            "fieldName": "Gender"
+        },
+        "mobile": {
+            "fieldName": "Phone Number"
+        },
+        "age": {
+            "fieldName": "Age (in Years)"
+        },
+        "auto_number": {
+            "fieldName": "Vehicle Number"
+        },
+        "upi_address": {
+            "fieldName": "UPI Address"
+        },
+        "aadhar": {
+            "fieldName": "Aadhar Number",
+            "logo": "credit-card"
+        },
+        "days_onboarded": {
+            "fieldName": "Onboarded Since"
+        }
+    },
+    "image": {
+        "uri": "https://testbucketasnyciot.s3.ap-south-1.amazonaws.com/profile.jpg",
+        "id": "213123"
+    }
+}
