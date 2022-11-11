@@ -1,5 +1,6 @@
 import React from 'react';
 import DriverDetails from './screens/DriverDetails';
+import RegisterDriver from './screens/RegisterDriver';
 import TopBar from './screens/TopBar';
 import { StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -11,7 +12,7 @@ const Main = () => {
         <PaperProvider>
             <View style={styles.container}>
                 <TopBar />
-                <DriverDetails driverid="000001" />
+                <RegisterDriver />
             </View>
         </PaperProvider>
     );

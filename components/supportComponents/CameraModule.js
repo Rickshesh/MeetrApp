@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import { StyleSheet, View, TouchableOpacity, ImageBackground, Alert } from 'react-native'
 import { Camera } from 'expo-camera'
 
-export default function App() {
+export default function CameraModule() {
     const [previewVisible, setPreviewVisible] = React.useState(false)
     const [capturedImage, setCapturedImage] = React.useState(null)
 

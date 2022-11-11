@@ -9,13 +9,19 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-community/datetimepicker": "6.2.0",
     "expo": "~46.0.16",
     "expo-camera": "~12.3.0",
     "expo-status-bar": "~1.4.0",
+    "moment": "^2.29.4",
     "react": "18.0.0",
     "react-native": "0.69.6",
+    "react-native-date-picker": "^4.2.6",
     "react-native-maps": "0.31.1",
-    "react-native-paper": "^4.12.5"
+    "react-native-modal-datetime-picker": "^14.0.0",
+    "react-native-modern-datepicker": "^1.0.0-beta.91",
+    "react-native-paper": "^4.12.5",
+    "react-native-paper-dates": "^0.9.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"

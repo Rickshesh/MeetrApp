@@ -1,0 +1,85 @@
+{
+    "displayInfo": {
+        "head": {
+            "identityParameters": "Driver Details",
+            "bankingDetails": "Bank Account Details",
+            "autoDetails": "Vehicle Details",
+            "creditPerformance": "Credit Details"
+        },
+        "body": {
+            "identityParameters": {
+                "firstName": {
+                    "label": "First Name",
+                    "regex": "",
+                    "format": "string"
+                },
+                "lastName": {
+                    "label": "Last Name",
+                    "regex": "",
+                    "format": "string"
+                },
+                "phoneNumber": {
+                    "label": "Phone Number",
+                    "regex": "",
+                    "format": "number"
+                },
+                "emailId": {
+                    "label": "Email Id",
+                    "regex": "",
+                    "format": "string"
+                }
+            },
+            "bankingDetails": {
+                "bankAccountNumber": {
+                    "label": "Bank Account Number",
+                    "regex": "",
+                    "format": "number"
+                },
+                "bankPhoneNumber": {
+                    "label": "Bank Registered Phone Number",
+                    "regex": "",
+                    "format": "number"
+                },
+                "bankName": {
+                    "label": "Bank Name",
+                    "regex": "",
+                    "format": "string"
+                },
+                "upiAddress": {
+                    "label": "UPI Address",
+                    "regex": "",
+                    "format": "string"
+                }
+            },
+            "autoDetails": {
+                "autoNumber": {
+                    "label": "Vehicle Number",
+                    "regex": "",
+                    "format": "string"
+                }
+            },
+            "exceptions": {
+                "identityParameters": {
+                    "adhaar": {
+                        "label": "Aadhaar Number",
+                        "regex": "",
+                        "format": "number"
+                    },
+                    "registerAddress": {
+                        "label": "Registered Address",
+                        "regex": "",
+                        "format": "string"
+                    },
+                    "dateOfBirth": {
+                        "label": "Date of Birth",
+                        "regex": "",
+                        "format": "date"
+                    }
+                },
+                "autoDetails": {
+                    "autoImages": "Vehcile Images"
+                }
+            }
+        }
+    }
+}

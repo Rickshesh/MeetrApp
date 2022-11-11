@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Surface, List, Portal, Modal, IconButton } from 'react-native-paper'
+import { Surface, List, Portal, Modal, IconButton, ActivityIndicator } from 'react-native-paper'
 import { StyleSheet, ScrollView, Pressable, View, Text, Image } from 'react-native'
 import driverDetailsConfig from '../responses/driverDetailsConfig.json';
 import MapService from '../supportComponents/MapService';
@@ -57,7 +57,7 @@ export default function DriverDetails(props) {
 
     return (
         <View style={styles.container}>
-            {isLoading ? <Text>Loading...</Text> :
+            {isLoading ? <ActivityIndicator animating={true} /> :
                 (<Surface style={styles.surface} elevation={2}>
                     <Portal>
                         <Modal visible={showAddress} contentContainerStyle={styles.containerStyle} onDismiss={_hideAddress}>
