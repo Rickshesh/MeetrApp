@@ -7,12 +7,12 @@ import moment from "moment";
 import CameraModule from '../supportComponents/CameraModule';
 
 
-
-
 export default function RegisterDriver() {
     const [selectedDate, setSelectedDate] = useState(moment(new Date()).format("DD-MM-YYYY"));
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [startCamera, setStartCamera] = useState(false);
+    const [photo, setPhoto] = useState(null);
+
 
     const _showDatePicker = () => { setShowDatePicker(true) }
     const _hideDatePicker = () => { setShowDatePicker(false) }
@@ -32,6 +32,7 @@ export default function RegisterDriver() {
 
     const displayInfo = registerDriver.displayInfo;
 
+
     return (
         <View style={styles.container}>
             <Surface style={styles.surface} elevation={2}>
@@ -42,7 +43,7 @@ export default function RegisterDriver() {
                         </Pressable>
                         <Portal>
                             <Modal visible={startCamera} onDismiss={_hideCamera} contentContainerStyle={styles.containerStyle}>
-                                <CameraModule />
+                                <CameraModule _setPhoto={setPhoto} />
                             </Modal>
                         </Portal>
                     </List.Section>
@@ -75,6 +76,8 @@ export default function RegisterDriver() {
         </View >
     )
 }
+
+
 
 const styles = StyleSheet.create({
     container: {
