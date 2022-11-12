@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, View, TouchableOpacity, ImageBackground, Alert, Image } from 'react-native'
+import { StyleSheet, View, TouchableOpacity, Image } from 'react-native'
 import { Camera } from 'expo-camera'
 
 

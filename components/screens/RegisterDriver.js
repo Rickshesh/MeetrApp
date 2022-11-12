@@ -38,9 +38,14 @@ export default function RegisterDriver() {
             <Surface style={styles.surface} elevation={2}>
                 <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ margin: 10 }}>
                     <List.Section style={styles.topSection}>
-                        <Pressable onPress={_startCamera} >
-                            <IconButton size={24} icon="camera" style={styles.avatar} />
-                        </Pressable>
+                        {!photo ?
+                            <Pressable onPress={_startCamera} >
+                                <IconButton size={24} icon="camera" style={styles.avatar} />
+                            </Pressable> :
+                            <Pressable onPress={_startCamera} >
+                                <Image source={{ uri: photo.uri }} style={styles.avatar} />
+                            </Pressable>
+                        }
                         <Portal>
                             <Modal visible={startCamera} onDismiss={_hideCamera} contentContainerStyle={styles.containerStyle}>
                                 <CameraModule _setPhoto={setPhoto} />
@@ -107,7 +112,6 @@ const styles = StyleSheet.create({
         width: 96,
         height: 96,
         borderRadius: 96 / 2,
-        backgroundColor: "rgb(158, 42, 155)"
     },
     inlineImage: {
         width: 144,
