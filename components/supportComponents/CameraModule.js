@@ -1,30 +1,44 @@
 import { StatusBar } from 'expo-status-bar'
-import React, { useEffect } from 'react'
-import { StyleSheet, View, TouchableOpacity, ImageBackground, Alert } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { StyleSheet, View, TouchableOpacity, ImageBackground, Alert, Image } from 'react-native'
 import { Camera } from 'expo-camera'
 
-export default function CameraModule({ _setPhoto }) {
-    const [previewVisible, setPreviewVisible] = React.useState(false)
-    const [capturedImage, setCapturedImage] = React.useState(null)
 
-    useEffect(() => async () => {
-        const { status } = await Camera.requestCameraPermissionsAsync()
-        if (status === 'granted') {
-            // start the camera
-            console.log('Permission given')
-        } else {
-            Alert.alert('Access denied')
+export default function CameraModule({ _setPhoto }) {
+    const [previewVisible, setPreviewVisible] = useState(false)
+    const [capturedImage, setCapturedImage] = useState(null)
+    const [cameraPermission, setCameraPermission] = useState(null)
+    const [camera, setCamera] = useState(null);
+
+    const permissionFunction = async () => {
+        // here is how you can get the camera permission
+        if (!cameraPermission) {
+            const permission = await Camera.requestCameraPermissionsAsync();
+
+            setCameraPermission(permission.status === 'granted');
+
+            if (
+                permission.status !== 'granted'
+            ) {
+                alert('Permission for camera needed.');
+            }
         }
+
+    };
+
+
+    useEffect(() => {
+        permissionFunction()
     }, [])
 
     const __takePicture = async () => {
-        if (!Camera) return
-        const photo = await Camera.takePictureAsync()
-        console.log(photo)
-        setPreviewVisible(true)
-        setCapturedImage(photo)
-        _setPhoto(photo)
-        console.warn(photo);
+        if (camera) {
+            const photo = await camera.takePictureAsync()
+            console.log(photo)
+            setPreviewVisible(true)
+            setCapturedImage(photo)
+            _setPhoto(photo)
+        }
     }
 
     return (
@@ -35,6 +49,7 @@ export default function CameraModule({ _setPhoto }) {
                 )
                 : (
                     <Camera
+                        ref={(ref) => setCamera(ref)}
                         style={{ flex: 1, width: '100%' }}
                     >
                         <View
@@ -85,24 +100,11 @@ export default function CameraModule({ _setPhoto }) {
     )
 }
 
-const CameraPreview = (photo) => {
-    console.log('sdsfds', photo)
+const CameraPreview = ({ photo }) => {
     return (
-        <View
-            style={{
-                backgroundColor: 'transparent',
-                flex: 1,
-                width: '100%',
-                height: '100%'
-            }}
-        >
-            <ImageBackground
-                source={{ uri: photo && photo.uri }}
-                style={{
-                    flex: 1
-                }}
-            />
-        </View>
+        <>
+            <Image source={{ uri: photo.uri }} style={{ flex: 1 }} />
+        </>
     )
 }
 
