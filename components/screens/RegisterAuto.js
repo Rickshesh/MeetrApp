@@ -24,7 +24,7 @@ export default function RegisterBank() {
                         </Surface>
                     </List.Section>
                     <List.Section>
-                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Bank'); uploadImageToS3(photo) }}>
+                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Details') }}>
                             Submit
                         </Button>
                     </List.Section>
