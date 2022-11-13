@@ -1,4 +1,5 @@
-import { StyleSheet, ScrollView, Pressable, View, Image } from 'react-native'
+import { StyleSheet, ScrollView, View } from 'react-native'
+import { Surface, List, TextInput, Button } from 'react-native-paper'
 import registerDriver from '../responses/registerDriver.json';
 
 
@@ -22,6 +23,11 @@ export default function RegisterBank() {
                             })}
                         </Surface>
                     </List.Section>
+                    <List.Section>
+                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Auto'); uploadImageToS3(photo) }}>
+                            Next
+                        </Button>
+                    </List.Section>
                 </ScrollView>
             </Surface>
         </View>
@@ -37,8 +43,9 @@ const styles = StyleSheet.create({
         margin: 10
     },
     "button": {
-        width: "50%",
+        flex: 0.5,
         alignSelf: "flex-end",
+        marginHorizontal: 10
     },
     title: {
         fontSize: 16,
@@ -56,7 +63,6 @@ const styles = StyleSheet.create({
         width: 96,
         height: 96,
         borderRadius: 96 / 2,
-        backgroundColor: "rgb(158, 42, 155)"
     },
     inlineImage: {
         width: 144,

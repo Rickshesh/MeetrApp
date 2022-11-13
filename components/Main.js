@@ -1,22 +1,37 @@
 import React from 'react';
 import DriverDetails from './screens/DriverDetails';
 import RegisterDriver from './screens/RegisterDriver';
+import RegisterBank from './screens/RegisterBank';
+import RegisterAuto from './screens/RegisterAuto';
 import TopBar from './screens/TopBar';
-import { StyleSheet, Text, View } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { MD3LightTheme as DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
-import MapService from './supportComponents/MapService';
+import { StyleSheet, View } from 'react-native';
+import { Provider as PaperProvider } from 'react-native-paper';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
+
+
+const Stack = createNativeStackNavigator()
+
 
 const Main = () => {
     return (
         <PaperProvider>
             <View style={styles.container}>
-                <TopBar />
-                <RegisterDriver />
+                <NavigationContainer>
+                    <TopBar />
+                    <Stack.Navigator>
+                        <Stack.Screen name="Driver" component={RegisterDriver} />
+                        <Stack.Screen name="Bank" component={RegisterBank} />
+                        <Stack.Screen name="Auto" component={RegisterAuto} />
+                        <Stack.Screen name="Details" component={DriverDetails} />
+                    </Stack.Navigator>
+                </NavigationContainer>
             </View>
         </PaperProvider>
     );
 };
+
+
 
 const styles = StyleSheet.create({
     container: {

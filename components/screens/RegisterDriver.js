@@ -1,17 +1,58 @@
 import { Surface, List, Portal, Modal, IconButton, TextInput, Button, Avatar, Text } from 'react-native-paper'
 import { StyleSheet, ScrollView, Pressable, View, Image } from 'react-native'
 import registerDriver from '../responses/registerDriver.json';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
 import CameraModule from '../supportComponents/CameraModule';
+import { RNS3 } from 'react-native-aws3';
 
 
-export default function RegisterDriver() {
+export default function RegisterDriver({ navigation }) {
     const [selectedDate, setSelectedDate] = useState(moment(new Date()).format("DD-MM-YYYY"));
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [startCamera, setStartCamera] = useState(false);
     const [photo, setPhoto] = useState(null);
+
+    const uploadImageToS3 = async image => {
+        const options = {
+            keyPrefix: "driverimages/",
+            bucket: "testbucketpiinfo",
+            region: "ap-south-1",
+            accessKey: "AKIA6EGOGYNI4FOFDT6E",
+            secretKey: "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",
+            successActionStatus: 201
+        }
+
+        console.log(image);
+
+        const file = {
+            uri: `${image.uri}`,
+            name: image.uri.substring(image.uri.lastIndexOf('/') + 1), //extracting filename from image path
+            type: "image/jpg",
+        };
+
+        try {
+            const response = await RNS3.put(file, options)
+            if (response.status === 201) {
+                console.log("Success: ", response.body)
+                /**
+                 * {
+                 *   postResponse: {
+                 *     bucket: "your-bucket",
+                 *     etag : "9f620878e06d28774406017480a59fd4",
+                 *     key: "uploads/image.png",
+                 *     location: "https://your-bucket.s3.amazonaws.com/uploads%2Fimage.png"
+                 *   }
+                 * }
+                 */
+            } else {
+                console.log("Failed to upload image to S3: ", response)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    };
 
 
     const _showDatePicker = () => { setShowDatePicker(true) }
@@ -72,7 +113,7 @@ export default function RegisterDriver() {
                         </Surface>
                     </List.Section>
                     <List.Section>
-                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={() => console.log('Pressed')}>
+                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Bank'); uploadImageToS3(photo) }}>
                             Next
                         </Button>
                     </List.Section>
@@ -93,8 +134,9 @@ const styles = StyleSheet.create({
         margin: 10
     },
     "button": {
-        width: "50%",
+        flex: 0.5,
         alignSelf: "flex-end",
+        marginHorizontal: 10
     },
     title: {
         fontSize: 16,

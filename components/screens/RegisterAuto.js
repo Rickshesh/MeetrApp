@@ -1,4 +1,5 @@
-import { StyleSheet, ScrollView, Pressable, View, Image } from 'react-native'
+import { StyleSheet, ScrollView, View } from 'react-native'
+import { Surface, List, TextInput, Button } from 'react-native-paper'
 import registerDriver from '../responses/registerDriver.json';
 
 
@@ -21,6 +22,11 @@ export default function RegisterBank() {
                                 )
                             })}
                         </Surface>
+                    </List.Section>
+                    <List.Section>
+                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Bank'); uploadImageToS3(photo) }}>
+                            Submit
+                        </Button>
                     </List.Section>
                 </ScrollView>
             </Surface>
