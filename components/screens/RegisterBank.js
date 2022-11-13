@@ -2,7 +2,6 @@ import { StyleSheet, ScrollView, View } from 'react-native'
 import { Surface, List, TextInput, Button } from 'react-native-paper'
 import registerDriver from '../responses/registerDriver.json';
 
-
 export default function RegisterBank() {
 
     const displayInfo = registerDriver.displayInfo;
