@@ -53,8 +53,8 @@ export default function RegisterDriver({ navigation }) {
             keyPrefix: "driverimages/",
             bucket: "testbucketpiinfo",
             region: "ap-south-1",
-            accessKey: "AKIA6EGOGYNI4FOFDT6E",
-            secretKey: "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",
+            accessKey: "",
+            secretKey: "",
             successActionStatus: 201
         }
 
