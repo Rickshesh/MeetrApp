@@ -1,11 +1,15 @@
-import { Surface, List, Portal, Modal, IconButton, TextInput, Button, Avatar, Text } from 'react-native-paper'
+import 'react-native-get-random-values';
+import { Surface, List, Portal, Modal, IconButton, TextInput, Button } from 'react-native-paper'
 import { StyleSheet, ScrollView, Pressable, View, Image } from 'react-native'
 import registerDriver from '../responses/registerDriver.json';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
 import CameraModule from '../supportComponents/CameraModule';
-import { RNS3 } from 'react-native-aws3';
+import { RNS3 } from 'react-native-upload-aws-s3';
+import { v4 as uuidv4 } from 'uuid';
+
+//Image Link
 
 
 export default function RegisterDriver({ navigation }) {
@@ -13,6 +17,36 @@ export default function RegisterDriver({ navigation }) {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [startCamera, setStartCamera] = useState(false);
     const [photo, setPhoto] = useState(null);
+    const [userDetails, setUserDetails] = useState({});
+
+    const setValue = (key, value) => {
+        let tempUserDetails = userDetails;
+        tempUserDetails[key] = value;
+        setUserDetails(tempUserDetails);
+    }
+
+    const onSubmit = async () => {
+        console.log(userDetails);
+        let response = await uploadImageToS3(photo);
+        if (response.status === 201) {
+            let imageID = uuidv4();
+            let imageObj = { id: imageID, uri: response.body.postResponse.location }
+            setValue("imageURI", imageObj);
+            navigation.navigate('Bank');
+        }
+        else {
+            console.warn("Image Upload Failed, please check")
+        }
+    }
+
+    const generateDriverId = () => {
+        let driverID = uuidv4();
+        setValue("driverID", driverID)
+    }
+
+    useEffect(() => {
+        generateDriverId();
+    }, [])
 
     const uploadImageToS3 = async image => {
         const options = {
@@ -32,6 +66,8 @@ export default function RegisterDriver({ navigation }) {
             type: "image/jpg",
         };
 
+        console.log(file);
+
         try {
             const response = await RNS3.put(file, options)
             if (response.status === 201) {
@@ -49,6 +85,7 @@ export default function RegisterDriver({ navigation }) {
             } else {
                 console.log("Failed to upload image to S3: ", response)
             }
+            return response;
         } catch (error) {
             console.log(error)
         }
@@ -100,7 +137,9 @@ export default function RegisterDriver({ navigation }) {
                         <Surface>
                             {Object.keys(displayInfo.body.identityParameters).map((key, index) => {
                                 return (
-                                    <TextInput key={index} label={displayInfo.body.identityParameters[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
+                                    <TextInput value={userDetails[key]} key={index}
+                                        onChangeText={text => setValue(key, text)}
+                                        label={displayInfo.body.identityParameters[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
                                 )
                             })}
                             <List.Item title="Date" right={props => <Button mode="contained" color="#FBFEFB" textColor="black" onPress={_showDatePicker}> {selectedDate.toString()} </Button>} />
@@ -113,7 +152,7 @@ export default function RegisterDriver({ navigation }) {
                         </Surface>
                     </List.Section>
                     <List.Section>
-                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Bank'); uploadImageToS3(photo) }}>
+                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={onSubmit}>
                             Next
                         </Button>
                     </List.Section>
