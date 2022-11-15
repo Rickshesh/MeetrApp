@@ -2,7 +2,7 @@ import { StyleSheet, ScrollView, View } from 'react-native'
 import { Surface, List, TextInput, Button } from 'react-native-paper'
 import registerDriver from '../responses/registerDriver.json';
 
-export default function RegisterBank() {
+export default function RegisterBank({ navigation }) {
 
     const displayInfo = registerDriver.displayInfo;
 
@@ -22,8 +22,8 @@ export default function RegisterBank() {
                             })}
                         </Surface>
                     </List.Section>
-                    <List.Section>
-                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Driver') }}>
+                    <List.Section flexDirection="row">
+                        <Button icon="step-backward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Driver') }}>
                             Previous
                         </Button>
                         <Button icon="step-forward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Auto') }}>

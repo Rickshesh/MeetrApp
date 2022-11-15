@@ -8,16 +8,25 @@ import moment from "moment";
 import CameraModule from '../supportComponents/CameraModule';
 import { RNS3 } from 'react-native-upload-aws-s3';
 import { v4 as uuidv4 } from 'uuid';
+import { useSelector, useDispatch } from 'react-redux';
+import { updateDriver } from "../actions/UserActions"
 
 //Image Link
 
 
 export default function RegisterDriver({ navigation }) {
+    const dispatch = useDispatch();
+    const driver = useSelector((store) => store.driver);
+
     const [selectedDate, setSelectedDate] = useState(moment(new Date()).format("DD-MM-YYYY"));
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [startCamera, setStartCamera] = useState(false);
     const [photo, setPhoto] = useState(null);
     const [userDetails, setUserDetails] = useState({});
+
+    const _updateDriver = (key, value) => {
+        dispatch(updateDriver({ key, value }))
+    }
 
     const setValue = (key, value) => {
         let tempUserDetails = userDetails;
@@ -26,7 +35,8 @@ export default function RegisterDriver({ navigation }) {
     }
 
     const onSubmit = async () => {
-        console.log(userDetails);
+        console.log(driver);
+        navigation.navigate('Bank');
         let response = await uploadImageToS3(photo);
         if (response.status === 201) {
             let imageID = uuidv4();
@@ -137,12 +147,12 @@ export default function RegisterDriver({ navigation }) {
                         <Surface>
                             {Object.keys(displayInfo.body.identityParameters).map((key, index) => {
                                 return (
-                                    <TextInput value={userDetails[key]} key={index}
-                                        onChangeText={text => setValue(key, text)}
+                                    <TextInput value={driver[key]} key={index}
+                                        onChangeText={text => _updateDriver(key, text)}
                                         label={displayInfo.body.identityParameters[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
                                 )
                             })}
-                            <List.Item title="Date" right={props => <Button mode="contained" color="#FBFEFB" textColor="black" onPress={_showDatePicker}> {selectedDate.toString()} </Button>} />
+                            <List.Item title="Date" right={() => <Button mode="contained" color="#FBFEFB" textColor="black" onPress={_showDatePicker}> {selectedDate.toString()} </Button>} />
                             <DateTimePickerModal
                                 isVisible={showDatePicker}
                                 mode="date"
@@ -161,7 +171,6 @@ export default function RegisterDriver({ navigation }) {
         </View >
     )
 }
-
 
 
 const styles = StyleSheet.create({

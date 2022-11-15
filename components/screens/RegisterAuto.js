@@ -3,7 +3,7 @@ import { Surface, List, TextInput, Button } from 'react-native-paper'
 import registerDriver from '../responses/registerDriver.json';
 
 
-export default function RegisterBank() {
+export default function RegisterBank({ navigation }) {
 
     const displayInfo = registerDriver.displayInfo;
 
@@ -23,7 +23,10 @@ export default function RegisterBank() {
                             })}
                         </Surface>
                     </List.Section>
-                    <List.Section>
+                    <List.Section flexDirection="row">
+                        <Button icon="step-backward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Bank') }}>
+                            Previous
+                        </Button>
                         <Button icon="step-forward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Details') }}>
                             Submit
                         </Button>
@@ -45,6 +48,7 @@ const styles = StyleSheet.create({
     "button": {
         width: "50%",
         alignSelf: "flex-end",
+        marginHorizontal: 10
     },
     title: {
         fontSize: 16,

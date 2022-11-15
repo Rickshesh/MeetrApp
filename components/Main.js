@@ -8,6 +8,11 @@ import { StyleSheet, View } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
+import { Provider } from 'react-redux';
+import configureStore from './store/configureStore';
+
+
+const store = configureStore()
 
 
 const Stack = createNativeStackNavigator()
@@ -15,19 +20,21 @@ const Stack = createNativeStackNavigator()
 
 const Main = () => {
     return (
-        <PaperProvider>
-            <View style={styles.container}>
-                <NavigationContainer>
-                    <TopBar />
-                    <Stack.Navigator>
-                        <Stack.Screen name="Driver" component={RegisterDriver} />
-                        <Stack.Screen name="Bank" component={RegisterBank} />
-                        <Stack.Screen name="Auto" component={RegisterAuto} />
-                        <Stack.Screen name="Details" component={DriverDetails} />
-                    </Stack.Navigator>
-                </NavigationContainer>
-            </View>
-        </PaperProvider>
+        <Provider store={store}>
+            <PaperProvider>
+                <View style={styles.container}>
+                    <NavigationContainer>
+                        <TopBar />
+                        <Stack.Navigator>
+                            <Stack.Screen name="Driver" component={RegisterDriver} />
+                            <Stack.Screen name="Bank" component={RegisterBank} />
+                            <Stack.Screen name="Auto" component={RegisterAuto} />
+                            <Stack.Screen name="Details" component={DriverDetails} />
+                        </Stack.Navigator>
+                    </NavigationContainer>
+                </View>
+            </PaperProvider>
+        </Provider>
     );
 };
 
