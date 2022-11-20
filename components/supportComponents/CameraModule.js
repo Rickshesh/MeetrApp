@@ -2,6 +2,8 @@ import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, View, TouchableOpacity, Image } from 'react-native'
 import { Camera } from 'expo-camera'
+import * as ImageManipulator from 'expo-image-manipulator';
+
 
 
 export default function CameraModule({ _setPhoto }) {
@@ -34,10 +36,11 @@ export default function CameraModule({ _setPhoto }) {
     const __takePicture = async () => {
         if (camera) {
             const photo = await camera.takePictureAsync()
-            console.log(photo)
+            const file = await ImageManipulator.manipulateAsync(photo.uri, [], { compress: 0.1 });
+            console.log(file)
             setPreviewVisible(true)
-            setCapturedImage(photo)
-            _setPhoto(photo)
+            setCapturedImage(file)
+            _setPhoto(file)
         }
     }
 
@@ -94,8 +97,6 @@ export default function CameraModule({ _setPhoto }) {
                     </Camera>
                 ))
             }
-
-            <StatusBar style="auto" />
         </View>
     )
 }

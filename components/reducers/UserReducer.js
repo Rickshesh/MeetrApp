@@ -1,7 +1,8 @@
 import { UPDATE_DRIVER } from "../actions/UserActions";
 
 const initialState = {
-    driver: {}
+    driver: {
+    }
 };
 
 const userReducer = (state = initialState, action) => {

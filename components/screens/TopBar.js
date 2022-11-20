@@ -5,7 +5,7 @@ export default function TopBar() {
     const theme = useTheme()
 
     return (
-        <Appbar.Header mode="center-aligned" elevated={true} style={{ backgroundColor: "#FBDA60" }}>
+        <Appbar.Header mode="small" statusBarHeight={30} elevated={true} style={{ backgroundColor: "#FBDA60" }}>
             <Appbar.Action size={30} icon="menu" onPress={() => { }} color="#4C243B" />
             <Appbar.Content title="" />
             <Appbar.Action size={30} icon="home" onPress={() => { }} color="#4C243B" />

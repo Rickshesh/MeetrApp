@@ -1,6 +1,6 @@
 import 'react-native-get-random-values';
 import { Surface, List, Portal, Modal, IconButton, TextInput, Button } from 'react-native-paper'
-import { StyleSheet, ScrollView, Pressable, View, Image } from 'react-native'
+import { StyleSheet, ScrollView, Pressable, View, Image, Text } from 'react-native'
 import registerDriver from '../responses/registerDriver.json';
 import React, { useEffect, useState } from 'react';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -9,7 +9,9 @@ import CameraModule from '../supportComponents/CameraModule';
 import { RNS3 } from 'react-native-upload-aws-s3';
 import { v4 as uuidv4 } from 'uuid';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateDriver } from "../actions/UserActions"
+import { updateDriver } from "../actions/UserActions";
+import { S3_ACCESS_KEY, S3_SECRET_KEY } from "@env";
+
 
 //Image Link
 
@@ -18,30 +20,20 @@ export default function RegisterDriver({ navigation }) {
     const dispatch = useDispatch();
     const driver = useSelector((store) => store.driver);
 
-    const [selectedDate, setSelectedDate] = useState(moment(new Date()).format("DD-MM-YYYY"));
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [startCamera, setStartCamera] = useState(false);
-    const [photo, setPhoto] = useState(null);
-    const [userDetails, setUserDetails] = useState({});
 
     const _updateDriver = (key, value) => {
         dispatch(updateDriver({ key, value }))
     }
 
-    const setValue = (key, value) => {
-        let tempUserDetails = userDetails;
-        tempUserDetails[key] = value;
-        setUserDetails(tempUserDetails);
-    }
-
     const onSubmit = async () => {
         console.log(driver);
-        navigation.navigate('Bank');
-        let response = await uploadImageToS3(photo);
+        let response = await uploadImageToS3(driver.driver.image);
         if (response.status === 201) {
-            let imageID = uuidv4();
+            let imageID = driver.driver.image.id;
             let imageObj = { id: imageID, uri: response.body.postResponse.location }
-            setValue("imageURI", imageObj);
+            _updateDriver("image", imageObj);
             navigation.navigate('Bank');
         }
         else {
@@ -51,20 +43,47 @@ export default function RegisterDriver({ navigation }) {
 
     const generateDriverId = () => {
         let driverID = uuidv4();
-        setValue("driverID", driverID)
+        _updateDriver("driverID", driverID)
     }
 
     useEffect(() => {
         generateDriverId();
     }, [])
 
+    const _showDatePicker = () => { setShowDatePicker(true) }
+    const _hideDatePicker = () => { setShowDatePicker(false) }
+
+
+    const _handleConfirm = (date) => {
+        console.log("A date has been picked: ", date);
+        _updateDriver("dateOfBirth", moment(date).format("DD-MM-YYYY"));
+        _hideDatePicker();
+    };
+
+    const _startCamera = () => {
+        setStartCamera(true);
+    }
+
+    const _hideCamera = () => {
+        setStartCamera(false);
+    }
+
+    const _captureImage = (image) => {
+        let imageID = uuidv4();
+        let imageObj = { id: imageID, uri: image.uri }
+        _updateDriver("image", imageObj)
+    }
+
+    const displayInfo = registerDriver.displayInfo;
+
+
     const uploadImageToS3 = async image => {
         const options = {
             keyPrefix: "driverimages/",
             bucket: "testbucketpiinfo",
             region: "ap-south-1",
-            accessKey: "",
-            secretKey: "",
+            accessKey: S3_ACCESS_KEY,
+            secretKey: S3_SECRET_KEY,
             successActionStatus: 201
         }
 
@@ -102,41 +121,22 @@ export default function RegisterDriver({ navigation }) {
     };
 
 
-    const _showDatePicker = () => { setShowDatePicker(true) }
-    const _hideDatePicker = () => { setShowDatePicker(false) }
-    const _handleConfirm = (date) => {
-        console.log("A date has been picked: ", date);
-        setSelectedDate(moment(date).format("DD-MM-YYYY"));
-        _hideDatePicker();
-    };
-
-    const _startCamera = () => {
-        setStartCamera(true);
-    }
-
-    const _hideCamera = () => {
-        setStartCamera(false);
-    }
-
-    const displayInfo = registerDriver.displayInfo;
-
-
     return (
         <View style={styles.container}>
             <Surface style={styles.surface} elevation={2}>
                 <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ margin: 10 }}>
                     <List.Section style={styles.topSection}>
-                        {!photo ?
+                        {(!driver.driver.image) ?
                             <Pressable onPress={_startCamera} >
                                 <IconButton size={24} icon="camera" style={styles.avatar} />
                             </Pressable> :
                             <Pressable onPress={_startCamera} >
-                                <Image source={{ uri: photo.uri }} style={styles.avatar} />
+                                <Image source={{ uri: driver.driver.image.uri }} style={styles.avatar} />
                             </Pressable>
                         }
                         <Portal>
                             <Modal visible={startCamera} onDismiss={_hideCamera} contentContainerStyle={styles.containerStyle}>
-                                <CameraModule _setPhoto={setPhoto} />
+                                <CameraModule _setPhoto={_captureImage} />
                             </Modal>
                         </Portal>
                     </List.Section>
@@ -147,12 +147,12 @@ export default function RegisterDriver({ navigation }) {
                         <Surface>
                             {Object.keys(displayInfo.body.identityParameters).map((key, index) => {
                                 return (
-                                    <TextInput value={driver[key]} key={index}
+                                    <TextInput value={driver.driver[key]} key={index}
                                         onChangeText={text => _updateDriver(key, text)}
                                         label={displayInfo.body.identityParameters[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
                                 )
                             })}
-                            <List.Item title="Date" right={() => <Button mode="contained" color="#FBFEFB" textColor="black" onPress={_showDatePicker}> {selectedDate.toString()} </Button>} />
+                            <List.Item title="Date" right={() => <Button mode="contained" color="#FBFEFB" textColor="black" onPress={_showDatePicker}> {(driver.driver.dateOfBirth) ? driver.driver.dateOfBirth.toString() : moment(new Date()).format("DD-MM-YYYY").toString()} </Button>} />
                             <DateTimePickerModal
                                 isVisible={showDatePicker}
                                 mode="date"
