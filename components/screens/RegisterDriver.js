@@ -22,23 +22,16 @@ export default function RegisterDriver({ navigation }) {
 
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [startCamera, setStartCamera] = useState(false);
+    const [captureAadhaar, setCaptureAadhaar] = useState(false);
+
 
     const _updateDriver = (key, value) => {
         dispatch(updateDriver({ key, value }))
     }
 
-    const onSubmit = async () => {
+    const onNext = async () => {
         console.log(driver);
-        let response = await uploadImageToS3(driver.driver.image);
-        if (response.status === 201) {
-            let imageID = driver.driver.image.id;
-            let imageObj = { id: imageID, uri: response.body.postResponse.location }
-            _updateDriver("image", imageObj);
-            navigation.navigate('Bank');
-        }
-        else {
-            console.warn("Image Upload Failed, please check")
-        }
+        navigation.navigate('Bank');
     }
 
     const generateDriverId = () => {
@@ -152,6 +145,7 @@ export default function RegisterDriver({ navigation }) {
                                         label={displayInfo.body.identityParameters[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
                                 )
                             })}
+                            <TextInput label={displayInfo.body.exceptions.identityParameters.adhaar.label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" right={<TextInput.Icon icon="camera" onPress={_startCamera} forceTextInputFocus={false} />} />
                             <List.Item title="Date" right={() => <Button mode="contained" color="#FBFEFB" textColor="black" onPress={_showDatePicker}> {(driver.driver.dateOfBirth) ? driver.driver.dateOfBirth.toString() : moment(new Date()).format("DD-MM-YYYY").toString()} </Button>} />
                             <DateTimePickerModal
                                 isVisible={showDatePicker}
@@ -162,7 +156,7 @@ export default function RegisterDriver({ navigation }) {
                         </Surface>
                     </List.Section>
                     <List.Section>
-                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={onSubmit}>
+                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={onNext}>
                             Next
                         </Button>
                     </List.Section>
@@ -184,7 +178,8 @@ const styles = StyleSheet.create({
     "button": {
         flex: 0.5,
         alignSelf: "flex-end",
-        marginHorizontal: 10
+        marginHorizontal: 10,
+        alignSelf: "stretch"
     },
     title: {
         fontSize: 16,

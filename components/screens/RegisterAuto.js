@@ -1,11 +1,30 @@
 import { StyleSheet, ScrollView, View } from 'react-native'
 import { Surface, List, TextInput, Button } from 'react-native-paper'
 import registerDriver from '../responses/registerDriver.json';
+import { useSelector, useDispatch } from 'react-redux';
+import { updateAutoDetails } from "../actions/UserActions";
 
 
 export default function RegisterBank({ navigation }) {
 
+    const dispatch = useDispatch();
+    const driver = useSelector((store) => store.driver);
+
     const displayInfo = registerDriver.displayInfo;
+
+    const _updateAutoDetails = (key, value) => {
+        dispatch(updateAutoDetails({ key, value }))
+    }
+
+    const onPrevious = async () => {
+        console.log(driver);
+        navigation.navigate('Bank');
+    }
+
+    const onSubmit = async () => {
+        console.log(driver);
+        navigation.navigate('Driver');
+    }
 
     return (
         <View style={styles.container}>
@@ -18,16 +37,19 @@ export default function RegisterBank({ navigation }) {
                         <Surface>
                             {Object.keys(displayInfo.body.autoDetails).map((key, index) => {
                                 return (
-                                    <TextInput key={index} label={displayInfo.body.autoDetails[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
+                                    <TextInput key={index}
+                                        value={driver.driver[key]}
+                                        onChangeText={text => _updateAutoDetails(key, text)}
+                                        label={displayInfo.body.autoDetails[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
                                 )
                             })}
                         </Surface>
                     </List.Section>
                     <List.Section flexDirection="row">
-                        <Button icon="step-backward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Bank') }}>
+                        <Button icon="step-backward" style={styles.button} mode="contained" onPress={onPrevious}>
                             Previous
                         </Button>
-                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Details') }}>
+                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={onSubmit}>
                             Submit
                         </Button>
                     </List.Section>
@@ -46,7 +68,7 @@ const styles = StyleSheet.create({
         margin: 10
     },
     "button": {
-        width: "50%",
+        flex: 0.5,
         alignSelf: "flex-end",
         marginHorizontal: 10
     },

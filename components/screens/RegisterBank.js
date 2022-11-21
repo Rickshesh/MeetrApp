@@ -1,10 +1,30 @@
 import { StyleSheet, ScrollView, View } from 'react-native'
 import { Surface, List, TextInput, Button } from 'react-native-paper'
 import registerDriver from '../responses/registerDriver.json';
+import { useSelector, useDispatch } from 'react-redux';
+import { updateBankDetails } from "../actions/UserActions";
 
 export default function RegisterBank({ navigation }) {
 
+    const dispatch = useDispatch();
+    const driver = useSelector((store) => store.driver);
+
     const displayInfo = registerDriver.displayInfo;
+
+    const _updateBankDetails = (key, value) => {
+        dispatch(updateBankDetails({ key, value }))
+    }
+
+    const onPrevious = async () => {
+        console.log(driver);
+        navigation.navigate('Driver');
+    }
+
+    const onNext = async () => {
+        console.log(driver);
+        navigation.navigate('Auto');
+    }
+
 
     return (
         <View style={styles.container}>
@@ -17,16 +37,19 @@ export default function RegisterBank({ navigation }) {
                         <Surface>
                             {Object.keys(displayInfo.body.bankingDetails).map((key, index) => {
                                 return (
-                                    <TextInput key={index} label={displayInfo.body.bankingDetails[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
+                                    <TextInput key={index} label={displayInfo.body.bankingDetails[key].label}
+                                        value={driver.driver[key]}
+                                        onChangeText={text => _updateBankDetails(key, text)}
+                                        style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
                                 )
                             })}
                         </Surface>
                     </List.Section>
                     <List.Section flexDirection="row">
-                        <Button icon="step-backward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Driver') }}>
+                        <Button icon="step-backward" style={styles.button} mode="contained" onPress={onPrevious}>
                             Previous
                         </Button>
-                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={() => { navigation.navigate('Auto') }}>
+                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={onNext}>
                             Next
                         </Button>
                     </List.Section>
