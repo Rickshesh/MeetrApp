@@ -64,7 +64,7 @@ export default function DriverDetails(props) {
                             <MapService lat={parseFloat(user.identityParameters.registerAddress.lat)} lon={parseFloat(user.identityParameters.registerAddress.lon)} />
                         </Modal>
                         <Modal visible={showAadhaar} contentContainerStyle={styles.containerStyle} onDismiss={_hideAadhaar}>
-                            <Image source={{ uri: user.identityParameters.adhaar.imageUri }} style={styles.modalImageStyle} />
+                            <Image source={{ uri: user.identityParameters.aadhaar.imageUri }} style={styles.modalImageStyle} />
                         </Modal>
                         <Modal visible={imageVisible} onDismiss={hideModal} contentContainerStyle={styles.containerStyle}>
                             <Image source={{ uri: user.identityParameters.image.uri }} style={styles.modalImageStyle} />
@@ -92,7 +92,7 @@ export default function DriverDetails(props) {
                                     <List.Item key={index} title={displayInfo.body.identityParameters[key]} description={user.identityParameters[key]} />
                                 )
                             })}
-                            <List.Item title={displayInfo.body.exceptions.identityParameters.adhaar} description={user.identityParameters.adhaar.number} right={props => <IconButton {...props} icon="smart-card" color="mediumblue" onPress={_showAadhaar} />} />
+                            <List.Item title={displayInfo.body.exceptions.identityParameters.aadhaar} description={user.identityParameters.aadhaar.number} right={props => <IconButton {...props} icon="smart-card" color="mediumblue" onPress={_showAadhaar} />} />
 
                             <List.Item title={displayInfo.body.exceptions.identityParameters.registerAddress} description={user.identityParameters.registerAddress.address} right={props => <IconButton {...props} icon="map-marker-check" color="mediumblue" onPress={_showAddress} />} />
                         </List.Section>

@@ -15,14 +15,16 @@ import { S3_ACCESS_KEY, S3_SECRET_KEY } from "@env";
 
 //Image Link
 
+const frontAadhaar = "frontAadhaar";
+const backAadhaar = "backAadhaar"
+
 
 export default function RegisterDriver({ navigation }) {
     const dispatch = useDispatch();
     const driver = useSelector((store) => store.driver);
 
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [startCamera, setStartCamera] = useState(false);
-    const [captureAadhaar, setCaptureAadhaar] = useState(false);
+    const [cameraType, setCameraType] = useState(null);
 
 
     const _updateDriver = (key, value) => {
@@ -35,8 +37,10 @@ export default function RegisterDriver({ navigation }) {
     }
 
     const generateDriverId = () => {
-        let driverID = uuidv4();
-        _updateDriver("driverID", driverID)
+        if (!driver.driver.driverID) {
+            let driverID = uuidv4();
+            _updateDriver("driverID", driverID)
+        }
     }
 
     useEffect(() => {
@@ -53,19 +57,15 @@ export default function RegisterDriver({ navigation }) {
         _hideDatePicker();
     };
 
-    const _startCamera = () => {
-        setStartCamera(true);
-    }
-
-    const _hideCamera = () => {
-        setStartCamera(false);
-    }
-
-    const _captureImage = (image) => {
+    const _captureImage = (file, type) => {
         let imageID = uuidv4();
-        let imageObj = { id: imageID, uri: image.uri }
-        _updateDriver("image", imageObj)
+        let imageObj = { id: imageID, uri: file.uri }
+        _updateDriver(type, imageObj)
     }
+
+    const _startCamera = (type) => { setCameraType(type) }
+    const _hideCamera = () => { setCameraType(null) }
+
 
     const displayInfo = registerDriver.displayInfo;
 
@@ -80,15 +80,11 @@ export default function RegisterDriver({ navigation }) {
             successActionStatus: 201
         }
 
-        console.log(image);
-
         const file = {
             uri: `${image.uri}`,
             name: image.uri.substring(image.uri.lastIndexOf('/') + 1), //extracting filename from image path
             type: "image/jpg",
         };
-
-        console.log(file);
 
         try {
             const response = await RNS3.put(file, options)
@@ -120,16 +116,16 @@ export default function RegisterDriver({ navigation }) {
                 <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ margin: 10 }}>
                     <List.Section style={styles.topSection}>
                         {(!driver.driver.image) ?
-                            <Pressable onPress={_startCamera} >
+                            <Pressable onPress={() => _startCamera("image")} >
                                 <IconButton size={24} icon="camera" style={styles.avatar} />
                             </Pressable> :
-                            <Pressable onPress={_startCamera} >
+                            <Pressable onPress={() => _startCamera("image")} >
                                 <Image source={{ uri: driver.driver.image.uri }} style={styles.avatar} />
                             </Pressable>
                         }
                         <Portal>
-                            <Modal visible={startCamera} onDismiss={_hideCamera} contentContainerStyle={styles.containerStyle}>
-                                <CameraModule _setPhoto={_captureImage} />
+                            <Modal visible={cameraType !== null} onDismiss={_hideCamera} contentContainerStyle={styles.containerStyle}>
+                                <CameraModule _setPhoto={(file, type) => _captureImage(file, type)} type={cameraType} />
                             </Modal>
                         </Portal>
                     </List.Section>
@@ -145,13 +141,33 @@ export default function RegisterDriver({ navigation }) {
                                         label={displayInfo.body.identityParameters[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
                                 )
                             })}
-                            <TextInput label={displayInfo.body.exceptions.identityParameters.adhaar.label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" right={<TextInput.Icon icon="camera" onPress={_startCamera} forceTextInputFocus={false} />} />
-                            <List.Item title="Date" right={() => <Button mode="contained" color="#FBFEFB" textColor="black" onPress={_showDatePicker}> {(driver.driver.dateOfBirth) ? driver.driver.dateOfBirth.toString() : moment(new Date()).format("DD-MM-YYYY").toString()} </Button>} />
+                            <TextInput label={displayInfo.body.exceptions.identityParameters.aadhaar.label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
+                            <View style={styles.inlineElement}>
+                                <View style={styles.inlineImage}>
+                                    {typeof driver.driver.frontAadhaar === 'undefined' ?
+                                        <>
+                                            <IconButton size={24} icon="camera" style={styles.avatar} onPress={() => _startCamera(frontAadhaar)} />
+                                            <Text variant="titleMedium">Aadhaar Front</Text>
+                                        </> :
+                                        <Pressable onPress={() => _startCamera(frontAadhaar)}><Image source={{ uri: driver.driver.frontAadhaar.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
+                                    }
+                                </View>
+                                <View style={styles.inlineImage}>
+                                    {typeof driver.driver.backAadhaar === 'undefined' ?
+                                        <>
+                                            <IconButton size={24} icon="camera" style={styles.avatar} onPress={() => _startCamera(backAadhaar)} />
+                                            <Text variant="titleMedium">Aadhaar Back</Text>
+                                        </> :
+                                        <Pressable onPress={() => _startCamera(backAadhaar)}><Image source={{ uri: driver.driver.backAadhaar.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
+                                    }
+                                </View>
+                            </View>
+                            <List.Item title="Date" right={() => <Button mode="contained" color="#FBFEFB" textColor="black" onPress={() => _showDatePicker}> {(driver.driver.dateOfBirth) ? driver.driver.dateOfBirth.toString() : moment(new Date()).format("DD-MM-YYYY").toString()} </Button>} />
                             <DateTimePickerModal
                                 isVisible={showDatePicker}
                                 mode="date"
-                                onConfirm={_handleConfirm}
-                                onCancel={_hideDatePicker}
+                                onConfirm={() => _handleConfirm}
+                                onCancel={() => _hideDatePicker}
                             />
                         </Surface>
                     </List.Section>
@@ -173,7 +189,8 @@ const styles = StyleSheet.create({
     },
     surface: {
         flex: 1,
-        margin: 10
+        margin: 10,
+        paddingVertical: 10
     },
     "button": {
         flex: 0.5,
@@ -197,15 +214,21 @@ const styles = StyleSheet.create({
         width: 96,
         height: 96,
         borderRadius: 96 / 2,
+        borderColor: "#4C243B",
+        borderWidth: 2,
+        justifyContent: "center"
     },
     inlineImage: {
         width: 144,
         height: 144,
-        resizeMode: 'contain'
+        marginHorizontal: 10,
+        alignItems: "center",
+        justifyContent: "center"
     },
     inlineElement: {
         flexDirection: "row",
-        justifyContent: "space-around"
+        justifyContent: "center",
+        marginVertical: 10,
     },
     containerStyle: {
         flex: 0.75,

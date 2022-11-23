@@ -60,7 +60,7 @@
             },
             "exceptions": {
                 "identityParameters": {
-                    "adhaar": {
+                    "aadhaar": {
                         "label": "Aadhaar Number",
                         "regex": "",
                         "format": "number"

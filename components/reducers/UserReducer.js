@@ -12,6 +12,7 @@ const userReducer = (state = initialState, action) => {
     switch (action.type) {
         case UPDATE_DRIVER:
             let { key, value } = action.payload;
+            console.log(state);
             return { ...state, driver: { ...state.driver, [key]: value } };
         case UPDATE_BANK_DETAILS:
             return { ...state, driver: { ...state.driver, [action.payload.key]: action.payload.value } };

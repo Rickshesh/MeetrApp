@@ -6,7 +6,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 
 
 
-export default function CameraModule({ _setPhoto }) {
+export default function CameraModule({ _setPhoto, type }) {
     const [previewVisible, setPreviewVisible] = useState(false)
     const [capturedImage, setCapturedImage] = useState(null)
     const [cameraPermission, setCameraPermission] = useState(null)
@@ -37,10 +37,9 @@ export default function CameraModule({ _setPhoto }) {
         if (camera) {
             const photo = await camera.takePictureAsync()
             const file = await ImageManipulator.manipulateAsync(photo.uri, [], { compress: 0.1 });
-            console.log(file)
             setPreviewVisible(true)
             setCapturedImage(file)
-            _setPhoto(file)
+            _setPhoto(file, type)
         }
     }
 
