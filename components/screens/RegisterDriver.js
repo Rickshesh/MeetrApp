@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateDriver } from "../actions/UserActions";
 import { S3_ACCESS_KEY, S3_SECRET_KEY } from "@env";
+import GetLocation from '../supportComponents/GetLocation';
 
 
 //Image Link
@@ -127,6 +128,9 @@ export default function RegisterDriver({ navigation }) {
                             <Modal visible={cameraType !== null} onDismiss={_hideCamera} contentContainerStyle={styles.containerStyle}>
                                 <CameraModule _setPhoto={(file, type) => _captureImage(file, type)} type={cameraType} />
                             </Modal>
+                            <Modal visible={true} onDismiss={_hideCamera} contentContainerStyle={styles.containerStyle}>
+                                <GetLocation />
+                            </Modal>
                         </Portal>
                     </List.Section>
                     <List.Section>
@@ -169,6 +173,9 @@ export default function RegisterDriver({ navigation }) {
                                 onConfirm={() => _handleConfirm}
                                 onCancel={() => _hideDatePicker}
                             />
+                            <Pressable>
+                                <List.Item title="Get Location ?" />
+                            </Pressable>
                         </Surface>
                     </List.Section>
                     <List.Section>

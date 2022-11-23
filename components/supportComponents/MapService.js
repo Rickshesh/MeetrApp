@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 export default function MapService({ lat, lon }) {
 
+
     return (
         <MapView
             style={styles.map}
@@ -15,7 +16,7 @@ export default function MapService({ lat, lon }) {
             }}
         >
             <Marker coordinate={{ latitude: lat, longitude: lon }} />
-        </MapView>
+        </MapView >
     )
 }
 
