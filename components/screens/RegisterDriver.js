@@ -26,10 +26,21 @@ export default function RegisterDriver({ navigation }) {
 
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [cameraType, setCameraType] = useState(null);
+    const [location, setLocation] = useState(false);
 
+    const _getLocation = () => { setLocation(true) };
 
     const _updateDriver = (key, value) => {
         dispatch(updateDriver({ key, value }))
+    }
+
+    const _getAddress = (location, address) => {
+        let getAddressObj = {
+            lat: location.latitude,
+            lon: location.longitude,
+            address
+        }
+        _updateDriver("registerAddress", getAddressObj);
     }
 
     const onNext = async () => {
@@ -66,7 +77,6 @@ export default function RegisterDriver({ navigation }) {
 
     const _startCamera = (type) => { setCameraType(type) }
     const _hideCamera = () => { setCameraType(null) }
-
 
     const displayInfo = registerDriver.displayInfo;
 
@@ -128,8 +138,8 @@ export default function RegisterDriver({ navigation }) {
                             <Modal visible={cameraType !== null} onDismiss={_hideCamera} contentContainerStyle={styles.containerStyle}>
                                 <CameraModule _setPhoto={(file, type) => _captureImage(file, type)} type={cameraType} />
                             </Modal>
-                            <Modal visible={true} onDismiss={_hideCamera} contentContainerStyle={styles.containerStyle}>
-                                <GetLocation />
+                            <Modal visible={location} onDismiss={() => setLocation(false)} contentContainerStyle={styles.containerStyle}>
+                                <GetLocation _getAddress={_getAddress} />
                             </Modal>
                         </Portal>
                     </List.Section>
@@ -166,20 +176,27 @@ export default function RegisterDriver({ navigation }) {
                                     }
                                 </View>
                             </View>
-                            <List.Item title="Date" right={() => <Button mode="contained" color="#FBFEFB" textColor="black" onPress={() => _showDatePicker}> {(driver.driver.dateOfBirth) ? driver.driver.dateOfBirth.toString() : moment(new Date()).format("DD-MM-YYYY").toString()} </Button>} />
+                            <List.Item title="Date" right={() => <Button mode="contained" color="#FBFEFB" textColor="black" onPress={_showDatePicker}> {(driver.driver.dateOfBirth) ? driver.driver.dateOfBirth.toString() : moment(new Date()).format("DD-MM-YYYY").toString()} </Button>} />
                             <DateTimePickerModal
                                 isVisible={showDatePicker}
                                 mode="date"
-                                onConfirm={() => _handleConfirm}
-                                onCancel={() => _hideDatePicker}
+                                onConfirm={_handleConfirm}
+                                onCancel={_hideDatePicker}
                             />
-                            <Pressable>
-                                <List.Item title="Get Location ?" />
-                            </Pressable>
+                            <List.Section>
+                                <Button icon="map-marker" mode="contained" color="#FBFEFB" onPress={() => _getLocation()}>
+                                    {driver.driver.registerAddress &&
+                                        <Text>{driver.driver.registerAddress.address}</Text>
+                                    }
+                                    {!driver.driver.registerAddress &&
+                                        <Text>Get Address</Text>}
+                                </Button>
+
+                            </List.Section>
                         </Surface>
                     </List.Section>
                     <List.Section>
-                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={onNext}>
+                        <Button icon="step-forward" mode="contained" onPress={onNext}>
                             Next
                         </Button>
                     </List.Section>
@@ -220,7 +237,6 @@ const styles = StyleSheet.create({
     avatar: {
         width: 96,
         height: 96,
-        borderRadius: 96 / 2,
         borderColor: "#4C243B",
         borderWidth: 2,
         justifyContent: "center"
