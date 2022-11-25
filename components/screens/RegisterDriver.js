@@ -81,46 +81,6 @@ export default function RegisterDriver({ navigation }) {
     const displayInfo = registerDriver.displayInfo;
 
 
-    const uploadImageToS3 = async image => {
-        const options = {
-            keyPrefix: "driverimages/",
-            bucket: "testbucketpiinfo",
-            region: "ap-south-1",
-            accessKey: S3_ACCESS_KEY,
-            secretKey: S3_SECRET_KEY,
-            successActionStatus: 201
-        }
-
-        const file = {
-            uri: `${image.uri}`,
-            name: image.uri.substring(image.uri.lastIndexOf('/') + 1), //extracting filename from image path
-            type: "image/jpg",
-        };
-
-        try {
-            const response = await RNS3.put(file, options)
-            if (response.status === 201) {
-                console.log("Success: ", response.body)
-                /**
-                 * {
-                 *   postResponse: {
-                 *     bucket: "your-bucket",
-                 *     etag : "9f620878e06d28774406017480a59fd4",
-                 *     key: "uploads/image.png",
-                 *     location: "https://your-bucket.s3.amazonaws.com/uploads%2Fimage.png"
-                 *   }
-                 * }
-                 */
-            } else {
-                console.log("Failed to upload image to S3: ", response)
-            }
-            return response;
-        } catch (error) {
-            console.log(error)
-        }
-    };
-
-
     return (
         <View style={styles.container}>
             <Surface style={styles.surface} elevation={2}>
