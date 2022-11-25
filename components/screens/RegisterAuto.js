@@ -1,19 +1,37 @@
-import { StyleSheet, ScrollView, View } from 'react-native'
-import { Surface, List, TextInput, Button } from 'react-native-paper'
+import { StyleSheet, ScrollView, View, Pressable, Image } from 'react-native'
+import { Surface, List, TextInput, Button, IconButton, Text, Portal, Modal } from 'react-native-paper'
 import registerDriver from '../responses/registerDriver.json';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateAutoDetails } from "../actions/UserActions";
+import React, { useState } from 'react';
+import CameraModule from '../supportComponents/CameraModule';
+import { v4 as uuidv4 } from 'uuid';
+import { updateDriver } from "../actions/UserActions";
+
+
+
+const frontAuto = "frontAuto";
+const backAuto = "backAuto"
 
 
 export default function RegisterBank({ navigation }) {
+
+    const [cameraType, setCameraType] = useState(null);
 
     const dispatch = useDispatch();
     const driver = useSelector((store) => store.driver);
 
     const displayInfo = registerDriver.displayInfo;
 
+    const _startCamera = (type) => { setCameraType(type) }
+    const _hideCamera = () => { setCameraType(null) }
+
     const _updateAutoDetails = (key, value) => {
         dispatch(updateAutoDetails({ key, value }))
+    }
+
+    const _updateDriver = (key, value) => {
+        dispatch(updateDriver({ key, value }))
     }
 
     const onPrevious = async () => {
@@ -26,10 +44,21 @@ export default function RegisterBank({ navigation }) {
         navigation.navigate('Driver');
     }
 
+    const _captureImage = (file, type) => {
+        let imageID = uuidv4();
+        let imageObj = { id: imageID, uri: file.uri }
+        _updateDriver(type, imageObj)
+    }
+
     return (
         <View style={styles.container}>
             <Surface style={styles.surface} elevation={2}>
                 <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ margin: 10 }}>
+                    <Portal>
+                        <Modal visible={cameraType !== null} onDismiss={_hideCamera} contentContainerStyle={styles.containerStyle}>
+                            <CameraModule _setPhoto={(file, type) => _captureImage(file, type)} type={cameraType} />
+                        </Modal>
+                    </Portal>
                     <List.Section>
                         <List.Subheader>
                             {displayInfo.head.autoDetails}
@@ -43,6 +72,26 @@ export default function RegisterBank({ navigation }) {
                                         label={displayInfo.body.autoDetails[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
                                 )
                             })}
+                            <View style={styles.inlineElement}>
+                                <View style={styles.inlineImage}>
+                                    {typeof driver.driver.frontAuto === 'undefined' ?
+                                        <>
+                                            <IconButton size={24} icon="camera" style={styles.avatar} onPress={() => _startCamera(frontAuto)} />
+                                            <Text variant="titleMedium">Auto Front</Text>
+                                        </> :
+                                        <Pressable onPress={() => _startCamera(frontAuto)}><Image source={{ uri: driver.driver.frontAuto.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
+                                    }
+                                </View>
+                                <View style={styles.inlineImage}>
+                                    {typeof driver.driver.backAuto === 'undefined' ?
+                                        <>
+                                            <IconButton size={24} icon="camera" style={styles.avatar} onPress={() => _startCamera(backAuto)} />
+                                            <Text variant="titleMedium">Auto Back</Text>
+                                        </> :
+                                        <Pressable onPress={() => _startCamera(backAuto)}><Image source={{ uri: driver.driver.backAuto.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
+                                    }
+                                </View>
+                            </View>
                         </Surface>
                     </List.Section>
                     <List.Section flexDirection="row">
@@ -87,17 +136,21 @@ const styles = StyleSheet.create({
     avatar: {
         width: 96,
         height: 96,
-        borderRadius: 96 / 2,
-        backgroundColor: "rgb(158, 42, 155)"
+        borderColor: "#4C243B",
+        borderWidth: 2,
+        justifyContent: "center"
     },
     inlineImage: {
         width: 144,
         height: 144,
-        resizeMode: 'contain'
+        marginHorizontal: 10,
+        alignItems: "center",
+        justifyContent: "center"
     },
     inlineElement: {
         flexDirection: "row",
-        justifyContent: "space-around"
+        justifyContent: "center",
+        marginVertical: 10,
     },
     containerStyle: {
         flex: 0.75,
