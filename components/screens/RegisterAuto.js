@@ -6,7 +6,7 @@ import { updateAutoDetails } from "../actions/UserActions";
 import React, { useState } from 'react';
 import CameraModule from '../supportComponents/CameraModule';
 import { v4 as uuidv4 } from 'uuid';
-import { updateDriver } from "../actions/UserActions";
+import { updateDriver, updateImages } from "../actions/UserActions";
 import imagesUploadFields from "../responses/imagesUploadFields.json";
 import { S3_ACCESS_KEY, S3_SECRET_KEY } from "@env";
 import { RNS3 } from 'react-native-upload-aws-s3';
@@ -32,10 +32,6 @@ export default function RegisterBank({ navigation }) {
         dispatch(updateAutoDetails({ key, value }))
     }
 
-    const _updateDriver = (key, value) => {
-        dispatch(updateDriver({ key, value }))
-    }
-
     const onPrevious = async () => {
         console.log(driver);
         navigation.navigate('Bank');
@@ -50,8 +46,16 @@ export default function RegisterBank({ navigation }) {
     const _captureImage = (file, type) => {
         let imageID = uuidv4();
         let imageObj = { id: imageID, uri: file.uri }
-        _updateDriver(type, imageObj)
+        _updateAutoDetails(type, imageObj)
     }
+
+    const uploadImages = async (input) => Object.keys(imagesUploadFields.imageFields).map(async (keyobject) => {
+        imagesUploadFields.imageFields[keyobject].map(async (keyarray) => {
+            let response = await uploadImageToS3(input[keyobject][keyarray]);
+            dispatch(updateImages({ keyobject, keyarray, imageuri: response.body.postResponse.location }))
+        })
+    })
+
 
     return (
         <View style={styles.container}>
@@ -110,10 +114,6 @@ export default function RegisterBank({ navigation }) {
         </View>
     )
 }
-
-const uploadImages = async (input) => imagesUploadFields.imageFields.map(async (key) => {
-    await uploadImageToS3(input[key]);
-})
 
 const uploadImageToS3 = async image => {
     const options = {

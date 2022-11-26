@@ -51,7 +51,6 @@ export default function RegisterDriver({ navigation }) {
         _updateDriver("activeStatus", "pending");
 
         console.log(driver);
-
         navigation.navigate('Bank');
     }
 

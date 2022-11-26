@@ -3,6 +3,8 @@ export const UPDATE_BANK_DETAILS = 'UPDATE_BANK_DETAILS'
 export const UPDATE_AUTO_DETAILS = 'UPDATE_AUTO_DETAILS'
 export const UPDATE_DRIVER_ID = 'UPDATE_DRIVER_ID'
 export const DELETE_DRIVER_ATTRIBUTE = 'DELETE_DRIVER_ATTRIBUTE'
+export const UPDATE_IMAGES = 'UPDATE_IMAGES'
+
 
 
 export function updateDriver(driver) {
@@ -37,5 +39,12 @@ export function deleteDriverAttribute(attribute) {
     return {
         type: DELETE_DRIVER_ATTRIBUTE,
         payload: attribute,
+    }
+}
+
+export function updateImages(image) {
+    return {
+        type: UPDATE_IMAGES,
+        payload: image,
     }
 }

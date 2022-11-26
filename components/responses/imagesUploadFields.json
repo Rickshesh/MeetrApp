@@ -1,9 +1,13 @@
 {
-    "imageFields": [
-        "backAadhaar",
-        "frontAadhaar",
-        "backAuto",
-        "frontAuto",
-        "image"
-    ]
+    "imageFields": {
+        "identityParameters": [
+            "backAadhaar",
+            "frontAadhaar",
+            "image"
+        ],
+        "autoDetails": [
+            "backAuto",
+            "frontAuto"
+        ]
+    }
 }
