@@ -64,16 +64,17 @@ export default function DriverDetails(props) {
                             <MapService lat={parseFloat(user.identityParameters.registerAddress.lat)} lon={parseFloat(user.identityParameters.registerAddress.lon)} />
                         </Modal>
                         <Modal visible={showAadhaar} contentContainerStyle={styles.containerStyle} onDismiss={_hideAadhaar}>
-                            <Image source={{ uri: user.identityParameters.aadhaar.imageUri }} style={styles.modalImageStyle} />
+                            <Image source={{ uri: user.identityParameters.frontAadhaar.uri }} style={styles.modalImageStyle} />
+                            <Image source={{ uri: user.identityParameters.backAadhaar.uri }} style={styles.modalImageStyle} />
                         </Modal>
                         <Modal visible={imageVisible} onDismiss={hideModal} contentContainerStyle={styles.containerStyle}>
                             <Image source={{ uri: user.identityParameters.image.uri }} style={styles.modalImageStyle} />
                         </Modal>
                         <Modal visible={showAutoFront} onDismiss={_hideAutoFront} contentContainerStyle={styles.containerStyle}>
-                            <Image source={{ uri: user.autoDetails.autoImages.front }} style={styles.modalImageStyle} />
+                            <Image source={{ uri: user.autoDetails.frontAuto.uri }} style={styles.modalImageStyle} />
                         </Modal>
                         <Modal visible={showAutoBack} onDismiss={_hideAutoBack} contentContainerStyle={styles.containerStyle}>
-                            <Image source={{ uri: user.autoDetails.autoImages.back }} style={styles.modalImageStyle} />
+                            <Image source={{ uri: user.autoDetails.backAuto.uri }} style={styles.modalImageStyle} />
                         </Modal>
                     </Portal>
                     <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
@@ -92,7 +93,7 @@ export default function DriverDetails(props) {
                                     <List.Item key={index} title={displayInfo.body.identityParameters[key]} description={user.identityParameters[key]} />
                                 )
                             })}
-                            <List.Item title={displayInfo.body.exceptions.identityParameters.aadhaar} description={user.identityParameters.aadhaar.number} right={props => <IconButton {...props} icon="smart-card" color="mediumblue" onPress={_showAadhaar} />} />
+                            <List.Item title={displayInfo.body.exceptions.identityParameters.aadhaar} description={user.identityParameters.aadhaar} right={props => <IconButton {...props} icon="smart-card" color="mediumblue" onPress={_showAadhaar} />} />
 
                             <List.Item title={displayInfo.body.exceptions.identityParameters.registerAddress} description={user.identityParameters.registerAddress.address} right={props => <IconButton {...props} icon="map-marker-check" color="mediumblue" onPress={_showAddress} />} />
                         </List.Section>
@@ -118,8 +119,8 @@ export default function DriverDetails(props) {
                             })}
                             <List.Item title={displayInfo.body.exceptions.autoDetails.autoImages} />
                             <View style={styles.inlineElement}>
-                                <Pressable onPress={_showAutoFront}><Image source={{ uri: user.autoDetails.autoImages.front }} style={styles.inlineImage} /></Pressable>
-                                <Pressable onPress={_showAutoBack}><Image source={{ uri: user.autoDetails.autoImages.back }} style={styles.inlineImage} /></Pressable>
+                                <Pressable onPress={_showAutoFront}><Image source={{ uri: user.autoDetails.frontAuto.uri }} style={styles.inlineImage} /></Pressable>
+                                <Pressable onPress={_showAutoBack}><Image source={{ uri: user.autoDetails.backAuto.uri }} style={styles.inlineImage} /></Pressable>
                             </View>
                         </List.Section>
                         <List.Section>

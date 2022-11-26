@@ -112,7 +112,7 @@ export default function RegisterBank({ navigation }) {
 }
 
 const uploadImages = async (input) => imagesUploadFields.imageFields.map(async (key) => {
-    await uploadImageToS3(input.driver[key]);
+    await uploadImageToS3(input[key]);
 })
 
 const uploadImageToS3 = async image => {
