@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateDriver } from "../actions/UserActions";
 import { updateDriverId } from "../actions/UserActions";
+import { deleteDriverAttribute } from "../actions/UserActions";
 import GetLocation from '../supportComponents/GetLocation';
 
 //Image Link
@@ -32,6 +33,10 @@ export default function RegisterDriver({ navigation }) {
         dispatch(updateDriver({ key, value }))
     }
 
+    const _deleteDriverAttribute = (attribute) => {
+        dispatch(deleteDriverAttribute(attribute))
+    }
+
     const _getAddress = (location, address) => {
         let getAddressObj = {
             lat: location.latitude,
@@ -44,15 +49,6 @@ export default function RegisterDriver({ navigation }) {
     const onNext = async () => {
         _updateDriver("dateOfOnboarding", moment(new Date()).format("DD-MM-YYYY").toString());
         _updateDriver("activeStatus", "pending");
-
-        let aadhaarObj = {
-            number: driver.identityParameters.aadhaar,
-            front: driver.identityParameters.frontAadhaar.uri,
-            back: driver.identityParameters.backAadhaar.uri
-        }
-
-        _updateDriver("aadhaar", aadhaarObj);
-
 
         console.log(driver);
 
