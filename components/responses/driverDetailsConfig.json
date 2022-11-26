@@ -33,7 +33,7 @@
             },
             "exceptions": {
                 "identityParameters": {
-                    "adhaar": "Aadhaar Number",
+                    "aadhaar": "Aadhaar Number",
                     "registerAddress": "Registered Address"
                 },
                 "creditPerformance": {

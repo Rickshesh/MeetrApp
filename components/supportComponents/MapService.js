@@ -1,10 +1,7 @@
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { View, StyleSheet, Text, Dimensions } from 'react-native'
-import { useEffect, useState } from 'react';
 
-export default function MapService({ lat, lon, _setLocation }) {
-
-    const [location, setLocation] = useState(null);
+export default function MapService({ lat, lon }) {
 
     return (
         <MapView
@@ -12,11 +9,11 @@ export default function MapService({ lat, lon, _setLocation }) {
             region={{
                 latitude: lat,
                 longitude: lon,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421,
+                latitudeDelta: 0.00922,
+                longitudeDelta: 0.00421,
             }}
         >
-            <Marker draggable coordinate={{ latitude: location.lat, longitude: location.lon }} onDragEnd={(coordinate) => _onDragEnd(coordinate)} />
+            <Marker coordinate={{ latitude: lat, longitude: lon }} />
         </MapView >
     )
 }

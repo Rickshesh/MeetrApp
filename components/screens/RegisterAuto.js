@@ -40,7 +40,7 @@ export default function RegisterBank({ navigation }) {
     const onSubmit = async () => {
         console.log(driver);
         uploadImages(driver);
-        navigation.navigate('Driver');
+        navigation.navigate('Details');
     }
 
     const _captureImage = (file, type) => {

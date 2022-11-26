@@ -49,7 +49,8 @@ export default function DriverDetails(props) {
     //To fetch the API, pass the User ID
     React.useEffect(() => {
         setLoading(true);
-        getUserDetails(props.driverid);
+        console.log(props.route.params.driverid)
+        getUserDetails(props.route.params.driverid);
     }, [])
 
     const displayInfo = driverDetailsConfig.displayInfo;
