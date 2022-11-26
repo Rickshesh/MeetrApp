@@ -45,6 +45,15 @@ export default function RegisterDriver({ navigation }) {
         _updateDriver("dateOfOnboarding", moment(new Date()).format("DD-MM-YYYY").toString());
         _updateDriver("activeStatus", "pending");
 
+        let aadhaarObj = {
+            number: driver.identityParameters.aadhaar,
+            front: driver.identityParameters.frontAadhaar.uri,
+            back: driver.identityParameters.backAadhaar.uri
+        }
+
+        _updateDriver("aadhaar", aadhaarObj);
+
+
         console.log(driver);
 
         navigation.navigate('Bank');
