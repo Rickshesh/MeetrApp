@@ -1,6 +1,8 @@
 export const UPDATE_DRIVER = 'UPDATE_DRIVER'
 export const UPDATE_BANK_DETAILS = 'UPDATE_BANK_DETAILS'
 export const UPDATE_AUTO_DETAILS = 'UPDATE_AUTO_DETAILS'
+export const UPDATE_DRIVER_ID = 'UPDATE_DRIVER_ID'
+
 
 export function updateDriver(driver) {
     return {
@@ -19,6 +21,13 @@ export function updateBankDetails(bank) {
 export function updateAutoDetails(auto) {
     return {
         type: UPDATE_AUTO_DETAILS,
+        payload: auto,
+    }
+}
+
+export function updateDriverId(auto) {
+    return {
+        type: UPDATE_DRIVER_ID,
         payload: auto,
     }
 }

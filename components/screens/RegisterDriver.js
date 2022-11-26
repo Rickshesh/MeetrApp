@@ -6,13 +6,11 @@ import React, { useEffect, useState } from 'react';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
 import CameraModule from '../supportComponents/CameraModule';
-import { RNS3 } from 'react-native-upload-aws-s3';
 import { v4 as uuidv4 } from 'uuid';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateDriver } from "../actions/UserActions";
-import { S3_ACCESS_KEY, S3_SECRET_KEY } from "@env";
+import { updateDriverId } from "../actions/UserActions";
 import GetLocation from '../supportComponents/GetLocation';
-
 
 //Image Link
 
@@ -22,7 +20,7 @@ const backAadhaar = "backAadhaar"
 
 export default function RegisterDriver({ navigation }) {
     const dispatch = useDispatch();
-    const driver = useSelector((store) => store.driver);
+    const driver = useSelector((store) => store.driver.driver);
 
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [cameraType, setCameraType] = useState(null);
@@ -44,14 +42,18 @@ export default function RegisterDriver({ navigation }) {
     }
 
     const onNext = async () => {
+        _updateDriver("dateOfOnboarding", moment(new Date()).format("DD-MM-YYYY").toString());
+        _updateDriver("activeStatus", "pending");
+
         console.log(driver);
+
         navigation.navigate('Bank');
     }
 
     const generateDriverId = () => {
-        if (!driver.driver.driverID) {
+        if (!driver.driverId) {
             let driverID = uuidv4();
-            _updateDriver("driverID", driverID)
+            updateDriverId("driverId", driverID)
         }
     }
 
@@ -85,13 +87,14 @@ export default function RegisterDriver({ navigation }) {
         <View style={styles.container}>
             <Surface style={styles.surface} elevation={2}>
                 <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ margin: 10 }}>
+                    {console.log(driver)}
                     <List.Section style={styles.topSection}>
-                        {(!driver.driver.image) ?
+                        {(!driver.identityParameters.image) ?
                             <Pressable onPress={() => _startCamera("image")} >
                                 <IconButton size={24} icon="camera" style={styles.avatar} />
                             </Pressable> :
                             <Pressable onPress={() => _startCamera("image")} >
-                                <Image source={{ uri: driver.driver.image.uri }} style={styles.avatar} />
+                                <Image source={{ uri: driver.identityParameters.image.uri }} style={styles.avatar} />
                             </Pressable>
                         }
                         <Portal>
@@ -110,33 +113,33 @@ export default function RegisterDriver({ navigation }) {
                         <Surface>
                             {Object.keys(displayInfo.body.identityParameters).map((key, index) => {
                                 return (
-                                    <TextInput value={driver.driver[key]} key={index}
+                                    <TextInput value={driver.identityParameters[key]} key={index}
                                         onChangeText={text => _updateDriver(key, text)}
                                         label={displayInfo.body.identityParameters[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
                                 )
                             })}
-                            <TextInput label={displayInfo.body.exceptions.identityParameters.aadhaar.label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
+                            <TextInput label={displayInfo.body.exceptions.identityParameters.aadhaar.label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" onChangeText={text => _updateDriver("aadhaar", text)} />
                             <View style={styles.inlineElement}>
                                 <View style={styles.inlineImage}>
-                                    {typeof driver.driver.frontAadhaar === 'undefined' ?
+                                    {typeof driver.identityParameters.frontAadhaar === 'undefined' ?
                                         <>
                                             <IconButton size={24} icon="camera" style={styles.avatar} onPress={() => _startCamera(frontAadhaar)} />
                                             <Text variant="titleMedium">Aadhaar Front</Text>
                                         </> :
-                                        <Pressable onPress={() => _startCamera(frontAadhaar)}><Image source={{ uri: driver.driver.frontAadhaar.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
+                                        <Pressable onPress={() => _startCamera(frontAadhaar)}><Image source={{ uri: driver.identityParameters.frontAadhaar.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
                                     }
                                 </View>
                                 <View style={styles.inlineImage}>
-                                    {typeof driver.driver.backAadhaar === 'undefined' ?
+                                    {typeof driver.identityParameters.backAadhaar === 'undefined' ?
                                         <>
                                             <IconButton size={24} icon="camera" style={styles.avatar} onPress={() => _startCamera(backAadhaar)} />
                                             <Text variant="titleMedium">Aadhaar Back</Text>
                                         </> :
-                                        <Pressable onPress={() => _startCamera(backAadhaar)}><Image source={{ uri: driver.driver.backAadhaar.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
+                                        <Pressable onPress={() => _startCamera(backAadhaar)}><Image source={{ uri: driver.identityParameters.backAadhaar.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
                                     }
                                 </View>
                             </View>
-                            <List.Item title="Date" right={() => <Button mode="contained" color="#FBFEFB" textColor="black" onPress={_showDatePicker}> {(driver.driver.dateOfBirth) ? driver.driver.dateOfBirth.toString() : moment(new Date()).format("DD-MM-YYYY").toString()} </Button>} />
+                            <List.Item title="Date" right={() => <Button mode="contained" color="#FBFEFB" textColor="black" onPress={_showDatePicker}> {(driver.identityParameters.dateOfBirth) ? driver.identityParameters.dateOfBirth.toString() : moment(new Date()).format("DD-MM-YYYY").toString()} </Button>} />
                             <DateTimePickerModal
                                 isVisible={showDatePicker}
                                 mode="date"
@@ -145,10 +148,10 @@ export default function RegisterDriver({ navigation }) {
                             />
                             <List.Section>
                                 <Button icon="map-marker" mode="contained" color="#FBFEFB" onPress={() => _getLocation()}>
-                                    {driver.driver.registerAddress &&
-                                        <Text>{driver.driver.registerAddress.address}</Text>
+                                    {driver.identityParameters.registerAddress &&
+                                        <Text>{driver.identityParameters.registerAddress.address}</Text>
                                     }
-                                    {!driver.driver.registerAddress &&
+                                    {!driver.identityParameters.registerAddress &&
                                         <Text>Get Address</Text>}
                                 </Button>
 

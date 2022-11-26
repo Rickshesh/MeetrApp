@@ -7,7 +7,9 @@ import React, { useState } from 'react';
 import CameraModule from '../supportComponents/CameraModule';
 import { v4 as uuidv4 } from 'uuid';
 import { updateDriver } from "../actions/UserActions";
-
+import imagesUploadFields from "../responses/imagesUploadFields.json";
+import { S3_ACCESS_KEY, S3_SECRET_KEY } from "@env";
+import { RNS3 } from 'react-native-upload-aws-s3';
 
 
 const frontAuto = "frontAuto";
@@ -19,7 +21,7 @@ export default function RegisterBank({ navigation }) {
     const [cameraType, setCameraType] = useState(null);
 
     const dispatch = useDispatch();
-    const driver = useSelector((store) => store.driver);
+    const driver = useSelector((store) => store.driver.driver);
 
     const displayInfo = registerDriver.displayInfo;
 
@@ -41,6 +43,7 @@ export default function RegisterBank({ navigation }) {
 
     const onSubmit = async () => {
         console.log(driver);
+        uploadImages(driver);
         navigation.navigate('Driver');
     }
 
@@ -67,28 +70,28 @@ export default function RegisterBank({ navigation }) {
                             {Object.keys(displayInfo.body.autoDetails).map((key, index) => {
                                 return (
                                     <TextInput key={index}
-                                        value={driver.driver[key]}
+                                        value={driver.autoDetails[key]}
                                         onChangeText={text => _updateAutoDetails(key, text)}
                                         label={displayInfo.body.autoDetails[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
                                 )
                             })}
                             <View style={styles.inlineElement}>
                                 <View style={styles.inlineImage}>
-                                    {typeof driver.driver.frontAuto === 'undefined' ?
+                                    {typeof driver.autoDetails.frontAuto === 'undefined' ?
                                         <>
                                             <IconButton size={24} icon="camera" style={styles.avatar} onPress={() => _startCamera(frontAuto)} />
                                             <Text variant="titleMedium">Auto Front</Text>
                                         </> :
-                                        <Pressable onPress={() => _startCamera(frontAuto)}><Image source={{ uri: driver.driver.frontAuto.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
+                                        <Pressable onPress={() => _startCamera(frontAuto)}><Image source={{ uri: driver.autoDetails.frontAuto.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
                                     }
                                 </View>
                                 <View style={styles.inlineImage}>
-                                    {typeof driver.driver.backAuto === 'undefined' ?
+                                    {typeof driver.autoDetails.backAuto === 'undefined' ?
                                         <>
                                             <IconButton size={24} icon="camera" style={styles.avatar} onPress={() => _startCamera(backAuto)} />
                                             <Text variant="titleMedium">Auto Back</Text>
                                         </> :
-                                        <Pressable onPress={() => _startCamera(backAuto)}><Image source={{ uri: driver.driver.backAuto.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
+                                        <Pressable onPress={() => _startCamera(backAuto)}><Image source={{ uri: driver.autoDetails.backAuto.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
                                     }
                                 </View>
                             </View>
@@ -107,6 +110,43 @@ export default function RegisterBank({ navigation }) {
         </View>
     )
 }
+
+const uploadImages = async (input) => imagesUploadFields.imageFields.map(async (key) => {
+    await uploadImageToS3(input.driver[key]);
+})
+
+const uploadImageToS3 = async image => {
+    const options = {
+        keyPrefix: "registerDriverImages/",
+        bucket: "testbucketpiinfo",
+        region: "ap-south-1",
+        accessKey: S3_ACCESS_KEY,
+        secretKey: S3_SECRET_KEY,
+        successActionStatus: 201
+    }
+
+    console.log(image);
+
+    const file = {
+        uri: `${image.uri}`,
+        name: image.uri.substring(image.uri.lastIndexOf('/') + 1), //extracting filename from image path
+        type: "image/jpg",
+    };
+
+    try {
+        const response = await RNS3.put(file, options)
+        if (response.status === 201) {
+            console.log("Success: ", response.body)
+        } else {
+            console.log("Failed to upload image to S3: ", response)
+        }
+        return response;
+    } catch (error) {
+        console.log(error)
+    }
+};
+
+
 
 const styles = StyleSheet.create({
     container: {

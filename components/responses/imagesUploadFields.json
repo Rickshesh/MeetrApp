@@ -1,0 +1,9 @@
+{
+    "imageFields": [
+        "backAadhaar",
+        "frontAadhaar",
+        "backAuto",
+        "frontAuto",
+        "image"
+    ]
+}

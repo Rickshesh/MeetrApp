@@ -7,7 +7,7 @@ import { updateBankDetails } from "../actions/UserActions";
 export default function RegisterBank({ navigation }) {
 
     const dispatch = useDispatch();
-    const driver = useSelector((store) => store.driver);
+    const driver = useSelector((store) => store.driver.driver);
 
     const displayInfo = registerDriver.displayInfo;
 
@@ -38,7 +38,7 @@ export default function RegisterBank({ navigation }) {
                             {Object.keys(displayInfo.body.bankingDetails).map((key, index) => {
                                 return (
                                     <TextInput key={index} label={displayInfo.body.bankingDetails[key].label}
-                                        value={driver.driver[key]}
+                                        value={driver.bankingDetails[key]}
                                         onChangeText={text => _updateBankDetails(key, text)}
                                         style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
                                 )

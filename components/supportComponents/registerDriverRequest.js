@@ -1,9 +1,17 @@
 import { useSelector } from 'react-redux';
+import imagesUploadFields from "../responses/imagesUploadFields.json";
+import React, { useEffect, useState } from 'react';
 
 
 export default function registerDriverRequest() {
 
     const output = useSelector((store) => store.driver);
+
+    useEffect(async () => uploadImages(), [])
+
+    const uploadImages = async () => imagesUploadFields.imageFields.map(async (key, index) => {
+        await uploadImageToS3(output.driver[key].uri);
+    })
 
     const uploadImageToS3 = async image => {
         const options = {
@@ -25,7 +33,6 @@ export default function registerDriverRequest() {
             const response = await RNS3.put(file, options)
             if (response.status === 201) {
                 console.log("Success: ", response.body)
-
             } else {
                 console.log("Failed to upload image to S3: ", response)
             }
@@ -55,6 +62,7 @@ export default function registerDriverRequest() {
             aadhaar: {
                 front: output.driver.frontAadhaar,
                 back: output.driver.backAadhaar,
+                number: output.driver.aadhaar
             },
             activeStatus: "Pending",
             dateOfBirth: output.driver.dateOfBirth,
