@@ -12,6 +12,11 @@ import { updateDriver } from "../actions/UserActions";
 import { updateDriverId } from "../actions/UserActions";
 import { deleteDriverAttribute } from "../actions/UserActions";
 import GetLocation from '../supportComponents/GetLocation';
+import CachedImage from 'react-native-expo-cached-image';
+import { S3_ACCESS_KEY, S3_SECRET_KEY } from "@env";
+import { RNS3 } from 'react-native-upload-aws-s3';
+
+
 
 //Image Link
 
@@ -49,8 +54,6 @@ export default function RegisterDriver({ navigation }) {
     const onNext = async () => {
         _updateDriver("dateOfOnboarding", moment(new Date()).format("DD-MM-YYYY").toString());
         _updateDriver("activeStatus", "pending");
-
-        console.log(driver);
         navigation.navigate('Bank');
     }
 
@@ -70,7 +73,6 @@ export default function RegisterDriver({ navigation }) {
 
 
     const _handleConfirm = (date) => {
-        console.log("A date has been picked: ", date);
         _updateDriver("dateOfBirth", moment(date).format("DD-MM-YYYY"));
         _hideDatePicker();
     };
@@ -80,6 +82,7 @@ export default function RegisterDriver({ navigation }) {
         let imageObj = { id: imageID, uri: file.uri }
         _updateDriver(type, imageObj)
     }
+
 
     const _startCamera = (type) => { setCameraType(type) }
     const _hideCamera = () => { setCameraType(null) }
@@ -91,7 +94,6 @@ export default function RegisterDriver({ navigation }) {
         <View style={styles.container}>
             <Surface style={styles.surface} elevation={2}>
                 <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ margin: 10 }}>
-                    {console.log(driver)}
                     <List.Section style={styles.topSection}>
                         {(!driver.identityParameters.image) ?
                             <Pressable onPress={() => _startCamera("image")} >
@@ -172,6 +174,8 @@ export default function RegisterDriver({ navigation }) {
         </View >
     )
 }
+
+
 
 
 const styles = StyleSheet.create({

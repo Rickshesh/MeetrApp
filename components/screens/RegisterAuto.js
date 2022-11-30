@@ -33,14 +33,15 @@ export default function RegisterBank({ navigation }) {
     }
 
     const onPrevious = async () => {
-        console.log(driver);
-        navigation.navigate('Bank');
+        navigation.navigate('Driver');
     }
 
     const onSubmit = async () => {
-        console.log(driver);
-        uploadImages(driver);
-        navigation.navigate('Details');
+
+        await uploadImages_v2(driver);
+        registerDriverAPI(driver);
+        navigation.navigate('Driver');
+
     }
 
     const _captureImage = (file, type) => {
@@ -49,12 +50,43 @@ export default function RegisterBank({ navigation }) {
         _updateAutoDetails(type, imageObj)
     }
 
-    const uploadImages = async (input) => Object.keys(imagesUploadFields.imageFields).map(async (keyobject) => {
-        imagesUploadFields.imageFields[keyobject].map(async (keyarray) => {
-            let response = await uploadImageToS3(input[keyobject][keyarray]);
-            dispatch(updateImages({ keyobject, keyarray, imageuri: response.body.postResponse.location }))
+    const uploadImages_v2 = async (input) => {
+
+        try {
+            await Promise.all(Object.keys(imagesUploadFields.imageFields).map(
+                async keyobject => {
+                    return await Promise.all(imagesUploadFields.imageFields[keyobject].map(
+                        async keyarray => {
+                            let response = await uploadImageToS3(input[keyobject][keyarray]);
+                            dispatch(updateImages({ keyobject, keyarray, imageuri: response.body.postResponse.location }))
+                            return response;
+                        }
+                    ))
+                }
+            )
+            )
+
+        }
+        catch (err) {
+            console.log(err)
+        }
+
+    };
+
+    const registerDriverAPI = async (data) => {
+        let response = await fetch("https://84qnnnkedj.execute-api.ap-south-1.amazonaws.com/beta/create", {
+            method: "PUT",
+            mode: "cors",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
         })
-    })
+
+        console.log("Response: " + JSON.stringify(response));
+
+        return response;
+    }
 
 
     return (
@@ -116,6 +148,7 @@ export default function RegisterBank({ navigation }) {
 }
 
 const uploadImageToS3 = async image => {
+
     const options = {
         keyPrefix: "registerDriverImages/",
         bucket: "testbucketpiinfo",
@@ -124,8 +157,6 @@ const uploadImageToS3 = async image => {
         secretKey: S3_SECRET_KEY,
         successActionStatus: 201
     }
-
-    console.log(image);
 
     const file = {
         uri: `${image.uri}`,

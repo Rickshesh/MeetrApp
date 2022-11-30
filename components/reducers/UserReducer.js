@@ -26,11 +26,9 @@ const userReducer = (state = initialState, action) => {
         case UPDATE_DRIVER_ID:
             return { ...state, driver: { ...state.driver, [action.payload.key]: action.payload.value } }
         case UPDATE_IMAGES:
-            console.log(action.payload);
             const { [action.payload.keyobject]: parentValue, ...remainingFields } = state.driver
             const { [action.payload.keyarray]: changedValue, ...remainingUnchanged } = parentValue
             changedValue.uri = action.payload.imageuri
-            console.log(state);
             return { ...state, driver: { ...remainingFields, [action.payload.keyobject]: { ...remainingUnchanged, [action.payload.keyarray]: changedValue } } }
         default:
             return state

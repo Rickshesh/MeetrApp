@@ -16,12 +16,10 @@ export default function RegisterBank({ navigation }) {
     }
 
     const onPrevious = async () => {
-        console.log(driver);
         navigation.navigate('Driver');
     }
 
     const onNext = async () => {
-        console.log(driver);
         navigation.navigate('Auto');
     }
 
