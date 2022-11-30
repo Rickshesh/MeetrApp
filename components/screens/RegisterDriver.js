@@ -53,7 +53,7 @@ export default function RegisterDriver({ navigation }) {
 
     const onNext = async () => {
         _updateDriver("dateOfOnboarding", moment(new Date()).format("DD-MM-YYYY").toString());
-        _updateDriver("activeStatus", "pending");
+        _updateDriver("activeStatus", "Pending");
         navigation.navigate('Bank');
     }
 

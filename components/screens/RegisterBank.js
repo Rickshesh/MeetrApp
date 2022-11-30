@@ -20,7 +20,7 @@ export default function RegisterBank({ navigation }) {
     }
 
     const onNext = async () => {
-        navigation.navigate('Auto');
+        navigation.navigate('Details');
     }
 
 

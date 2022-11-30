@@ -84,6 +84,9 @@ export default function DriverDetails(props) {
                                 <Image source={{ uri: user.identityParameters.image.uri }} style={styles.avatar} />
                                 {console.log("URI is: " + user.identityParameters.image.uri)}
                             </Pressable>
+                            <Text style={{ alignSelf: "flex-end" }}>
+                                {displayInfo.body.exceptions.activeStatus}: {user.activeStatus}
+                            </Text>
                         </List.Section>
                         <List.Section>
                             <List.Subheader>

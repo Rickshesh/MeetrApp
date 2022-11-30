@@ -12,7 +12,6 @@
                 "lastName": "Last Name",
                 "phoneNumber": "Phone Number",
                 "dateOfOnboarding": "Date of Onboarding",
-                "activeStatus": "Active Status",
                 "dateOfBirth": "Date of Birth",
                 "emailId": "Email Id"
             },
@@ -32,6 +31,7 @@
                 "autoNumber": "Vehicle Number"
             },
             "exceptions": {
+                "activeStatus": "Status",
                 "identityParameters": {
                     "aadhaar": "Aadhaar Number",
                     "registerAddress": "Registered Address"
