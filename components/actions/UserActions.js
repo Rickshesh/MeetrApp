@@ -5,8 +5,6 @@ export const UPDATE_DRIVER_ID = 'UPDATE_DRIVER_ID'
 export const DELETE_DRIVER_ATTRIBUTE = 'DELETE_DRIVER_ATTRIBUTE'
 export const UPDATE_IMAGES = 'UPDATE_IMAGES'
 
-
-
 export function updateDriver(driver) {
     return {
         type: UPDATE_DRIVER,
@@ -28,10 +26,10 @@ export function updateAutoDetails(auto) {
     }
 }
 
-export function updateDriverId(id) {
+export function updateDriverId(key, value) {
     return {
         type: UPDATE_DRIVER_ID,
-        payload: id,
+        payload: { key, value },
     }
 }
 

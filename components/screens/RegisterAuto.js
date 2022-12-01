@@ -39,8 +39,9 @@ export default function RegisterBank({ navigation }) {
     const onSubmit = async () => {
 
         await uploadImages_v2(driver);
+        console.log(driver);
         registerDriverAPI(driver);
-        navigation.navigate('Driver');
+        navigation.navigate('Details');
 
     }
 

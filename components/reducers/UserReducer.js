@@ -2,7 +2,6 @@ import { UPDATE_DRIVER } from "../actions/UserActions";
 import { UPDATE_AUTO_DETAILS } from "../actions/UserActions";
 import { UPDATE_BANK_DETAILS } from "../actions/UserActions";
 import { UPDATE_DRIVER_ID } from "../actions/UserActions";
-import { DELETE_DRIVER_ATTRIBUTE } from "../actions/UserActions";
 import { UPDATE_IMAGES } from "../actions/UserActions";
 
 
@@ -18,6 +17,7 @@ const userReducer = (state = initialState, action) => {
     switch (action.type) {
         case UPDATE_DRIVER:
             let { key, value } = action.payload;
+            console.log(state);
             return { ...state, driver: { ...state.driver, identityParameters: { ...state.driver.identityParameters, [key]: value } } }
         case UPDATE_BANK_DETAILS:
             return { ...state, driver: { ...state.driver, bankingDetails: { ...state.driver.bankingDetails, [action.payload.key]: action.payload.value } } }

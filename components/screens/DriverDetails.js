@@ -82,7 +82,6 @@ export default function DriverDetails(props) {
                         <List.Section style={styles.topSection}>
                             <Pressable onPress={() => { showModal() }} >
                                 <Image source={{ uri: user.identityParameters.image.uri }} style={styles.avatar} />
-                                {console.log("URI is: " + user.identityParameters.image.uri)}
                             </Pressable>
                             <Text style={{ alignSelf: "flex-end" }}>
                                 {displayInfo.body.exceptions.activeStatus}: {user.activeStatus}
@@ -127,16 +126,19 @@ export default function DriverDetails(props) {
                                 <Pressable onPress={_showAutoBack}><Image source={{ uri: user.autoDetails.backAuto.uri }} style={styles.inlineImage} /></Pressable>
                             </View>
                         </List.Section>
-                        <List.Section>
-                            <List.Subheader>
-                                {displayInfo.head.creditPerformance}
-                            </List.Subheader>
-                            {Object.keys(displayInfo.body.creditPerformance).map((key, index) => {
-                                return (
-                                    <List.Item key={index} title={displayInfo.body.creditPerformance[key]} description={user.creditPerformance[key]} />
-                                )
-                            })}
-                        </List.Section>
+                        {user.creditPerformance && (
+                            <List.Section>
+                                <List.Subheader>
+                                    {displayInfo.head.creditPerformance}
+                                </List.Subheader>
+                                {Object.keys(displayInfo.body.creditPerformance).map((key, index) => {
+                                    return (
+                                        (<List.Item key={index} title={displayInfo.body.creditPerformance[key]} description={user.creditPerformance[key]} />)
+                                    )
+                                })}
+                            </List.Section>
+                        )}
+
                     </ScrollView>
                 </Surface>
                 )

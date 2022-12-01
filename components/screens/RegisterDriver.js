@@ -60,7 +60,7 @@ export default function RegisterDriver({ navigation }) {
     const generateDriverId = () => {
         if (!driver.driverId) {
             let driverID = uuidv4();
-            updateDriverId("driverId", driverID)
+            dispatch(updateDriverId("driverId", driverID));
         }
     }
 

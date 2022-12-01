@@ -28,10 +28,10 @@ const Main = () => {
                     <NavigationContainer>
                         <TopBar />
                         <Stack.Navigator>
+                            <Stack.Screen name="Details" component={DriverDetails} initialParams={{ 'driverid': '87823a70-4f2e-4904-ae2a-724e88dcf7f5' }} />
                             <Stack.Screen name="Driver" component={RegisterDriver} />
                             <Stack.Screen name="Bank" component={RegisterBank} />
                             <Stack.Screen name="Auto" component={RegisterAuto} />
-                            <Stack.Screen name="Details" component={DriverDetails} initialParams={{ 'driverid': '000001' }} />
                         </Stack.Navigator>
                     </NavigationContainer>
                 </View>
