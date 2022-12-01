@@ -80,7 +80,7 @@ export default function RegisterBank({ navigation }) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: data
         })
 
         console.log("Response: " + JSON.stringify(response));
