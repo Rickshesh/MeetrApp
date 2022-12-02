@@ -1,7 +1,7 @@
 import { UPDATE_DRIVER } from "../actions/UserActions";
 import { UPDATE_AUTO_DETAILS } from "../actions/UserActions";
 import { UPDATE_BANK_DETAILS } from "../actions/UserActions";
-import { UPDATE_DRIVER_ID } from "../actions/UserActions";
+import { UPDATE_DRIVER_ATTRIBUTE } from "../actions/UserActions";
 import { UPDATE_IMAGES } from "../actions/UserActions";
 
 
@@ -23,7 +23,7 @@ const userReducer = (state = initialState, action) => {
             return { ...state, driver: { ...state.driver, bankingDetails: { ...state.driver.bankingDetails, [action.payload.key]: action.payload.value } } }
         case UPDATE_AUTO_DETAILS:
             return { ...state, driver: { ...state.driver, autoDetails: { ...state.driver.autoDetails, [action.payload.key]: action.payload.value } } }
-        case UPDATE_DRIVER_ID:
+        case UPDATE_DRIVER_ATTRIBUTE:
             return { ...state, driver: { ...state.driver, [action.payload.key]: action.payload.value } }
         case UPDATE_IMAGES:
             const { [action.payload.keyobject]: parentValue, ...remainingFields } = state.driver

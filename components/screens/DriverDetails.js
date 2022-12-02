@@ -58,7 +58,7 @@ export default function DriverDetails(props) {
 
     return (
         <View style={styles.container}>
-            {isLoading ? <ActivityIndicator animating={true} /> :
+            {isLoading ? <Surface style={[styles.surface, { justifyContent: "center", alignItems: "center" }]}><ActivityIndicator animating={true} /></Surface> :
                 (<Surface style={styles.surface} elevation={2}>
                     <Portal>
                         <Modal visible={showAddress} contentContainerStyle={styles.containerStyle} onDismiss={_hideAddress}>

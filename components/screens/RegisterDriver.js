@@ -9,12 +9,11 @@ import CameraModule from '../supportComponents/CameraModule';
 import { v4 as uuidv4 } from 'uuid';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateDriver } from "../actions/UserActions";
-import { updateDriverId } from "../actions/UserActions";
+import { updateDriverAttribute } from "../actions/UserActions";
 import { deleteDriverAttribute } from "../actions/UserActions";
 import GetLocation from '../supportComponents/GetLocation';
 import CachedImage from 'react-native-expo-cached-image';
-import { S3_ACCESS_KEY, S3_SECRET_KEY } from "@env";
-import { RNS3 } from 'react-native-upload-aws-s3';
+
 
 
 
@@ -53,14 +52,14 @@ export default function RegisterDriver({ navigation }) {
 
     const onNext = async () => {
         _updateDriver("dateOfOnboarding", moment(new Date()).format("DD-MM-YYYY").toString());
-        _updateDriver("activeStatus", "Pending");
+        dispatch(updateDriverAttribute("activeStatus", "Pending"));
         navigation.navigate('Bank');
     }
 
     const generateDriverId = () => {
         if (!driver.driverId) {
             let driverID = uuidv4();
-            dispatch(updateDriverId("driverId", driverID));
+            dispatch(updateDriverAttribute("driverId", driverID));
         }
     }
 
