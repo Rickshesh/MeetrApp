@@ -1,17 +1,23 @@
 import * as React from 'react'
 import { Surface, List, Portal, Modal, IconButton, Avatar, ActivityIndicator } from 'react-native-paper'
-import { StyleSheet, ScrollView, Pressable, View, Image, Text } from 'react-native'
+import { StyleSheet, ScrollView, Pressable, View, Image, Text, Linking } from 'react-native'
+
 
 export default function DriverList() {
 
     const [isLoading, setLoading] = React.useState(true)
-
+    const [driverList, setDriverList] = React.useState([])
 
     const getUsers = async () => {
 
         fetch('https://ri6c0kl11e.execute-api.ap-south-1.amazonaws.com/beta/getuserlist') //S3 Link for Json
             .then((response) => response.json())
-            .then((data) => console.log(data))
+            .then(
+                (data) => {
+                    setDriverList(data.body);
+                    console.log("Data: " + data);
+                }
+            )
             .catch((error) => console.error(error))
             .finally(() => setLoading(false));
 
@@ -26,66 +32,39 @@ export default function DriverList() {
 
             {isLoading ? <Surface style={[styles.surface, { justifyContent: "center", alignItems: "center" }]}><ActivityIndicator animating={true} /></Surface> :
                 (<Surface style={[styles.surface]} elevation={2}>
-
+                    {console.log(driverList)}
                     <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} style={styles.container}>
 
-                        <Surface style={[styles.listitem, styles.paddingHorizontal]} elevation={2}>
-                            <View style={{ flex: 1, margin: 5 }}>
-                                <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                                    <Image resizeMode="contain" style={styles.avatar} source={{ uri: "https://s3-ap-south-1.amazonaws.com/testbucketpiinfo/registerDriverImages%2Fe8441df4-05b7-48a5-87ea-cfdeb4714fd0.jpg" }} />
-                                </View>
-                            </View>
-                            <View style={{ flex: 2, margin: 5 }}>
-                                <View style={{ flex: 1, justifyContent: "center", paddingVertical: 5 }}>
-                                    <View style={{ flex: 2, justifyContent: "flex-end" }}>
-                                        <Text style={{ fontWeight: "500", fontSize: 20 }}>
-                                            Rickshesh Manchanda
-                                        </Text>
+                        {driverList.map((driver, index) => {
+                            return (
+                                <Surface style={[styles.listitem, styles.paddingHorizontal]} elevation={2} key={index}>
+                                    <View style={{ flex: 1, margin: 5 }}>
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+                                            <Image resizeMode="contain" style={styles.avatar} source={{ uri: driver.image.uri }} />
+                                        </View>
                                     </View>
-                                    <View style={{ flex: 1, justifyContent: "flex-end" }}>
-                                        <Text style={{ fontWeight: "300", fontSize: 15 }}>
-                                            Amount Due: Rs 300
-                                        </Text>
+                                    <View style={{ flex: 2, margin: 5 }}>
+                                        <View style={{ flex: 1, justifyContent: "center", paddingVertical: 5 }}>
+                                            <View style={{ flex: 2, justifyContent: "flex-end" }}>
+                                                <Text style={{ fontWeight: "500", fontSize: 20 }}>
+                                                    {driver.firstName} {driver.lastName}
+                                                </Text>
+                                            </View>
+                                            <View style={{ flex: 1, justifyContent: "flex-end" }}>
+                                                <Text style={{ fontWeight: "300", fontSize: 15 }}>
+                                                    Amount Due: Rs {driver.totalAmountPending}
+                                                </Text>
+                                            </View>
+                                        </View>
                                     </View>
-                                </View>
-                            </View>
-                            <View style={{ flex: 0.5, margin: 5 }}>
-                                <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                                    <IconButton icon="phone-in-talk" mode="contained" />
-                                </View>
-                            </View>
-                        </Surface>
-
-                        <Surface style={[styles.listitem, styles.paddingHorizontal]} elevation={2}>
-
-                            <Image resizeMode="contain" style={styles.avatar} source={{ uri: "https://s3-ap-south-1.amazonaws.com/testbucketpiinfo/registerDriverImages%2Fe8441df4-05b7-48a5-87ea-cfdeb4714fd0.jpg" }} />
-
-                        </Surface>
-
-                        <Surface style={[styles.listitem, styles.paddingHorizontal]} elevation={2}>
-
-                            <Image resizeMode="contain" style={styles.avatar} source={{ uri: "https://s3-ap-south-1.amazonaws.com/testbucketpiinfo/registerDriverImages%2Fe8441df4-05b7-48a5-87ea-cfdeb4714fd0.jpg" }} />
-
-                        </Surface>
-
-                        <Surface style={[styles.listitem, styles.paddingHorizontal]} elevation={2}>
-
-                            <Image resizeMode="contain" style={styles.avatar} source={{ uri: "https://s3-ap-south-1.amazonaws.com/testbucketpiinfo/registerDriverImages%2Fe8441df4-05b7-48a5-87ea-cfdeb4714fd0.jpg" }} />
-
-                        </Surface>
-
-                        <Surface style={[styles.listitem, styles.paddingHorizontal]} elevation={2}>
-
-                            <Image resizeMode="contain" style={styles.avatar} source={{ uri: "https://s3-ap-south-1.amazonaws.com/testbucketpiinfo/registerDriverImages%2Fe8441df4-05b7-48a5-87ea-cfdeb4714fd0.jpg" }} />
-
-                        </Surface>
-
-
-                        <Surface style={[styles.listitem, styles.paddingHorizontal]} elevation={2}>
-
-                            <Image resizeMode="contain" style={styles.avatar} source={{ uri: "https://s3-ap-south-1.amazonaws.com/testbucketpiinfo/registerDriverImages%2Fe8441df4-05b7-48a5-87ea-cfdeb4714fd0.jpg" }} />
-
-                        </Surface>
+                                    <View style={{ flex: 0.5, margin: 5 }}>
+                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+                                            <IconButton icon="phone-in-talk" mode="contained" onPress={() => Linking.openURL(`tel:${driver.phoneNumber}`)} />
+                                        </View>
+                                    </View>
+                                </Surface>
+                            )
+                        })}
 
                     </ScrollView>
                 </Surface>)
