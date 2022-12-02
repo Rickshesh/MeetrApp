@@ -79,13 +79,10 @@ export default function DriverDetails(props) {
                         </Modal>
                     </Portal>
                     <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
-                        <List.Section style={styles.topSection}>
+                        <List.Section style={user.activeStatus !== "Active" ? { alignItems: 'center', backgroundColor: "#FAF9F9" } : { alignItems: 'center', backgroundColor: "#FEF5D8" }}>
                             <Pressable onPress={() => { showModal() }} >
                                 <Image source={{ uri: user.identityParameters.image.uri }} style={styles.avatar} />
                             </Pressable>
-                            <Text style={{ alignSelf: "flex-end" }}>
-                                {displayInfo.body.exceptions.activeStatus}: {user.activeStatus}
-                            </Text>
                         </List.Section>
                         <List.Section>
                             <List.Subheader>
@@ -170,7 +167,6 @@ const styles = StyleSheet.create({
     avatar: {
         width: 96,
         height: 96,
-        borderRadius: 96 / 2,
     },
     inlineImage: {
         width: 144,

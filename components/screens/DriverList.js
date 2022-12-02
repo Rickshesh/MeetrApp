@@ -3,7 +3,7 @@ import { Surface, List, Portal, Modal, IconButton, Avatar, ActivityIndicator } f
 import { StyleSheet, ScrollView, Pressable, View, Image, Text, Linking } from 'react-native'
 
 
-export default function DriverList() {
+export default function DriverList({ navigation }) {
 
     const [isLoading, setLoading] = React.useState(true)
     const [driverList, setDriverList] = React.useState([])
@@ -31,38 +31,42 @@ export default function DriverList() {
         <View style={styles.container}>
 
             {isLoading ? <Surface style={[styles.surface, { justifyContent: "center", alignItems: "center" }]}><ActivityIndicator animating={true} /></Surface> :
-                (<Surface style={[styles.surface]} elevation={2}>
+                (<Surface style={styles.surface} elevation={2}>
                     {console.log(driverList)}
                     <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} style={styles.container}>
 
                         {driverList.map((driver, index) => {
                             return (
-                                <Surface style={[styles.listitem, styles.paddingHorizontal]} elevation={2} key={index}>
-                                    <View style={{ flex: 1, margin: 5 }}>
-                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                                            <Image resizeMode="contain" style={styles.avatar} source={{ uri: driver.image.uri }} />
-                                        </View>
-                                    </View>
-                                    <View style={{ flex: 2, margin: 5 }}>
-                                        <View style={{ flex: 1, justifyContent: "center", paddingVertical: 5 }}>
-                                            <View style={{ flex: 2, justifyContent: "flex-end" }}>
-                                                <Text style={{ fontWeight: "500", fontSize: 20 }}>
-                                                    {driver.firstName} {driver.lastName}
-                                                </Text>
-                                            </View>
-                                            <View style={{ flex: 1, justifyContent: "flex-end" }}>
-                                                <Text style={{ fontWeight: "300", fontSize: 15 }}>
-                                                    Amount Due: Rs {driver.totalAmountPending}
-                                                </Text>
+                                <Pressable onPress={() => navigation.navigate('Details', {
+                                    driverid: driver.driverId
+                                })}>
+                                    <Surface key={index} style={driver.activeStatus !== "Active" ? { height: 100, paddingHorizontal: 10, margin: 10, flexDirection: "row" } : { height: 100, paddingHorizontal: 10, margin: 10, flexDirection: "row", backgroundColor: "#FEF5D8" }} elevation={2}>
+                                        <View style={{ flex: 1, margin: 5 }}>
+                                            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+                                                <Image resizeMode="contain" style={styles.avatar} source={{ uri: driver.image.uri }} />
                                             </View>
                                         </View>
-                                    </View>
-                                    <View style={{ flex: 0.5, margin: 5 }}>
-                                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                                            <IconButton icon="phone-in-talk" mode="contained" onPress={() => Linking.openURL(`tel:${driver.phoneNumber}`)} />
+                                        <View style={{ flex: 2, margin: 5 }}>
+                                            <View style={{ flex: 1, justifyContent: "center", paddingVertical: 5 }}>
+                                                <View style={{ flex: 2, justifyContent: "flex-end" }}>
+                                                    <Text style={{ fontWeight: "500", fontSize: 20 }}>
+                                                        {driver.firstName} {driver.lastName}
+                                                    </Text>
+                                                </View>
+                                                <View style={{ flex: 1, justifyContent: "flex-end" }}>
+                                                    <Text style={{ fontWeight: "300", fontSize: 15 }}>
+                                                        Amount Due: Rs {driver.totalAmountPending}
+                                                    </Text>
+                                                </View>
+                                            </View>
                                         </View>
-                                    </View>
-                                </Surface>
+                                        <View style={{ flex: 0.5, margin: 5 }}>
+                                            <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+                                                <IconButton icon="phone-in-talk" mode="contained" onPress={() => Linking.openURL(`tel:${driver.phoneNumber}`)} />
+                                            </View>
+                                        </View>
+                                    </Surface>
+                                </Pressable>
                             )
                         })}
 
