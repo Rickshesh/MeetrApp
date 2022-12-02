@@ -79,13 +79,13 @@ export default function DriverDetails(props) {
                         </Modal>
                     </Portal>
                     <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
-                        <List.Section style={user.activeStatus !== "Active" ? { alignItems: 'center', backgroundColor: "#FAF9F9" } : { alignItems: 'center', backgroundColor: "#FEF5D8" }}>
+                        <Surface elevation={2} style={user.activeStatus !== "Active" ? { alignItems: 'center', backgroundColor: "#EFF1F3", margin: 10 } : { alignItems: 'center', backgroundColor: "#FEF5D8", margin: 10 }}>
                             <Pressable onPress={() => { showModal() }} >
                                 <Image source={{ uri: user.identityParameters.image.uri }} style={styles.avatar} />
                             </Pressable>
-                        </List.Section>
-                        <List.Section>
-                            <List.Subheader>
+                        </Surface>
+                        <Surface elevation={2} style={{ margin: 10 }}>
+                            <List.Subheader style={{ fontSize: 18 }}>
                                 {displayInfo.head.identityParameters}
                             </List.Subheader>
                             {Object.keys(displayInfo.body.identityParameters).map((key, index) => {
@@ -96,9 +96,9 @@ export default function DriverDetails(props) {
                             <List.Item title={displayInfo.body.exceptions.identityParameters.aadhaar} description={user.identityParameters.aadhaar} right={props => <IconButton {...props} icon="smart-card" color="mediumblue" onPress={_showAadhaar} />} />
 
                             <List.Item title={displayInfo.body.exceptions.identityParameters.registerAddress} description={user.identityParameters.registerAddress.address} right={props => <IconButton {...props} icon="map-marker-check" color="mediumblue" onPress={_showAddress} />} />
-                        </List.Section>
-                        <List.Section>
-                            <List.Subheader>
+                        </Surface>
+                        <Surface elevation={2} style={{ margin: 10 }}>
+                            <List.Subheader style={{ fontSize: 18 }}>
                                 {displayInfo.head.bankingDetails}
                             </List.Subheader>
                             {Object.keys(displayInfo.body.bankingDetails).map((key, index) => {
@@ -106,9 +106,9 @@ export default function DriverDetails(props) {
                                     < List.Item key={index} title={displayInfo.body.bankingDetails[key]} description={user.bankingDetails[key]} />
                                 )
                             })}
-                        </List.Section>
-                        <List.Section>
-                            <List.Subheader>
+                        </Surface>
+                        <Surface elevation={2} style={{ margin: 10 }}>
+                            <List.Subheader style={{ fontSize: 18 }}>
                                 {displayInfo.head.autoDetails}
                             </List.Subheader>
                             {Object.keys(displayInfo.body.autoDetails).map((key, index) => {
@@ -122,10 +122,10 @@ export default function DriverDetails(props) {
                                 <Pressable onPress={_showAutoFront}><Image source={{ uri: user.autoDetails.frontAuto.uri }} style={styles.inlineImage} /></Pressable>
                                 <Pressable onPress={_showAutoBack}><Image source={{ uri: user.autoDetails.backAuto.uri }} style={styles.inlineImage} /></Pressable>
                             </View>
-                        </List.Section>
+                        </Surface>
                         {user.creditPerformance && (
-                            <List.Section>
-                                <List.Subheader>
+                            <Surface elevation={2} style={{ margin: 10 }}>
+                                <List.Subheader style={{ fontSize: 18 }}>
                                     {displayInfo.head.creditPerformance}
                                 </List.Subheader>
                                 {Object.keys(displayInfo.body.creditPerformance).map((key, index) => {
@@ -133,14 +133,14 @@ export default function DriverDetails(props) {
                                         (<List.Item key={index} title={displayInfo.body.creditPerformance[key]} description={user.creditPerformance[key]} />)
                                     )
                                 })}
-                            </List.Section>
+                            </Surface>
                         )}
 
                     </ScrollView>
                 </Surface>
                 )
             }
-        </View>
+        </View >
     )
 }
 
