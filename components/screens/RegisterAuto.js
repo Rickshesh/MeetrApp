@@ -2,11 +2,10 @@ import { StyleSheet, ScrollView, View, Pressable, Image } from 'react-native'
 import { Surface, List, TextInput, Button, IconButton, Text, Portal, Modal } from 'react-native-paper'
 import registerDriver from '../responses/registerDriver.json';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateAutoDetails } from "../actions/UserActions";
 import React, { useState } from 'react';
 import CameraModule from '../supportComponents/CameraModule';
 import { v4 as uuidv4 } from 'uuid';
-import { updateDriver, updateImages } from "../actions/UserActions";
+import { updateAutoDetails, updateImages, resetDriver } from "../actions/UserActions";
 import imagesUploadFields from "../responses/imagesUploadFields.json";
 import { S3_ACCESS_KEY, S3_SECRET_KEY } from "@env";
 import { RNS3 } from 'react-native-upload-aws-s3';
@@ -42,10 +41,10 @@ export default function RegisterBank({ navigation }) {
         console.log(driver);
         let response = await registerDriverAPI(driver);
         console.log("Response" + JSON.stringify(response));
+        dispatch(resetDriver());
         navigation.navigate('Details', {
             driverid: response.driverId
         });
-
     }
 
     const _captureImage = (file, type) => {

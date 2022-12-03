@@ -3,6 +3,8 @@ import { UPDATE_AUTO_DETAILS } from "../actions/UserActions";
 import { UPDATE_BANK_DETAILS } from "../actions/UserActions";
 import { UPDATE_DRIVER_ATTRIBUTE } from "../actions/UserActions";
 import { UPDATE_IMAGES } from "../actions/UserActions";
+import { RESET_DRIVER } from "../actions/UserActions";
+
 
 
 const initialState = {
@@ -30,6 +32,12 @@ const userReducer = (state = initialState, action) => {
             const { [action.payload.keyarray]: changedValue, ...remainingUnchanged } = parentValue
             changedValue.uri = action.payload.imageuri
             return { ...state, driver: { ...remainingFields, [action.payload.keyobject]: { ...remainingUnchanged, [action.payload.keyarray]: changedValue } } }
+        case RESET_DRIVER:
+            return {
+                identityParameters: {},
+                bankingDetails: {},
+                autoDetails: {}
+            }
         default:
             return state
     }

@@ -18,7 +18,7 @@ import { StatusBar } from 'expo-status-bar';
 const store = configureStore()
 
 
-const Stack = createNativeStackNavigator()
+const Stack = createNativeStackNavigator();
 
 
 const Main = () => {
@@ -27,13 +27,10 @@ const Main = () => {
             <PaperProvider>
                 <View style={styles.container}>
                     <NavigationContainer>
-                        <TopBar />
-                        <Stack.Navigator>
-                            <Stack.Screen name="Driver" component={RegisterDriver} />
-                            <Stack.Screen name="Bank" component={RegisterBank} />
-                            <Stack.Screen name="Auto" component={RegisterAuto} />
+                        <Stack.Navigator initialRouteName="List" screenOptions={{ header: ({ navigation, route, options, back }) => { return (<TopBar navigation={navigation} route={route} options={options} back={back} />) } }}>
+                            <Stack.Screen name="Register" component={Register} initialParams={{ initial: false }} />
                             <Stack.Screen name="List" component={DriverList} />
-                            <Stack.Screen name="Details" component={DriverDetails} initialParams={{ 'driverid': '000003' }} />
+                            <Stack.Screen name="Details" component={DriverDetails} initialParams={{ driverid: "000003" }} />
                         </Stack.Navigator>
                     </NavigationContainer>
                 </View>
@@ -41,6 +38,16 @@ const Main = () => {
         </Provider>
     );
 };
+
+function Register() {
+    return (
+        <Stack.Navigator initialRouteName="Driver">
+            <Stack.Screen name="Driver" component={RegisterDriver} options={{ title: "Driver Details" }} />
+            <Stack.Screen name="Bank" component={RegisterBank} options={{ title: "Bank Details" }} />
+            <Stack.Screen name="Auto" component={RegisterAuto} options={{ title: "Vehicle Details" }} />
+        </Stack.Navigator>
+    )
+}
 
 
 

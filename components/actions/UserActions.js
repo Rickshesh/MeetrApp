@@ -4,6 +4,7 @@ export const UPDATE_AUTO_DETAILS = 'UPDATE_AUTO_DETAILS'
 export const UPDATE_DRIVER_ATTRIBUTE = 'UPDATE_DRIVER_ATTRIBUTE'
 export const DELETE_DRIVER_ATTRIBUTE = 'DELETE_DRIVER_ATTRIBUTE'
 export const UPDATE_IMAGES = 'UPDATE_IMAGES'
+export const RESET_DRIVER = 'RESET_DRIVER'
 
 export function updateDriver(driver) {
     return {
@@ -44,5 +45,11 @@ export function updateImages(image) {
     return {
         type: UPDATE_IMAGES,
         payload: image,
+    }
+}
+
+export function resetDriver() {
+    return {
+        type: RESET_DRIVER,
     }
 }
