@@ -79,11 +79,29 @@ export default function DriverDetails(props) {
                         </Modal>
                     </Portal>
                     <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
-                        <Surface elevation={2} style={user.activeStatus !== "Active" ? { alignItems: 'center', backgroundColor: "#EFF1F3", margin: 10 } : { alignItems: 'center', backgroundColor: "#FEF5D8", margin: 10 }}>
-                            <Pressable onPress={() => { showModal() }} >
-                                <Image source={{ uri: user.identityParameters.image.uri }} style={styles.avatar} />
-                            </Pressable>
-                        </Surface>
+                        <View>
+                            <Surface elevation={2} style={user.activeStatus !== "Active" ? { alignItems: 'center', backgroundColor: "#EFF1F3", margin: 10, flexDirection: "row" } : { alignItems: 'center', backgroundColor: "#FEF5D8", margin: 10, flexDirection: "row" }}>
+                                <View style={{ flex: 1 }}>
+
+                                </View>
+                                <View style={{ flex: 1, alignItems: "center" }}>
+                                    <Pressable onPress={() => { showModal() }} >
+                                        <Image source={{ uri: user.identityParameters.image.uri }} style={styles.avatar} />
+                                    </Pressable>
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <View style={{ flex: 1, alignItems: "flex-end", paddingHorizontal: 10 }}>
+                                        <Text style={user.activeStatus == "Pending" ? { color: "red", fontSize: 15, fontWeight: "600" } : { color: "green", fontSize: 15, fontWeight: "600" }}>{user.activeStatus}</Text>
+                                    </View>
+                                    <View style={{ flex: 1, alignItems: "flex-end", justifyContent: "flex-end", paddingHorizontal: 10 }}>
+                                        <IconButton icon="phone-in-talk" mode="contained" onPress={() => Linking.openURL(`tel:${user.identityParameters.phoneNumber}`)} />
+                                    </View>
+                                </View>
+                            </Surface>
+                            <Surface elevation={2} style={{ height: 200, margin: 10, }}>
+                                <MapService currentLocation={{ latitude: 28.539473, longitude: 77.188727 }} locationHistory={[{ latitude: 28.538529, longitude: 77.191254 }, { latitude: 28.537046, longitude: 77.195523 }]} style={{ flex: 1 }} icon="circle-slice-8" />
+                            </Surface>
+                        </View>
                         <Surface elevation={2} style={{ margin: 10 }}>
                             <List.Subheader style={{ fontSize: 18 }}>
                                 {displayInfo.head.identityParameters}

@@ -40,8 +40,11 @@ export default function RegisterBank({ navigation }) {
 
         await uploadImages_v2(driver);
         console.log(driver);
-        registerDriverAPI(driver);
-        navigation.navigate('Details');
+        let response = await registerDriverAPI(driver);
+        console.log("Response" + JSON.stringify(response));
+        navigation.navigate('Details', {
+            driverid: response.driverId
+        });
 
     }
 
@@ -86,7 +89,7 @@ export default function RegisterBank({ navigation }) {
 
         console.log("Response: " + JSON.stringify(response));
 
-        return response;
+        return response.json();
     }
 
 
