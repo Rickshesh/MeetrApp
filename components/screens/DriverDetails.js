@@ -62,7 +62,7 @@ export default function DriverDetails(props) {
                 (<Surface style={styles.surface} elevation={2}>
                     <Portal>
                         <Modal visible={showAddress} contentContainerStyle={styles.containerStyle} onDismiss={_hideAddress}>
-                            <MapService lat={parseFloat(user.identityParameters.registerAddress.lat)} lon={parseFloat(user.identityParameters.registerAddress.lon)} />
+                            <MapService currentLocation={{ latitude: parseFloat(user.identityParameters.registerAddress.lat), longitude: parseFloat(user.identityParameters.registerAddress.lon) }} />
                         </Modal>
                         <Modal visible={showAadhaar} contentContainerStyle={styles.containerStyle} onDismiss={_hideAadhaar}>
                             <Image source={{ uri: user.identityParameters.frontAadhaar.uri }} style={styles.modalImageStyle} />

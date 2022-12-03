@@ -30,6 +30,7 @@ export default function DriverList({ navigation }) {
 
     const _setShowLocation = (driverId, value) => {
         setShowLocation({ ...showLocation, [driverId]: value });
+        console.log(showLocation)
     }
 
     return (
@@ -71,15 +72,17 @@ export default function DriverList({ navigation }) {
                                                     <Badge style={driver.creditScore > 60 ? { alignSelf: "center", backgroundColor: "lightgreen" } : { alignSelf: "center", backgroundColor: "lightblue" }}></Badge>
                                                 </View>
                                                 <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
-                                                    <IconButton icon="map-marker-check" mode="contained" onPress={() => _setShowLocation(driver.driverId, true)} />
+                                                    <IconButton icon="map-marker-check" mode="contained" onPress={() => _setShowLocation(driver.driverId, !showLocation[driver.driverId])} />
                                                     <IconButton icon="phone-in-talk" mode="contained" onPress={() => Linking.openURL(`tel:${driver.phoneNumber}`)} />
                                                 </View>
                                             </View>
                                         </Surface>
                                     </Pressable>
-                                    {(Object.keys(showLocation).includes(driver.driverId) && showLocation[driver.driverId]) && <Surface elevation={2} style={{ height: 200, paddingHorizontal: 10, margin: 10, }}>
-                                        <MapService lat={28.890675} lon={76.613966} scale={10} style={{ flex: 1 }} />
-                                    </Surface>}
+                                    {(Object.keys(showLocation).includes(driver.driverId) && showLocation[driver.driverId] == true) &&
+                                        <Surface elevation={2} style={{ height: 200, margin: 10, }}>
+                                            <MapService currentLocation={{ latitude: 28.539473, longitude: 77.188727 }} locationHistory={[{ latitude: 28.538529, longitude: 77.191254 }, { latitude: 28.537046, longitude: 77.195523 }]} style={{ flex: 1 }} icon="circle-slice-8" />
+                                            <IconButton icon="chevron-up" onPress={() => _setShowLocation(driver.driverId, false)} style={{ position: "absolute", right: 2, top: 2, backgroundColor: "white", borderWidth: 0.5 }} />
+                                        </Surface>}
                                 </View>
                             )
                         })}

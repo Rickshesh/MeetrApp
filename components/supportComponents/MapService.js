@@ -1,32 +1,70 @@
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { View, StyleSheet, Text, Dimensions, Image } from 'react-native'
-import auto from "../../assets/Location_auto.png";
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
+import { View, StyleSheet, Text, Dimensions } from 'react-native'
+import { IconButton } from 'react-native-paper';
 
-export default function MapService({ lat, lon, scale }) {
+export default function MapService({ currentLocation, scale, icon, iconcolor, locationHistory }) {
 
     return (
-        <MapView
-            style={styles.map}
-            region={
-                scale ?
-                    {
-                        latitude: lat,
-                        longitude: lon,
-                        latitudeDelta: 0.00922 / scale,
-                        longitudeDelta: 0.00421 / scale,
-                    } :
-                    {
-                        latitude: lat,
-                        longitude: lon,
-                        latitudeDelta: 0.00922,
-                        longitudeDelta: 0.00421,
-                    }}
-        >
-            <Marker coordinate={{ latitude: lat, longitude: lon }} >
-            </Marker>
-        </MapView >
+
+        <View style={{ flex: 1 }}>
+            {!Array.isArray(locationHistory) ?
+                <MapView
+                    style={styles.map}
+                    region={
+                        scale ?
+                            {
+                                latitude: currentLocation.latitude,
+                                longitude: currentLocation.longitude,
+                                latitudeDelta: 0.00922 / scale,
+                                longitudeDelta: 0.00421 / scale,
+                            } :
+                            {
+                                latitude: currentLocation.latitude,
+                                longitude: currentLocation.longitude,
+                                latitudeDelta: 0.00922,
+                                longitudeDelta: 0.00421,
+                            }}
+                >
+                    <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude }} pinColor="red" tracksViewChanges={false}>
+                        {icon ? <IconButton icon={icon} color={iconcolor ? iconcolor : "blue"} /> : <></>}
+                    </Marker>
+                </MapView >
+                :
+                <MapView
+                    style={styles.map}
+                    region={
+                        scale ?
+                            {
+                                latitude: currentLocation.latitude,
+                                longitude: currentLocation.longitude,
+                                latitudeDelta: 0.00922 / scale,
+                                longitudeDelta: 0.00421 / scale,
+                            } :
+                            {
+                                latitude: currentLocation.latitude,
+                                longitude: currentLocation.longitude,
+                                latitudeDelta: 0.00922,
+                                longitudeDelta: 0.00421,
+                            }}
+                >
+                    <Marker coordinate={{ latitude: currentLocation.latitude, longitude: currentLocation.longitude }} tracksViewChanges={false} anchor={icon && { x: 0.5, y: 0.5 }}>
+                        {icon ? <IconButton icon={icon} color={iconcolor ? iconcolor : "blue"} /> : <></>}
+                    </Marker>
+                    {locationHistory.map((item, index) => {
+                        return (
+                            <Marker key={index} coordinate={{ latitude: item.latitude, longitude: item.longitude }} tracksViewChanges={false} anchor={icon && { x: 0.5, y: 0.5 }}>
+                                {icon ? <IconButton icon={icon} color={iconcolor ? iconcolor : "lightskyblue"} /> : <></>}
+                            </Marker>
+                        )
+                    })}
+
+                    <Polyline strokeWidth={3} strokeColor="lightskyblue" coordinates={[...locationHistory, currentLocation]} />
+                </MapView >
+            }
+        </View >
     )
 }
+
 
 const styles = StyleSheet.create({
     map: {
