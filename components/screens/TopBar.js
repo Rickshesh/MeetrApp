@@ -10,7 +10,7 @@ export default function TopBar({ navigation }) {
             <Appbar.Action size={30} icon="menu" onPress={() => { }} color="#4C243B" />
             <Appbar.Content title="" />
             <Appbar.Action size={30} icon="home" onPress={() => navigation.navigate("List")} color="#4C243B" />
-            <Pressable onPress={() => navigation.navigate("List")}><Avatar.Text size={30} label="RM" style={{ backgroundColor: "#4C243B" }} /></Pressable>
+            <Pressable onPress={() => navigation.navigate("Register")}><Avatar.Text size={30} label="RM" style={{ backgroundColor: "#4C243B" }} /></Pressable>
         </Appbar.Header>
     )
 };

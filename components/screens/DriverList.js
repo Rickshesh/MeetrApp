@@ -16,7 +16,6 @@ export default function DriverList({ navigation }) {
             .then(
                 (data) => {
                     setDriverList(data.body);
-                    console.log("Data: " + data);
                 }
             )
             .catch((error) => console.error(error))
@@ -26,11 +25,11 @@ export default function DriverList({ navigation }) {
 
     React.useEffect(() => {
         getUsers();
+        console.log(navigation.getState());
     }, [])
 
     const _setShowLocation = (driverId, value) => {
         setShowLocation({ ...showLocation, [driverId]: value });
-        console.log(showLocation)
     }
 
     return (

@@ -51,6 +51,7 @@ export default function DriverDetails(props) {
         setLoading(true);
         console.log(props.route.params.driverid)
         getUserDetails(props.route.params.driverid);
+        console.log(props.navigation.getState());
     }, [])
 
     const displayInfo = driverDetailsConfig.displayInfo;

@@ -42,8 +42,13 @@ export default function RegisterBank({ navigation }) {
         let response = await registerDriverAPI(driver);
         console.log("Response" + JSON.stringify(response));
         dispatch(resetDriver());
-        navigation.navigate('Details', {
-            driverid: response.driverId
+
+
+        console.log(navigation.getState());
+
+        navigation.reset({
+            index: 2,
+            routes: [{ name: "List" }, { name: "Register" }, { name: 'Details', params: { driverid: response.driverId } }]
         });
     }
 

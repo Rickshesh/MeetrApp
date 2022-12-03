@@ -19,7 +19,7 @@ const store = configureStore()
 
 
 const Stack = createNativeStackNavigator();
-
+const RegisterStack = createNativeStackNavigator();
 
 const Main = () => {
     return (
@@ -41,11 +41,11 @@ const Main = () => {
 
 function Register() {
     return (
-        <Stack.Navigator initialRouteName="Driver">
-            <Stack.Screen name="Driver" component={RegisterDriver} options={{ title: "Driver Details" }} />
-            <Stack.Screen name="Bank" component={RegisterBank} options={{ title: "Bank Details" }} />
-            <Stack.Screen name="Auto" component={RegisterAuto} options={{ title: "Vehicle Details" }} />
-        </Stack.Navigator>
+        <RegisterStack.Navigator initialRouteName="Driver">
+            <RegisterStack.Screen name="Driver" component={RegisterDriver} options={{ title: "Driver Details" }} />
+            <RegisterStack.Screen name="Bank" component={RegisterBank} options={{ title: "Bank Details" }} />
+            <RegisterStack.Screen name="Auto" component={RegisterAuto} options={{ title: "Vehicle Details" }} />
+        </RegisterStack.Navigator>
     )
 }
 
