@@ -1,10 +1,10 @@
 {
   "version": "1",
   "cognitoConfig": {
-    "identityPoolName": "meetrapp9dbc92ee_identitypool_9dbc92ee",
+    "identityPoolName": "meetrapp77c470e0_identitypool_77c470e0",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "meetra9dbc92ee",
-    "userPoolName": "meetrapp9dbc92ee_userpool_9dbc92ee",
+    "resourceNameTruncated": "meetra77c470e0",
+    "userPoolName": "meetrapp77c470e0_userpool_77c470e0",
     "autoVerifiedAttributes": [
       "email"
     ],
@@ -31,12 +31,26 @@
     "userpoolClientReadAttributes": [
       "email"
     ],
-    "userpoolClientLambdaRole": "meetra9dbc92ee_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "meetra77c470e0_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "9dbc92ee",
-    "resourceName": "meetrapp9dbc92ee",
+    "sharedId": "77c470e0",
+    "resourceName": "meetrapp77c470e0",
     "authSelections": "identityPoolAndUserPool",
     "useDefault": "default",
+    "usernameAttributes": [
+      "email"
+    ],
+    "triggers": {
+      "DefineAuthChallenge": [
+        "boilerplate-define-challenge"
+      ],
+      "CreateAuthChallenge": [
+        "boilerplate-create-challenge"
+      ],
+      "VerifyAuthChallengeResponse": [
+        "boilerplate-verify"
+      ]
+    },
     "userPoolGroupList": [],
     "serviceName": "Cognito",
     "usernameCaseSensitive": false,
