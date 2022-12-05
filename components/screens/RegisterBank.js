@@ -1,5 +1,5 @@
 import { StyleSheet, ScrollView, View } from 'react-native'
-import { Surface, List, TextInput, Button } from 'react-native-paper'
+import { Surface, List, TextInput, Button, Text } from 'react-native-paper'
 import registerDriver from '../responses/registerDriver.json';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateBankDetails } from "../actions/UserActions";
@@ -31,9 +31,9 @@ export default function RegisterBank({ navigation }) {
                 <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} contentContainerStyle={{ margin: 10 }}>
                     <List.Section>
                         <List.Subheader>
-                            {displayInfo.head.bankingDetails}
+                            <Text variant='titleSmall'>{displayInfo.head.bankingDetails}</Text>
                         </List.Subheader>
-                        <Surface>
+                        <View>
                             {Object.keys(displayInfo.body.bankingDetails).map((key, index) => {
                                 return (
                                     <TextInput key={index} label={displayInfo.body.bankingDetails[key].label}
@@ -42,7 +42,7 @@ export default function RegisterBank({ navigation }) {
                                         style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
                                 )
                             })}
-                        </Surface>
+                        </View>
                     </List.Section>
                     <List.Section flexDirection="row">
                         <Button icon="step-backward" style={styles.button} mode="contained" onPress={onPrevious}>

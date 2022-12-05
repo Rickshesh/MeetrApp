@@ -1,6 +1,6 @@
 import 'react-native-get-random-values';
-import { Surface, List, Portal, Modal, IconButton, TextInput, Button } from 'react-native-paper'
-import { StyleSheet, ScrollView, Pressable, View, Image, Text } from 'react-native'
+import { Surface, List, Portal, Modal, IconButton, TextInput, Button, Text } from 'react-native-paper'
+import { StyleSheet, ScrollView, Pressable, View, Image, Alert } from 'react-native'
 import registerDriver from '../responses/registerDriver.json';
 import React, { useEffect, useState } from 'react';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -113,9 +113,9 @@ export default function RegisterDriver({ navigation }) {
                     </List.Section>
                     <List.Section>
                         <List.Subheader>
-                            {displayInfo.head.identityParameters}
+                            <Text variant="titleSmall">{displayInfo.head.identityParameters}</Text>
                         </List.Subheader>
-                        <Surface>
+                        <View>
                             {Object.keys(displayInfo.body.identityParameters).map((key, index) => {
                                 return (
                                     <TextInput value={driver.identityParameters[key]} key={index}
@@ -129,7 +129,7 @@ export default function RegisterDriver({ navigation }) {
                                     {typeof driver.identityParameters.frontAadhaar === 'undefined' ?
                                         <>
                                             <IconButton size={24} icon="camera" style={styles.avatar} onPress={() => _startCamera(frontAadhaar)} />
-                                            <Text variant="titleMedium">Aadhaar Front</Text>
+                                            <Text variant="titleSmall">Aadhaar Front</Text>
                                         </> :
                                         <Pressable onPress={() => _startCamera(frontAadhaar)}><Image source={{ uri: driver.identityParameters.frontAadhaar.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
                                     }
@@ -138,13 +138,13 @@ export default function RegisterDriver({ navigation }) {
                                     {typeof driver.identityParameters.backAadhaar === 'undefined' ?
                                         <>
                                             <IconButton size={24} icon="camera" style={styles.avatar} onPress={() => _startCamera(backAadhaar)} />
-                                            <Text variant="titleMedium">Aadhaar Back</Text>
+                                            <Text variant="titleSmall">Aadhaar Back</Text>
                                         </> :
                                         <Pressable onPress={() => _startCamera(backAadhaar)}><Image source={{ uri: driver.identityParameters.backAadhaar.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
                                     }
                                 </View>
                             </View>
-                            <List.Item title="Date" right={() => <Button mode="contained" color="#FBFEFB" textColor="black" onPress={_showDatePicker}> {(driver.identityParameters.dateOfBirth) ? driver.identityParameters.dateOfBirth.toString() : moment(new Date()).format("DD-MM-YYYY").toString()} </Button>} />
+                            <List.Item title="Date" right={() => <Button mode="contained" color="#FBFEFB" onPress={_showDatePicker}> {(driver.identityParameters.dateOfBirth) ? driver.identityParameters.dateOfBirth.toString() : moment(new Date()).format("DD-MM-YYYY").toString()} </Button>} />
                             <DateTimePickerModal
                                 isVisible={showDatePicker}
                                 mode="date"
@@ -157,11 +157,11 @@ export default function RegisterDriver({ navigation }) {
                                         <Text>{driver.identityParameters.registerAddress.address}</Text>
                                     }
                                     {!driver.identityParameters.registerAddress &&
-                                        <Text>Get Address</Text>}
+                                        <>Get Address</>}
                                 </Button>
 
                             </List.Section>
-                        </Surface>
+                        </View>
                     </List.Section>
                     <List.Section>
                         <Button icon="step-forward" mode="contained" onPress={onNext}>

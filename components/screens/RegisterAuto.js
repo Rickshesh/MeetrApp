@@ -32,7 +32,7 @@ export default function RegisterBank({ navigation }) {
     }
 
     const onPrevious = async () => {
-        navigation.navigate('Driver');
+        navigation.navigate('Bank');
     }
 
     const onSubmit = async () => {
@@ -109,9 +109,9 @@ export default function RegisterBank({ navigation }) {
                     </Portal>
                     <List.Section>
                         <List.Subheader>
-                            {displayInfo.head.autoDetails}
+                            <Text variant='titleSmall'>{displayInfo.head.autoDetails}</Text>
                         </List.Subheader>
-                        <Surface>
+                        <View>
                             {Object.keys(displayInfo.body.autoDetails).map((key, index) => {
                                 return (
                                     <TextInput key={index}
@@ -125,7 +125,7 @@ export default function RegisterBank({ navigation }) {
                                     {typeof driver.autoDetails.frontAuto === 'undefined' ?
                                         <>
                                             <IconButton size={24} icon="camera" style={styles.avatar} onPress={() => _startCamera(frontAuto)} />
-                                            <Text variant="titleMedium">Auto Front</Text>
+                                            <Text variant="titleSmall">Auto Front</Text>
                                         </> :
                                         <Pressable onPress={() => _startCamera(frontAuto)}><Image source={{ uri: driver.autoDetails.frontAuto.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
                                     }
@@ -134,13 +134,13 @@ export default function RegisterBank({ navigation }) {
                                     {typeof driver.autoDetails.backAuto === 'undefined' ?
                                         <>
                                             <IconButton size={24} icon="camera" style={styles.avatar} onPress={() => _startCamera(backAuto)} />
-                                            <Text variant="titleMedium">Auto Back</Text>
+                                            <Text variant="titleSmall">Auto Back</Text>
                                         </> :
                                         <Pressable onPress={() => _startCamera(backAuto)}><Image source={{ uri: driver.autoDetails.backAuto.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
                                     }
                                 </View>
                             </View>
-                        </Surface>
+                        </View>
                     </List.Section>
                     <List.Section flexDirection="row">
                         <Button icon="step-backward" style={styles.button} mode="contained" onPress={onPrevious}>

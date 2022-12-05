@@ -13,7 +13,7 @@ export default function TopBar({ navigation }) {
         <Appbar.Header mode="small" statusBarHeight={30} elevated={true} style={{ backgroundColor: "#FBDA60" }}>
             <Appbar.Action size={30} icon="menu" onPress={() => { navigation.openDrawer() }} color="#4C243B" />
             <Appbar.Content title="" />
-            <Appbar.Action size={30} icon="home" onPress={() => navigation.navigate("List")} color="#4C243B" />
+            <Appbar.Action size={30} icon="home" onPress={() => navigation.jumpTo("List")} color="#4C243B" />
             <Pressable onPress={() => dispatch(toggleAccountSection())}><Avatar.Icon size={30} icon="account" style={{ backgroundColor: "#4C243B" }} /></Pressable>
         </Appbar.Header>
 

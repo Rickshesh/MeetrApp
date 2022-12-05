@@ -12,7 +12,7 @@ export default function AccountSection({ navigation }) {
 
     return (
         <Portal>
-            <Modal contentContainerStyle={styles.containerStyle} visible={showAccountSection}>
+            <Modal contentContainerStyle={styles.containerStyle} visible={showAccountSection} onDismiss={() => dispatch(toggleAccountSection())}>
                 <View style={{ flex: 0.6, justifyContent: "space-evenly", alignItems: "center" }}>
                     <Avatar.Icon size={100} icon="account" />
                     <Text variant="titleMedium">Rickshesh Manchanda</Text>

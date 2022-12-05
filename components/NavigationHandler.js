@@ -11,7 +11,9 @@ import DriverList from './screens/DriverList';
 import AccountSection from './screens/AccountSection';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { resetDriver } from "./actions/UserActions";
+
 
 
 
@@ -19,7 +21,8 @@ import { useSelector } from 'react-redux';
 const RegisterStack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
-export default function NavigationContainer() {
+export default function NavigationHandler() {
+    const dispatch = useDispatch();
 
     return (
         <PaperProvider>
@@ -30,7 +33,9 @@ export default function NavigationContainer() {
                         backBehavior="initialRoute"
                     >
                         <Drawer.Screen name="List" component={DriverList} options={{ title: "Driver List" }} />
-                        <Drawer.Screen name="Register" component={Register} options={{ title: "Register Driver" }} />
+                        <Drawer.Screen name="Register" component={Register} options={{ title: "Register Driver", unmountOnBlur: true }}
+                            listeners={() => ({ blur: () => { dispatch(resetDriver()); } })}
+                        />
                         <Drawer.Screen name="Details" component={DriverDetails} initialParams={{ driverid: "000003" }} />
                     </Drawer.Navigator>
                 </NavigationContainer>
