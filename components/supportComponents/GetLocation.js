@@ -64,34 +64,37 @@ export default function GetLocation({ _getAddress }) {
 
     const GetCurrentLocation = async () => {
 
-        let { status } = await Location.requestForegroundPermissionsAsync();
+        try {
+            let { status } = await Location.requestForegroundPermissionsAsync();
 
-        if (status !== 'granted') {
-            setErrorMsg('Permission to access location was denied');
-            return;
-        }
-
-        let { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
-
-        if (coords) {
-            const { latitude, longitude } = coords;
-            let response = await Location.reverseGeocodeAsync({
-                latitude,
-                longitude
-            });
-
-            setLocation({ latitude, longitude });
-
-            for (let item of response) {
-                let address = `${item.name}, ${item.street}, ${item.region}, ${item.postalCode}, ${item.city}`;
-
-                setDisplayCurrentAddress(address);
-
-                _getAddress({ latitude, longitude }, address);
-
+            if (status !== 'granted') {
+                setErrorMsg('Permission to access location was denied');
+                return;
             }
 
+            let { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
 
+            if (coords) {
+                const { latitude, longitude } = coords;
+                let response = await Location.reverseGeocodeAsync({
+                    latitude,
+                    longitude
+                });
+
+                setLocation({ latitude, longitude });
+
+                for (let item of response) {
+                    let address = `${item.name}, ${item.street}, ${item.region}, ${item.postalCode}, ${item.city}`;
+
+                    setDisplayCurrentAddress(address);
+
+                    _getAddress({ latitude, longitude }, address);
+
+                }
+            }
+        }
+        catch (err) {
+            console.log(err);
         }
 
     }

@@ -27,7 +27,7 @@
                 "upiAddress": "UPI Address"
             },
             "autoDetails": {
-                "deviceMac": "Device Id",
+                "deviceID": "Device Id",
                 "autoNumber": "Vehicle Number"
             },
             "exceptions": {

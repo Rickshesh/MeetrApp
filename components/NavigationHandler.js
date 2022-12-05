@@ -15,9 +15,6 @@ import { useDispatch } from 'react-redux';
 import { resetDriver } from "./actions/UserActions";
 
 
-
-
-
 const RegisterStack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
@@ -32,11 +29,11 @@ export default function NavigationHandler() {
                         screenOptions={{ header: ({ navigation, route, options, layout }) => { return (<TopBar navigation={navigation} route={route} options={options} layout={layout} />) } }}
                         backBehavior="initialRoute"
                     >
-                        <Drawer.Screen name="List" component={DriverList} options={{ title: "Driver List" }} />
+                        <Drawer.Screen name="List" component={DriverList} options={{ title: "Driver List", unmountOnBlur: true }} />
                         <Drawer.Screen name="Register" component={Register} options={{ title: "Register Driver", unmountOnBlur: true }}
                             listeners={() => ({ blur: () => { dispatch(resetDriver()); } })}
                         />
-                        <Drawer.Screen name="Details" component={DriverDetails} initialParams={{ driverid: "000003" }} />
+                        <Drawer.Screen name="Details" component={DriverDetails} options={{ unmountOnBlur: true }} />
                     </Drawer.Navigator>
                 </NavigationContainer>
                 <AccountSection />

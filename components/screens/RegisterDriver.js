@@ -154,7 +154,7 @@ export default function RegisterDriver({ navigation }) {
                             <List.Section>
                                 <Button icon="map-marker" mode="contained" color="#FBFEFB" onPress={() => _getLocation()}>
                                     {driver.identityParameters.registerAddress &&
-                                        <Text>{driver.identityParameters.registerAddress.address}</Text>
+                                        <>{driver.identityParameters.registerAddress.address}</>
                                     }
                                     {!driver.identityParameters.registerAddress &&
                                         <>Get Address</>}

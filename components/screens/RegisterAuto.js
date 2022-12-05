@@ -1,5 +1,5 @@
 import { StyleSheet, ScrollView, View, Pressable, Image } from 'react-native'
-import { Surface, List, TextInput, Button, IconButton, Text, Portal, Modal } from 'react-native-paper'
+import { Surface, List, TextInput, Button, IconButton, Text, Portal, Modal, Dialog, Paragraph } from 'react-native-paper'
 import registerDriver from '../responses/registerDriver.json';
 import { useSelector, useDispatch } from 'react-redux';
 import React, { useState } from 'react';
@@ -18,6 +18,9 @@ const backAuto = "backAuto"
 export default function RegisterBank({ navigation }) {
 
     const [cameraType, setCameraType] = useState(null);
+    const [submitLoading, setSubmitLoading] = useState(false);
+    const [showFail, setShowFail] = useState(false);
+
 
     const dispatch = useDispatch();
     const driver = useSelector((store) => store.driver.driver);
@@ -37,20 +40,30 @@ export default function RegisterBank({ navigation }) {
 
     const onSubmit = async () => {
 
+        setSubmitLoading(true);
         await uploadImages_v2(driver);
         console.log(driver);
         let response = await registerDriverAPI(driver);
-        console.log("Response" + JSON.stringify(response));
-        dispatch(resetDriver());
+        setSubmitLoading(false);
+
+        if (response && response.driverId) {
+            console.log("Response" + JSON.stringify(response));
+            dispatch(resetDriver());
+            navigateOnSubmit(response);
+        }
+
+        else {
+            setShowFail(true);
+        }
+    }
 
 
+    const navigateOnSubmit = (response) => {
         console.log(navigation.getState());
         navigation.reset({
             index: 0,
             routes: [{ name: 'Details', params: { driverid: response.driverId } }]
         });
-
-
     }
 
     const _captureImage = (file, type) => {
@@ -83,18 +96,25 @@ export default function RegisterBank({ navigation }) {
     };
 
     const registerDriverAPI = async (data) => {
-        let response = await fetch("https://84qnnnkedj.execute-api.ap-south-1.amazonaws.com/beta/create", {
-            method: "PUT",
-            mode: "cors",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
 
-        console.log("Response: " + JSON.stringify(response));
+        try {
+            let response = await fetch("https://84qnnnkedj.execute-api.ap-south-1.amazonaws.com/beta/create", {
+                method: "PUT",
+                mode: "cors",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
 
-        return response.json();
+
+            console.log("Response: " + JSON.stringify(response));
+
+            return response.json();
+        }
+        catch (err) {
+            return err;
+        }
     }
 
 
@@ -106,6 +126,16 @@ export default function RegisterBank({ navigation }) {
                         <Modal visible={cameraType !== null} onDismiss={_hideCamera} contentContainerStyle={styles.containerStyle}>
                             <CameraModule _setPhoto={(file, type) => _captureImage(file, type)} type={cameraType} />
                         </Modal>
+
+                        <Dialog visible={showFail} onDismiss={() => setShowFail(false)}>
+                            <Dialog.Content>
+                                <Paragraph>Registeration Failed !! </Paragraph>
+                                <Paragraph>Please Retry Later</Paragraph>
+                            </Dialog.Content>
+                            <Dialog.Actions>
+                                <Button onPress={() => { }}>Ok</Button>
+                            </Dialog.Actions>
+                        </Dialog>
                     </Portal>
                     <List.Section>
                         <List.Subheader>
@@ -146,7 +176,7 @@ export default function RegisterBank({ navigation }) {
                         <Button icon="step-backward" style={styles.button} mode="contained" onPress={onPrevious}>
                             Previous
                         </Button>
-                        <Button icon="step-forward" style={styles.button} mode="contained" onPress={onSubmit}>
+                        <Button icon="step-forward" style={styles.button} mode="contained" loading={submitLoading} onPress={onSubmit}>
                             Submit
                         </Button>
                     </List.Section>
