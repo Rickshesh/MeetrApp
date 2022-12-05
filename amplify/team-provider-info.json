@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-meetrapp-dev-92232-authRole",
+      "UnauthRoleArn": "arn:aws:iam::971095065425:role/amplify-meetrapp-dev-92232-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::971095065425:role/amplify-meetrapp-dev-92232-authRole",
+      "Region": "ap-south-1",
+      "DeploymentBucketName": "amplify-meetrapp-dev-92232-deployment",
+      "UnauthRoleName": "amplify-meetrapp-dev-92232-unauthRole",
+      "StackName": "amplify-meetrapp-dev-92232",
+      "StackId": "arn:aws:cloudformation:ap-south-1:971095065425:stack/amplify-meetrapp-dev-92232/12848f90-7387-11ed-a372-0a29a03a5300",
+      "AmplifyAppId": "d3vak3j4he23ko"
+    },
+    "categories": {
+      "auth": {
+        "meetrapp9dbc92ee": {}
+      }
+    }
+  }
+}

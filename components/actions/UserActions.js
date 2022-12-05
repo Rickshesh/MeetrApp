@@ -5,6 +5,7 @@ export const UPDATE_DRIVER_ATTRIBUTE = 'UPDATE_DRIVER_ATTRIBUTE'
 export const DELETE_DRIVER_ATTRIBUTE = 'DELETE_DRIVER_ATTRIBUTE'
 export const UPDATE_IMAGES = 'UPDATE_IMAGES'
 export const RESET_DRIVER = 'RESET_DRIVER'
+export const TOGGLE_ACCOUNT_SECTION = 'TOGGLE_ACCOUNT_SECTION'
 
 export function updateDriver(driver) {
     return {
@@ -51,5 +52,11 @@ export function updateImages(image) {
 export function resetDriver() {
     return {
         type: RESET_DRIVER,
+    }
+}
+
+export function toggleAccountSection() {
+    return {
+        type: TOGGLE_ACCOUNT_SECTION
     }
 }

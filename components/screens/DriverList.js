@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Surface, List, Portal, Modal, IconButton, Avatar, ActivityIndicator, Badge } from 'react-native-paper'
+import { Surface, List, Portal, Modal, IconButton, Avatar, ActivityIndicator, Badge, Button, AnimatedFAB } from 'react-native-paper'
 import { StyleSheet, ScrollView, Pressable, View, Image, Text, Linking, Dimensions } from 'react-native'
 import MapService from '../supportComponents/MapService';
 
@@ -25,7 +25,6 @@ export default function DriverList({ navigation }) {
 
     React.useEffect(() => {
         getUsers();
-        console.log(navigation.getState());
     }, [])
 
     const _setShowLocation = (driverId, value) => {
@@ -37,7 +36,8 @@ export default function DriverList({ navigation }) {
 
             {isLoading ? <Surface style={[styles.surface, { justifyContent: "center", alignItems: "center" }]}><ActivityIndicator animating={true} /></Surface> :
                 (<Surface style={styles.surface} elevation={2}>
-                    <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} style={styles.container}>
+
+                    <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} style={[styles.container]}>
 
                         {driverList.map((driver, index) => {
                             return (
@@ -87,6 +87,11 @@ export default function DriverList({ navigation }) {
                         })}
 
                     </ScrollView>
+                    <View style={{ margin: 20 }}>
+                        <Button mode="contained" onPress={() => navigation.navigate("Register")}>
+                            Register Driver
+                        </Button>
+                    </View>
                 </Surface>)
             }
         </View>

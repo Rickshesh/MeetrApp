@@ -45,11 +45,12 @@ export default function RegisterBank({ navigation }) {
 
 
         console.log(navigation.getState());
-
         navigation.reset({
-            index: 2,
-            routes: [{ name: "List" }, { name: "Register" }, { name: 'Details', params: { driverid: response.driverId } }]
+            index: 0,
+            routes: [{ name: 'Details', params: { driverid: response.driverId } }]
         });
+
+
     }
 
     const _captureImage = (file, type) => {

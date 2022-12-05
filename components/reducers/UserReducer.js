@@ -4,6 +4,7 @@ import { UPDATE_BANK_DETAILS } from "../actions/UserActions";
 import { UPDATE_DRIVER_ATTRIBUTE } from "../actions/UserActions";
 import { UPDATE_IMAGES } from "../actions/UserActions";
 import { RESET_DRIVER } from "../actions/UserActions";
+import { TOGGLE_ACCOUNT_SECTION } from "../actions/UserActions"
 
 
 
@@ -12,7 +13,8 @@ const initialState = {
         identityParameters: {},
         bankingDetails: {},
         autoDetails: {}
-    }
+    },
+    showAccountSection: false
 };
 
 const userReducer = (state = initialState, action) => {
@@ -34,9 +36,15 @@ const userReducer = (state = initialState, action) => {
             return { ...state, driver: { ...remainingFields, [action.payload.keyobject]: { ...remainingUnchanged, [action.payload.keyarray]: changedValue } } }
         case RESET_DRIVER:
             return {
-                identityParameters: {},
-                bankingDetails: {},
-                autoDetails: {}
+                ...state, driver: {
+                    identityParameters: {},
+                    bankingDetails: {},
+                    autoDetails: {}
+                }
+            }
+        case TOGGLE_ACCOUNT_SECTION:
+            return {
+                ...state, showAccountSection: !state.showAccountSection
             }
         default:
             return state

@@ -5,13 +5,15 @@ import RegisterBank from './screens/RegisterBank';
 import RegisterAuto from './screens/RegisterAuto';
 import DriverList from './screens/DriverList';
 import TopBar from './screens/TopBar';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Button } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { Provider } from 'react-redux';
 import configureStore from './store/configureStore';
-import { StatusBar } from 'expo-status-bar';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import AccountSection from './screens/AccountSection';
+
 
 
 
@@ -20,24 +22,33 @@ const store = configureStore()
 
 const Stack = createNativeStackNavigator();
 const RegisterStack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
+
 
 const Main = () => {
+
+
     return (
         <Provider store={store}>
             <PaperProvider>
                 <View style={styles.container}>
                     <NavigationContainer>
-                        <Stack.Navigator initialRouteName="List" screenOptions={{ header: ({ navigation, route, options, back }) => { return (<TopBar navigation={navigation} route={route} options={options} back={back} />) } }}>
-                            <Stack.Screen name="Register" component={Register} initialParams={{ initial: false }} />
-                            <Stack.Screen name="List" component={DriverList} />
-                            <Stack.Screen name="Details" component={DriverDetails} initialParams={{ driverid: "000003" }} />
-                        </Stack.Navigator>
+                        <Drawer.Navigator initialRouteName="List"
+                            screenOptions={{ header: ({ navigation, route, options, layout }) => { return (<TopBar navigation={navigation} route={route} options={options} layout={layout} />) } }}
+                            backBehavior="initialRoute"
+                        >
+                            <Drawer.Screen name="List" component={DriverList} options={{ title: "Driver List" }} />
+                            <Drawer.Screen name="Register" component={Register} options={{ title: "Register Driver" }} />
+                            <Drawer.Screen name="Details" component={DriverDetails} initialParams={{ driverid: "000003" }} />
+                        </Drawer.Navigator>
                     </NavigationContainer>
+                    <AccountSection />
                 </View>
             </PaperProvider>
         </Provider>
     );
 };
+
 
 function Register() {
     return (
@@ -48,7 +59,6 @@ function Register() {
         </RegisterStack.Navigator>
     )
 }
-
 
 
 const styles = StyleSheet.create({
