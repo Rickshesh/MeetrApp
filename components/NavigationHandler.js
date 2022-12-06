@@ -14,7 +14,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { useDispatch, useSelector } from 'react-redux';
 import { resetDriver, toggleAccountSection } from "./actions/UserActions";
 import { useEffect } from 'react';
-
+import DrawerSection from './screens/DrawerSection';
 
 const RegisterStack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -38,6 +38,7 @@ export default function NavigationHandler() {
                     <Drawer.Navigator initialRouteName="List"
                         screenOptions={{ header: ({ navigation, route, options, layout }) => { return (<TopBar navigation={navigation} route={route} options={options} layout={layout} />) } }}
                         backBehavior="initialRoute"
+                        drawerContent={({ state, navigation, descriptors }) => <DrawerSection state={state} navigation={navigation} descriptors={descriptors} />}
                     >
                         <Drawer.Screen name="List" component={DriverList} options={{ title: "Driver List", unmountOnBlur: true }} />
                         <Drawer.Screen name="Register" component={Register} options={{ title: "Register Driver", unmountOnBlur: true }}
