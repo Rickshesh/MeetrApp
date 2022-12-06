@@ -25,7 +25,7 @@ export default function MapService({ currentLocation, scale, icon, iconcolor, lo
                                 longitudeDelta: 0.00421,
                             }}
                 >
-                    <Marker coordinate={{ latitude: location.latitude, longitude: location.longitude }} pinColor="red" tracksViewChanges={false}>
+                    <Marker coordinate={{ latitude: currentLocation.latitude, longitude: currentLocation.longitude }} pinColor="red" tracksViewChanges={false}>
                         {icon ? <IconButton icon={icon} color={iconcolor ? iconcolor : "blue"} /> : <></>}
                     </Marker>
                 </MapView >

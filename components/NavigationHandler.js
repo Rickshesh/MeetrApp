@@ -11,8 +11,9 @@ import DriverList from './screens/DriverList';
 import AccountSection from './screens/AccountSection';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { useDispatch } from 'react-redux';
-import { resetDriver } from "./actions/UserActions";
+import { useDispatch, useSelector } from 'react-redux';
+import { resetDriver, toggleAccountSection } from "./actions/UserActions";
+import { useEffect } from 'react';
 
 
 const RegisterStack = createNativeStackNavigator();
@@ -20,6 +21,15 @@ const Drawer = createDrawerNavigator();
 
 export default function NavigationHandler() {
     const dispatch = useDispatch();
+
+    const showAccountSection = useSelector(store => store.driver.showAccountSection)
+
+    useEffect(() => {
+        if (showAccountSection) {
+            dispatch(toggleAccountSection())
+        }
+        dispatch(resetDriver());
+    }, [])
 
     return (
         <PaperProvider>
