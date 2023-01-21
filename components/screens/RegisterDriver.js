@@ -118,12 +118,15 @@ export default function RegisterDriver({ navigation }) {
                         <View>
                             {Object.keys(displayInfo.body.identityParameters).map((key, index) => {
                                 return (
-                                    <TextInput value={driver.identityParameters[key]} key={index}
-                                        onChangeText={text => _updateDriver(key, text)}
-                                        label={displayInfo.body.identityParameters[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
+                                    <View key={index}>
+                                        <TextInput keyboardType={displayInfo.body.identityParameters[key].format == "number" ? "numeric" : "default"}
+                                            value={driver.identityParameters[key]}
+                                            onChangeText={text => _updateDriver(key, text)}
+                                            label={displayInfo.body.identityParameters[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
+                                    </View>
                                 )
                             })}
-                            <TextInput label={displayInfo.body.exceptions.identityParameters.aadhaar.label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" onChangeText={text => _updateDriver("aadhaar", text)} />
+                            <TextInput label={displayInfo.body.exceptions.identityParameters.aadhaar.label} keyboardType={displayInfo.body.exceptions.identityParameters.aadhaar.format == "number" ? "numeric" : "default"} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" onChangeText={text => _updateDriver("aadhaar", text)} />
                             <View style={styles.inlineElement}>
                                 <View style={styles.inlineImage}>
                                     {typeof driver.identityParameters.frontAadhaar === 'undefined' ?

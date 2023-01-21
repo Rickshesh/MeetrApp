@@ -36,10 +36,13 @@ export default function RegisterBank({ navigation }) {
                         <View>
                             {Object.keys(displayInfo.body.bankingDetails).map((key, index) => {
                                 return (
-                                    <TextInput key={index} label={displayInfo.body.bankingDetails[key].label}
-                                        value={driver.bankingDetails[key]}
-                                        onChangeText={text => _updateBankDetails(key, text)}
-                                        style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
+                                    <View key={index}>
+                                        <TextInput label={displayInfo.body.bankingDetails[key].label}
+                                            keyboardType={displayInfo.body.bankingDetails[key].format == "number" ? "numeric" : "default"}
+                                            value={driver.bankingDetails[key]}
+                                            onChangeText={text => _updateBankDetails(key, text)}
+                                            style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
+                                    </View>
                                 )
                             })}
                         </View>

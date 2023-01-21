@@ -144,10 +144,12 @@ export default function RegisterBank({ navigation }) {
                         <View>
                             {Object.keys(displayInfo.body.autoDetails).map((key, index) => {
                                 return (
-                                    <TextInput key={index}
-                                        value={driver.autoDetails[key]}
-                                        onChangeText={text => _updateAutoDetails(key, text)}
-                                        label={displayInfo.body.autoDetails[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
+                                    <View key={index}>
+                                        <TextInput
+                                            value={driver.autoDetails[key]}
+                                            onChangeText={text => _updateAutoDetails(key, text)}
+                                            label={displayInfo.body.autoDetails[key].label} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" />
+                                    </View>
                                 )
                             })}
                             <View style={styles.inlineElement}>

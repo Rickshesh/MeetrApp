@@ -19,6 +19,7 @@ import DrawerSection from './screens/DrawerSection';
 const RegisterStack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
+
 export default function NavigationHandler() {
     const dispatch = useDispatch();
 

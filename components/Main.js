@@ -9,8 +9,6 @@ import awsExports from '../src/aws-exports';
 Amplify.configure(awsExports);
 
 
-
-
 const store = configureStore()
 
 const Main = () => {
