@@ -1,15 +1,13 @@
-import Amplify from 'aws-amplify';
+import { Amplify, PubSub, Auth } from 'aws-amplify';
 import { AWSIoTProvider } from '@aws-amplify/pubsub';
-import PubSub from '@aws-amplify/pubsub';
 import { View } from "react-native"
 import { Button } from 'react-native-paper';
+import { useEffect } from 'react';
 
 Amplify.addPluggable(new AWSIoTProvider({
     aws_pubsub_region: 'ap-south-1',
     aws_pubsub_endpoint: 'wss://ata8s3hvseeyg-ats.iot.ap-south-1.amazonaws.com/mqtt',
 }));
-Amplify.configure(config);
-
 PubSub.configure();
 
 PubSub.subscribe('myTopic1').subscribe({

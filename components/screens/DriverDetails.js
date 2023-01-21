@@ -3,6 +3,15 @@ import { Surface, List, Portal, Modal, IconButton, ActivityIndicator } from 'rea
 import { StyleSheet, ScrollView, Pressable, View, Text, Image } from 'react-native'
 import driverDetailsConfig from '../responses/driverDetailsConfig.json';
 import MapService from '../supportComponents/MapService';
+import { AWSIoTProvider } from '@aws-amplify/pubsub';
+import { Amplify, PubSub } from 'aws-amplify';
+
+Amplify.addPluggable(new AWSIoTProvider({
+    aws_pubsub_region: 'ap-south-1',
+    aws_pubsub_endpoint: 'wss://ata8s3hvseeyg-ats.iot.ap-south-1.amazonaws.com/mqtt',
+}));
+PubSub.configure();
+
 
 export default function DriverDetails(props) {
     const [user, setUser] = React.useState([]);
@@ -36,6 +45,7 @@ export default function DriverDetails(props) {
             .then((response) => response.json())
             .then((json) => {
                 setUser(json)
+                subscribeMqtt(json.autoDetails)
                 console.log(json)
             })
             .catch((error) => console.error(error))
@@ -44,6 +54,14 @@ export default function DriverDetails(props) {
 
     const __setStartCamera = () => {
         setStartCamera(!startCamera)
+    }
+
+    const subscribeMqtt = (autoDetails) => {
+        PubSub.subscribe('aws/deviceUpdate/' + autoDetails.deviceID).subscribe({
+            next: data => console.log('Message received', data.value),
+            error: error => console.error(error),
+            complete: () => console.log('Done'),
+        });
     }
 
     //To fetch the API, pass the User ID

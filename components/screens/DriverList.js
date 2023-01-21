@@ -31,6 +31,7 @@ export default function DriverList({ navigation }) {
         setShowLocation({ ...showLocation, [driverId]: value });
     }
 
+
     return (
         <View style={styles.container}>
 
@@ -61,7 +62,7 @@ export default function DriverList({ navigation }) {
                                                     </View>
                                                     <View style={{ flex: 1, justifyContent: "flex-end" }}>
                                                         <Text style={{ fontWeight: "300", fontSize: 15 }}>
-                                                            Amount Due: Rs {driver.totalAmountPending}
+                                                            Rs {driver.totalAmountPending} Pending
                                                         </Text>
                                                     </View>
                                                 </View>
