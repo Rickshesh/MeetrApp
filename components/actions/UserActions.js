@@ -6,6 +6,7 @@ export const DELETE_DRIVER_ATTRIBUTE = 'DELETE_DRIVER_ATTRIBUTE'
 export const UPDATE_IMAGES = 'UPDATE_IMAGES'
 export const RESET_DRIVER = 'RESET_DRIVER'
 export const TOGGLE_ACCOUNT_SECTION = 'TOGGLE_ACCOUNT_SECTION'
+export const UPDATE_MQTT_DATA = 'UPDATE_MQTT_DATA'
 
 export function updateDriver(driver) {
     return {
@@ -58,5 +59,11 @@ export function resetDriver() {
 export function toggleAccountSection() {
     return {
         type: TOGGLE_ACCOUNT_SECTION
+    }
+}
+
+export function updateMQTTdata() {
+    return {
+        type: UPDATE_MQTT_DATA
     }
 }

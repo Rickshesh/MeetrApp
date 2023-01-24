@@ -1,15 +1,13 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { Text } from 'react-native'
 import configureStore from './store/configureStore';
 import NavigationHandler from './NavigationHandler';
-import Dummy from "./Dummy";
 import { Amplify } from 'aws-amplify';
-import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react-native';
+import { Authenticator } from '@aws-amplify/ui-react-native';
 import awsExports from '../src/aws-exports';
 Amplify.configure(awsExports);
 
-
+// configure Amplify with the settings defined in the aws-exports.js file
 const store = configureStore()
 
 const Main = () => {

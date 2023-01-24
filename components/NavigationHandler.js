@@ -15,6 +15,25 @@ import { useDispatch, useSelector } from 'react-redux';
 import { resetDriver, toggleAccountSection } from "./actions/UserActions";
 import { useEffect } from 'react';
 import DrawerSection from './screens/DrawerSection';
+import { AWSIoTProvider } from '@aws-amplify/pubsub';
+import { Amplify, PubSub } from 'aws-amplify';
+import { CONNECTION_STATE_CHANGE, ConnectionState } from '@aws-amplify/pubsub';
+import { Hub } from 'aws-amplify';
+
+Amplify.addPluggable(new AWSIoTProvider({
+    aws_pubsub_region: 'ap-south-1',
+    aws_pubsub_endpoint: 'wss://ata8s3hvseeyg-ats.iot.ap-south-1.amazonaws.com/mqtt',
+}));
+PubSub.configure();
+
+
+Hub.listen('pubsub', (data) => {
+    const { payload } = data;
+    if (payload.event === CONNECTION_STATE_CHANGE) {
+        const connectionState = payload.data.connectionState;
+        console.log(connectionState);
+    }
+});
 
 const RegisterStack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();

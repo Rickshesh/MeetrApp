@@ -5,7 +5,7 @@ import { UPDATE_DRIVER_ATTRIBUTE } from "../actions/UserActions";
 import { UPDATE_IMAGES } from "../actions/UserActions";
 import { RESET_DRIVER } from "../actions/UserActions";
 import { TOGGLE_ACCOUNT_SECTION } from "../actions/UserActions"
-
+import { UPDATE_MQTT_DATA } from "../actions/UserActions"
 
 
 const initialState = {
@@ -14,7 +14,8 @@ const initialState = {
         bankingDetails: {},
         autoDetails: {}
     },
-    showAccountSection: false
+    showAccountSection: false,
+    mqttData: {}
 };
 
 const userReducer = (state = initialState, action) => {
@@ -45,6 +46,11 @@ const userReducer = (state = initialState, action) => {
         case TOGGLE_ACCOUNT_SECTION:
             return {
                 ...state, showAccountSection: !state.showAccountSection
+            }
+        case UPDATE_MQTT_DATA:
+            console.log(action.payload);
+            return {
+                ...state, mqttData: { ...mqttData, [action.payload.key]: action.payload.value }
             }
         default:
             return state

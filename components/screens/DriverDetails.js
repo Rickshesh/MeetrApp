@@ -3,14 +3,9 @@ import { Surface, List, Portal, Modal, IconButton, ActivityIndicator } from 'rea
 import { StyleSheet, ScrollView, Pressable, View, Text, Image } from 'react-native'
 import driverDetailsConfig from '../responses/driverDetailsConfig.json';
 import MapService from '../supportComponents/MapService';
-import { AWSIoTProvider } from '@aws-amplify/pubsub';
 import { Amplify, PubSub } from 'aws-amplify';
-
-Amplify.addPluggable(new AWSIoTProvider({
-    aws_pubsub_region: 'ap-south-1',
-    aws_pubsub_endpoint: 'wss://ata8s3hvseeyg-ats.iot.ap-south-1.amazonaws.com/mqtt',
-}));
-PubSub.configure();
+import { FETCH_RECENT_LOCATION } from "@env";
+import { useSelector } from 'react-redux';
 
 
 export default function DriverDetails(props) {
@@ -22,6 +17,9 @@ export default function DriverDetails(props) {
     const [showAutoFront, setShowAutoFront] = React.useState(false)
     const [showAutoBack, setShowAutoBack] = React.useState(false)
     const [isLoading, setLoading] = React.useState(true)
+    const [mapLoading, setMapLoading] = React.useState(true);
+    const [deviceID, setDeviceID] = React.useState();
+
 
     const showModal = () => setImageVisible(true)
     const hideModal = () => setImageVisible(false)
@@ -38,14 +36,14 @@ export default function DriverDetails(props) {
     const _showAutoBack = () => setShowAutoBack(true)
     const _hideAutoBack = () => setShowAutoBack(false)
 
-
+    const mqttData = useSelector((store) => store.driver.mqttData);
 
     const getUserDetails = (driverid) => {
         fetch('https://ri6c0kl11e.execute-api.ap-south-1.amazonaws.com/beta/getuser/?driverid=' + driverid.toString()) //S3 Link for Json
             .then((response) => response.json())
             .then((json) => {
                 setUser(json)
-                subscribeMqtt(json.autoDetails)
+                setDeviceID(json.autoDetails.deviceID)
                 console.log(json)
             })
             .catch((error) => console.error(error))
@@ -56,24 +54,16 @@ export default function DriverDetails(props) {
         setStartCamera(!startCamera)
     }
 
-    const subscribeMqtt = (autoDetails) => {
-        PubSub.subscribe('aws/deviceUpdate/' + autoDetails.deviceID).subscribe({
-            next: data => console.log('Message received', data.value),
-            error: error => console.error(error),
-            complete: () => console.log('Done'),
-        });
-    }
-
     //To fetch the API, pass the User ID
     React.useEffect(() => {
         setLoading(true);
+        setMapLoading(true);
         console.log(props.route.params.driverid)
         getUserDetails(props.route.params.driverid);
         console.log(props.navigation.getState());
     }, [])
 
     const displayInfo = driverDetailsConfig.displayInfo;
-
 
     return (
         <View style={styles.container}>
@@ -117,8 +107,15 @@ export default function DriverDetails(props) {
                                     </View>
                                 </View>
                             </Surface>
-                            <Surface elevation={2} style={{ height: 200, margin: 10, }}>
-                                <MapService currentLocation={{ latitude: 28.539473, longitude: 77.188727 }} locationHistory={[{ latitude: 28.538529, longitude: 77.191254 }, { latitude: 28.537046, longitude: 77.195523 }]} style={{ flex: 1 }} icon="circle-slice-8" />
+                            <Surface elevation={2} style={{ height: 200, margin: 10 }}>
+                                {!deviceID ?
+                                    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}><ActivityIndicator animating={true} /></View> :
+                                    <MapService currentLocation={mqttData.currentLocation} locationHistory={mqttData.locationHistory} style={{ flex: 1 }} icon="circle-slice-8" />
+                                }
+                                {deviceID && mqttData.deviceID ?
+                                    <MapService currentLocation={mqttData.deviceID.currentLocation} locationHistory={mqttData.deviceID.locationHistory} style={{ flex: 1 }} icon="circle-slice-8" /> :
+                                    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}><Text>Trying to fetch the Location</Text></View>
+                                }
                             </Surface>
                         </View>
                         <Surface elevation={2} style={{ margin: 10 }}>

@@ -2,12 +2,20 @@ import React, { useState } from 'react'
 import { Surface, List, Portal, Modal, IconButton, Avatar, ActivityIndicator, Badge, Button, AnimatedFAB } from 'react-native-paper'
 import { StyleSheet, ScrollView, Pressable, View, Image, Text, Linking, Dimensions } from 'react-native'
 import MapService from '../supportComponents/MapService';
+import { Amplify, PubSub } from 'aws-amplify';
+import { updateMQTTdata } from '../actions/UserActions';
+import { useSelector, useDispatch } from 'react-redux';
 
 export default function DriverList({ navigation }) {
 
     const [isLoading, setLoading] = useState(true)
     const [driverList, setDriverList] = useState([])
     const [showLocation, setShowLocation] = useState({})
+    const [devicesList, setDevicesList] = useState([]);
+    const [pubsubClient, setPubSubClient] = useState([]);
+
+    const dispatch = useDispatch();
+    const mqttData = useSelector((store) => store.driver.mqttData);
 
     const getUsers = async () => {
 
@@ -16,11 +24,94 @@ export default function DriverList({ navigation }) {
             .then(
                 (data) => {
                     setDriverList(data.body);
+                    let tempDevicesList = _setDevicesList(data.body);
+                    setPubSubClient(subscribeMqtt(tempDevicesList));
                 }
             )
             .catch((error) => console.error(error))
-            .finally(() => setLoading(false));
+            .finally(
+                () => {
+                    setLoading(false);
+                    console.log(pubsubClient);
+                }
+            );
 
+    }
+
+    const subscribeMqtt = (devicesList) => {
+        let topics = devicesList.map(element => "aws/deviceUpdate/" + element);
+        PubSub.subscribe(topics).subscribe({
+            next: data => _extractMQTTData(data),
+            error: error => console.error(error),
+            complete: () => console.log('Done'),
+        });
+    }
+
+    //Location, Speed, Rickshaw Running Status, Last Updated Time, Battery Life
+    const _extractMQTTData = (data) => {
+        if (!data.value.DeviceId) {
+            return;
+        }
+
+        let deviceId = data.value.DeviceId;
+        let Location = data.value.Location;
+        let RickshawStopped = data.value.RickshawStopped;
+        let Batterylife = data.value.Batterylife;
+        let timeUTC = new Date();
+        let offset = (330 * 60 * 1000);
+        let currentTime = new Date(timeUTC.getTime() + offset);
+
+        let locationHistory = [];
+        let currentLocation = {}
+        let currentSpeed;
+
+        if (Location != null) {
+            Object.keys(Location).forEach((key, index) => {
+                if (Location[key] != null && checkRecentEvent(key, currentTime)) {
+                    let unformattedLocationString = Location[key];
+                    let unformattedLocationArray = JSON.parse(unformattedLocationString.split(",")[1]);
+                    let location = {};
+                    location.latitude = unformattedLocationArray[0];
+                    location.longitude = unformattedLocationArray[1];
+                    currentSpeed = unformattedLocationArray[2];
+                    locationHistory = [location, ...locationHistory]
+                    if (index == Object.keys(Location).length - 1) {
+                        currentLocation = location;
+                    }
+                }
+            })
+        }
+
+        if (mqttData[deviceId]) {
+            let deviceStore = mqttData[deviceId];
+            let tempDeviceStore = { ...deviceStore, locationHistory: [locationHistory, ...deviceStore.locationHistory], currentLocation, currentSpeed, RickshawStopped, Batterylife, currentTime };
+            let payload = {
+                key: deviceId,
+                value: tempDeviceStore
+            }
+            dispatch(updateMQTTdata(payload));
+        }
+        else {
+            let tempDeviceStore = { locationHistory, currentLocation, currentSpeed, RickshawStopped, Batterylife, currentTime };
+            let payload = {
+                key: deviceId,
+                value: tempDeviceStore
+            }
+            dispatch(updateMQTTdata(payload));
+        }
+
+    }
+
+    function checkRecentEvent(eventTime, IST_time) {
+        let eventDate = new Date(eventTime);
+        let timeDifference = IST_time.getTime() - eventDate.getTime();
+        //console.log(timeDifference);
+        let oneMinute = 60000;
+        if (timeDifference < oneMinute) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     React.useEffect(() => {
@@ -29,6 +120,17 @@ export default function DriverList({ navigation }) {
 
     const _setShowLocation = (driverId, value) => {
         setShowLocation({ ...showLocation, [driverId]: value });
+    }
+
+    const _setDevicesList = (driverList) => {
+        let tempDevicesList = [];
+        driverList.forEach(element => {
+            if (!tempDevicesList.includes(element.deviceId)) {
+                tempDevicesList = [...tempDevicesList, element.deviceId];
+            }
+        });
+        setDevicesList(tempDevicesList);
+        return tempDevicesList;
     }
 
 
