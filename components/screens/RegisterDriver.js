@@ -1,6 +1,6 @@
 import 'react-native-get-random-values';
 import { Surface, List, Portal, Modal, IconButton, TextInput, Button, Text } from 'react-native-paper'
-import { StyleSheet, ScrollView, Pressable, View, Image, Alert } from 'react-native'
+import { StyleSheet, ScrollView, Pressable, View, Image } from 'react-native'
 import registerDriver from '../responses/registerDriver.json';
 import React, { useEffect, useState } from 'react';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -10,10 +10,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateDriver } from "../actions/UserActions";
 import { updateDriverAttribute } from "../actions/UserActions";
-import { deleteDriverAttribute } from "../actions/UserActions";
 import GetLocation from '../supportComponents/GetLocation';
-import CachedImage from 'react-native-expo-cached-image';
 
+//RegisterDriver is the first Screen in Registeration Flow, inside Stack Navigator
+//It helps collect the personal, as well as verification details of the customer
+//It stores everything inside Store, for global access
+//It needs Camera for Driver, and Aadhaar Card Photo Capture
+//It also uses a GetLocation Component to collect the address of the Driver
 
 
 
@@ -37,10 +40,6 @@ export default function RegisterDriver({ navigation }) {
         dispatch(updateDriver({ key, value }))
     }
 
-    const _deleteDriverAttribute = (attribute) => {
-        dispatch(deleteDriverAttribute(attribute))
-    }
-
     const _getAddress = (location, address) => {
         let getAddressObj = {
             lat: location.latitude,
@@ -51,8 +50,8 @@ export default function RegisterDriver({ navigation }) {
     }
 
     const onNext = async () => {
-        _updateDriver("dateOfOnboarding", moment(new Date()).format("DD-MM-YYYY").toString());
-        dispatch(updateDriverAttribute("activeStatus", "Pending"));
+        _updateDriver("dateOfRegisteration", moment(new Date()).format("DD-MM-YYYY").toString());
+        dispatch(updateDriverAttribute("activeStatus", "pending_driver_registeration"));
         navigation.navigate('Bank');
     }
 
@@ -147,7 +146,7 @@ export default function RegisterDriver({ navigation }) {
                                     }
                                 </View>
                             </View>
-                            <List.Item title="Date" right={() => <Button mode="contained" color="#FBFEFB" onPress={_showDatePicker}> {(driver.identityParameters.dateOfBirth) ? driver.identityParameters.dateOfBirth.toString() : moment(new Date()).format("DD-MM-YYYY").toString()} </Button>} />
+                            <List.Item title="Date of Birth" right={() => <Button mode="contained" color="#FBFEFB" onPress={_showDatePicker}> {(driver.identityParameters.dateOfBirth) ? driver.identityParameters.dateOfBirth.toString() : moment(new Date()).format("DD-MM-YYYY").toString()} </Button>} />
                             <DateTimePickerModal
                                 isVisible={showDatePicker}
                                 mode="date"

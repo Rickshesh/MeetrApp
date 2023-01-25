@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
 import { Surface, List, Portal, Modal, IconButton, Avatar, ActivityIndicator, Badge, Button, AnimatedFAB } from 'react-native-paper'
-import { StyleSheet, ScrollView, Pressable, View, Image, Text, Linking, Dimensions } from 'react-native'
+import { StyleSheet, ScrollView, Pressable, View, Image, Text, Linking, Dimensions, TouchableOpacity } from 'react-native'
 import MapService from '../supportComponents/MapService';
 import { Amplify, PubSub } from 'aws-amplify';
 import { updateMQTTdata } from '../actions/UserActions';
 import { useSelector, useDispatch } from 'react-redux';
+import { GET_USER_LIST } from "@env";
+import { driverStatus } from "../responses/driverStatus.json";
+
 
 export default function DriverList({ navigation }) {
 
@@ -12,27 +15,24 @@ export default function DriverList({ navigation }) {
     const [driverList, setDriverList] = useState([])
     const [showLocation, setShowLocation] = useState({})
     const [devicesList, setDevicesList] = useState([]);
-    const [pubsubClient, setPubSubClient] = useState([]);
 
     const dispatch = useDispatch();
     const mqttData = useSelector((store) => store.driver.mqttData);
 
     const getUsers = async () => {
 
-        fetch('https://ri6c0kl11e.execute-api.ap-south-1.amazonaws.com/beta/getuserlist') //S3 Link for Json
+        fetch(GET_USER_LIST) //S3 Link for Json
             .then((response) => response.json())
             .then(
                 (data) => {
                     setDriverList(data.body);
                     let tempDevicesList = _setDevicesList(data.body);
-                    setPubSubClient(subscribeMqtt(tempDevicesList));
                 }
             )
             .catch((error) => console.error(error))
             .finally(
                 () => {
                     setLoading(false);
-                    console.log(pubsubClient);
                 }
             );
 
@@ -105,7 +105,6 @@ export default function DriverList({ navigation }) {
     function checkRecentEvent(eventTime, IST_time) {
         let eventDate = new Date(eventTime);
         let timeDifference = IST_time.getTime() - eventDate.getTime();
-        //console.log(timeDifference);
         let oneMinute = 60000;
         if (timeDifference < oneMinute) {
             return true;
@@ -140,7 +139,7 @@ export default function DriverList({ navigation }) {
             {isLoading ? <Surface style={[styles.surface, { justifyContent: "center", alignItems: "center" }]}><ActivityIndicator animating={true} /></Surface> :
                 (<Surface style={styles.surface} elevation={2}>
 
-                    <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} style={[styles.container]}>
+                    <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false} style={{ flex: 1 }}>
 
                         {driverList.map((driver, index) => {
                             return (
@@ -149,7 +148,11 @@ export default function DriverList({ navigation }) {
                                         driverid: driver.driverId
                                     })}
                                     >
-                                        <Surface style={driver.activeStatus !== "Active" ? { height: 100, paddingHorizontal: 10, margin: 10, flexDirection: "row", backgroundColor: "#EFF1F3" } : { height: 100, paddingHorizontal: 10, margin: 10, flexDirection: "row", backgroundColor: "#FEF5D8" }} elevation={2}>
+                                        <Surface style={driver.activeStatus !== "active" ? { height: 100, paddingHorizontal: 10, marginTop: 10, margin: 10, flexDirection: "row", backgroundColor: "#EFF1F3" } : { height: 100, paddingHorizontal: 10, margin: 10, flexDirection: "row", backgroundColor: "#FEF5D8" }} elevation={2}>
+                                            {driver.activeStatus != "active" &&
+                                                <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: 'tomato', position: "absolute", left: 4, top: 4 }}>
+                                                </View>
+                                            }
                                             <View style={{ flex: 1, margin: 5 }}>
                                                 <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
                                                     <Image resizeMode="contain" style={styles.avatar} source={{ uri: driver.image.uri }} />
@@ -157,43 +160,70 @@ export default function DriverList({ navigation }) {
                                             </View>
                                             <View style={{ flex: 2, margin: 5 }}>
                                                 <View style={{ flex: 1, justifyContent: "center", paddingVertical: 5 }}>
-                                                    <View style={{ flex: 2, justifyContent: "flex-end" }}>
+                                                    <View style={{ flex: 2, justifyContent: "center" }}>
                                                         <Text style={{ fontWeight: "500", fontSize: 20 }}>
                                                             {driver.firstName} {driver.lastName}
                                                         </Text>
                                                     </View>
-                                                    <View style={{ flex: 1, justifyContent: "flex-end" }}>
-                                                        <Text style={{ fontWeight: "300", fontSize: 15 }}>
-                                                            Rs {driver.totalAmountPending} Pending
-                                                        </Text>
-                                                    </View>
+                                                    {driver.activeStatus == "active" &&
+                                                        <View style={{ flex: 1, justifyContent: "flex-end" }}>
+                                                            <Text style={{ fontWeight: "300", fontSize: 15 }}>
+                                                                Rs {driver.totalAmountPending} Pending
+                                                            </Text>
+                                                        </View>
+                                                    }
                                                 </View>
                                             </View>
                                             <View style={{ flex: 1, margin: 5 }}>
-                                                <View style={{ flex: 1, flexDirection: "row-reverse" }}>
-                                                    <Badge style={driver.creditScore > 60 ? { alignSelf: "center", backgroundColor: "lightgreen" } : { alignSelf: "center", backgroundColor: "lightblue" }}></Badge>
-                                                </View>
-                                                <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
-                                                    <IconButton icon="map-marker-check" mode="contained" onPress={() => _setShowLocation(driver.driverId, !showLocation[driver.driverId])} />
+                                                <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "flex-end" }}>
                                                     <IconButton icon="phone-in-talk" mode="contained" onPress={() => Linking.openURL(`tel:${driver.phoneNumber}`)} />
                                                 </View>
+                                                {driver.activeStatus == "active" &&
+                                                    <View style={{ flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "flex-end" }}>
+                                                        <IconButton icon="map-marker-check" mode="contained" onPress={() => _setShowLocation(driver.driverId, !showLocation[driver.driverId])} />
+                                                    </View>
+                                                }
                                             </View>
                                         </Surface>
                                     </Pressable>
+                                    {driver.activeStatus != "active" &&
+                                        <Surface style={{ height: 40, marginHorizontal: 10, marginTop: -10, flexDirection: "row" }}>
+                                            <View style={{ flex: 2, justifyContent: "center", marginHorizontal: 10 }}>
+                                                <Text style={{ fontWeight: "500", fontSize: 15 }}>
+                                                    {driverStatus[driver.activeStatus].field}
+                                                </Text>
+                                            </View>
+                                            <View style={{ flex: 1, justifyContent: "center", marginHorizontal: 10 }}>
+                                                {driver.activeStatus == "pending_auto_registeration" &&
+                                                    <TouchableOpacity style={{ alignItems: "center", justifyContent: "center", backgroundColor: "#674FA3", borderRadius: 5, padding: 5 }} onPress={() => navigation.navigate("Auto", {
+                                                        driverid: driver.driverId
+                                                    })}>
+                                                        <View>
+                                                            <Text style={{ fontWeight: "400", fontSize: 15, color: "white" }}>
+                                                                Register Auto
+                                                            </Text>
+                                                        </View>
+                                                    </TouchableOpacity>
+                                                }
+                                            </View>
+                                        </Surface>
+                                    }
                                     {(Object.keys(showLocation).includes(driver.driverId) && showLocation[driver.driverId] == true) &&
                                         <Surface elevation={2} style={{ height: 200, margin: 10, }}>
                                             <MapService currentLocation={{ latitude: 28.539473, longitude: 77.188727 }} locationHistory={[{ latitude: 28.538529, longitude: 77.191254 }, { latitude: 28.537046, longitude: 77.195523 }]} style={{ flex: 1 }} icon="circle-slice-8" />
                                             <IconButton icon="chevron-up" onPress={() => _setShowLocation(driver.driverId, false)} style={{ position: "absolute", right: 2, top: 2, backgroundColor: "white", borderWidth: 0.5 }} />
-                                        </Surface>}
+                                        </Surface>
+                                    }
                                 </View>
                             )
                         })}
-
                     </ScrollView>
-                    <View style={{ margin: 20 }}>
-                        <Button mode="contained" onPress={() => navigation.navigate("Register")}>
-                            Register Driver
-                        </Button>
+                    <View style={{ margin: 20, height: 50, flexDirection: "row" }}>
+                        <View style={{ flex: 1, marginHorizontal: 5 }}>
+                            <Button mode="contained" onPress={() => navigation.navigate("Register")}>
+                                Register Driver
+                            </Button>
+                        </View>
                     </View>
                 </Surface>)
             }

@@ -4,10 +4,6 @@
             "backAadhaar",
             "frontAadhaar",
             "image"
-        ],
-        "autoDetails": [
-            "backAuto",
-            "frontAuto"
         ]
     }
 }

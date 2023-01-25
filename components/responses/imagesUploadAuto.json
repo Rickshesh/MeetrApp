@@ -1,0 +1,8 @@
+{
+    "imageFields": {
+        "autoDetails": [
+            "backAuto",
+            "frontAuto"
+        ]
+    }
+}

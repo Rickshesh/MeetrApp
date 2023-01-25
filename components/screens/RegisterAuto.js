@@ -2,20 +2,26 @@ import { StyleSheet, ScrollView, View, Pressable, Image } from 'react-native'
 import { Surface, List, TextInput, Button, IconButton, Text, Portal, Modal, Dialog, Paragraph } from 'react-native-paper'
 import registerDriver from '../responses/registerDriver.json';
 import { useSelector, useDispatch } from 'react-redux';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CameraModule from '../supportComponents/CameraModule';
 import { v4 as uuidv4 } from 'uuid';
-import { updateAutoDetails, updateImages, resetDriver } from "../actions/UserActions";
-import imagesUploadFields from "../responses/imagesUploadFields.json";
-import { S3_ACCESS_KEY, S3_SECRET_KEY } from "@env";
+import { updateAutoDetails, resetDriver, updateImages } from "../actions/UserActions";
+import imagesUploadAuto from "../responses/imagesUploadAuto.json";
+import { S3_ACCESS_KEY, S3_SECRET_KEY, REGISTER_AUTO_API } from "@env";
 import { RNS3 } from 'react-native-upload-aws-s3';
+
+//RegisterAuto is the third Screen in Registeration Flow, inside Stack Navigator
+//It helps collect the details regarding the auto that is being provided to the driver
+//It stores everything inside Store, for global access
+//It needs Camera for Capturing Front, and Back of the Auto
+//It uploads the photos of Auto to S3 Bucket
 
 
 const frontAuto = "frontAuto";
 const backAuto = "backAuto"
 
 
-export default function RegisterBank({ navigation }) {
+export default function RegisterAuto({ navigation, route }) {
 
     const [cameraType, setCameraType] = useState(null);
     const [submitLoading, setSubmitLoading] = useState(false);
@@ -34,19 +40,17 @@ export default function RegisterBank({ navigation }) {
         dispatch(updateAutoDetails({ key, value }))
     }
 
-    const onPrevious = async () => {
-        navigation.navigate('Bank');
-    }
+    useEffect(() => console.log(route.params.driverid), []);
+
 
     const onSubmit = async () => {
-
         setSubmitLoading(true);
-        await uploadImages_v2(driver);
+        await uploadImagesAuto(driver);
         console.log(driver);
-        let response = await registerDriverAPI(driver);
+        console.log(route.params.driverid);
+        let response = await registerAutoAPI(driver.autoDetails, route.params.driverid);
         setSubmitLoading(false);
-
-        if (response && response.driverId) {
+        if (response && response.message) {
             console.log("Response" + JSON.stringify(response));
             dispatch(resetDriver());
             navigateOnSubmit(response);
@@ -57,13 +61,19 @@ export default function RegisterBank({ navigation }) {
         }
     }
 
-
     const navigateOnSubmit = (response) => {
         console.log(navigation.getState());
+
         navigation.reset({
             index: 0,
-            routes: [{ name: 'Details', params: { driverid: response.driverId } }]
+            routes: [{ name: 'List' }]
         });
+
+        /*navigation.reset({
+            index: 0,
+            routes: [{ name: 'Details', params: { driverid: driverId } }]
+        });
+        */
     }
 
     const _captureImage = (file, type) => {
@@ -72,33 +82,24 @@ export default function RegisterBank({ navigation }) {
         _updateAutoDetails(type, imageObj)
     }
 
-    const uploadImages_v2 = async (input) => {
-
+    const uploadImagesAuto = async (input) => {
         try {
-            await Promise.all(Object.keys(imagesUploadFields.imageFields).map(
-                async keyobject => {
-                    return await Promise.all(imagesUploadFields.imageFields[keyobject].map(
-                        async keyarray => {
-                            let response = await uploadImageToS3(input[keyobject][keyarray]);
-                            dispatch(updateImages({ keyobject, keyarray, imageuri: response.body.postResponse.location }))
-                            return response;
-                        }
-                    ))
+            return await Promise.all((imagesUploadAuto.imageFields.autoDetails).map(
+                async key => {
+                    let response = await uploadImageToS3(input.autoDetails[key]);
+                    dispatch(updateImages({ keyobject: autoDetails, keyarray: key, imageuri: response.body.postResponse.location }))
+                    return response;
                 }
-            )
-            )
-
+            ))
         }
         catch (err) {
-            console.log(err)
+            console.log(err);
         }
-
     };
 
-    const registerDriverAPI = async (data) => {
-
+    const registerAutoAPI = async (data, driverId) => {
         try {
-            let response = await fetch("https://84qnnnkedj.execute-api.ap-south-1.amazonaws.com/beta/create", {
+            let response = await fetch(REGISTER_AUTO_API + "?driverId=" + driverId, {
                 method: "PUT",
                 mode: "cors",
                 headers: {
@@ -106,10 +107,7 @@ export default function RegisterBank({ navigation }) {
                 },
                 body: JSON.stringify(data)
             })
-
-
             console.log("Response: " + JSON.stringify(response));
-
             return response.json();
         }
         catch (err) {
@@ -129,7 +127,7 @@ export default function RegisterBank({ navigation }) {
 
                         <Dialog visible={showFail} onDismiss={() => setShowFail(false)}>
                             <Dialog.Content>
-                                <Paragraph>Registeration Failed !! </Paragraph>
+                                <Paragraph>Auto Registeration Failed !! </Paragraph>
                                 <Paragraph>Please Retry Later</Paragraph>
                             </Dialog.Content>
                             <Dialog.Actions>
@@ -175,9 +173,6 @@ export default function RegisterBank({ navigation }) {
                         </View>
                     </List.Section>
                     <List.Section flexDirection="row">
-                        <Button icon="step-backward" style={styles.button} mode="contained" onPress={onPrevious}>
-                            Previous
-                        </Button>
                         <Button icon="step-forward" style={styles.button} mode="contained" loading={submitLoading} onPress={onSubmit}>
                             Submit
                         </Button>
@@ -229,7 +224,7 @@ const styles = StyleSheet.create({
         margin: 10
     },
     "button": {
-        flex: 0.5,
+        flex: 1,
         alignSelf: "flex-end",
         marginHorizontal: 10
     },

@@ -12,6 +12,7 @@
                 "lastName": "Last Name",
                 "phoneNumber": "Phone Number",
                 "dateOfOnboarding": "Date of Onboarding",
+                "dateOfRegisteration": "Date of Registeration",
                 "dateOfBirth": "Date of Birth",
                 "emailId": "Email Id"
             },

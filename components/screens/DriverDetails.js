@@ -3,9 +3,8 @@ import { Surface, List, Portal, Modal, IconButton, ActivityIndicator } from 'rea
 import { StyleSheet, ScrollView, Pressable, View, Text, Image } from 'react-native'
 import driverDetailsConfig from '../responses/driverDetailsConfig.json';
 import MapService from '../supportComponents/MapService';
-import { Amplify, PubSub } from 'aws-amplify';
-import { FETCH_RECENT_LOCATION } from "@env";
 import { useSelector } from 'react-redux';
+import { driverStatus } from "../responses/driverStatus.json";
 
 
 export default function DriverDetails(props) {
@@ -17,7 +16,6 @@ export default function DriverDetails(props) {
     const [showAutoFront, setShowAutoFront] = React.useState(false)
     const [showAutoBack, setShowAutoBack] = React.useState(false)
     const [isLoading, setLoading] = React.useState(true)
-    const [mapLoading, setMapLoading] = React.useState(true);
     const [deviceID, setDeviceID] = React.useState();
 
 
@@ -57,7 +55,6 @@ export default function DriverDetails(props) {
     //To fetch the API, pass the User ID
     React.useEffect(() => {
         setLoading(true);
-        setMapLoading(true);
         console.log(props.route.params.driverid)
         getUserDetails(props.route.params.driverid);
         console.log(props.navigation.getState());
@@ -71,25 +68,26 @@ export default function DriverDetails(props) {
                 (<Surface style={styles.surface} elevation={2}>
                     <Portal>
                         <Modal visible={showAddress} contentContainerStyle={styles.containerStyle} onDismiss={_hideAddress}>
-                            <MapService currentLocation={{ latitude: parseFloat(user.identityParameters.registerAddress.lat), longitude: parseFloat(user.identityParameters.registerAddress.lon) }} />
+                            {user.identityParameters && user.identityParameters.registerAddress && <MapService currentLocation={{ latitude: parseFloat(user.identityParameters.registerAddress.lat || 0), longitude: parseFloat(user.identityParameters.registerAddress.lon || 0) }} />}
                         </Modal>
                         <Modal visible={showAadhaar} contentContainerStyle={styles.containerStyle} onDismiss={_hideAadhaar}>
-                            <Image source={{ uri: user.identityParameters.frontAadhaar.uri }} style={styles.modalImageStyle} />
-                            <Image source={{ uri: user.identityParameters.backAadhaar.uri }} style={styles.modalImageStyle} />
+                            {user.identityParameters && user.identityParameters.frontAadhaar && <Image source={{ uri: user.identityParameters.frontAadhaar.uri || '' }} style={styles.modalImageStyle} />}
+                            {user.identityParameters && user.identityParameters.backAadhaar && <Image source={{ uri: user.identityParameters.backAadhaar.uri || '' }} style={styles.modalImageStyle} />}
                         </Modal>
                         <Modal visible={imageVisible} onDismiss={hideModal} contentContainerStyle={styles.containerStyle}>
-                            <Image source={{ uri: user.identityParameters.image.uri }} style={styles.modalImageStyle} />
+                            {user.identityParameters && user.identityParameters.image && <Image source={{ uri: user.identityParameters.image.uri || '' }} style={styles.modalImageStyle} />}
                         </Modal>
                         <Modal visible={showAutoFront} onDismiss={_hideAutoFront} contentContainerStyle={styles.containerStyle}>
-                            <Image source={{ uri: user.autoDetails.frontAuto.uri }} style={styles.modalImageStyle} />
+                            {user.autoDetails && user.autoDetails.frontAuto && <Image source={{ uri: user.autoDetails.frontAuto.uri || '' }} style={styles.modalImageStyle} />}
                         </Modal>
                         <Modal visible={showAutoBack} onDismiss={_hideAutoBack} contentContainerStyle={styles.containerStyle}>
-                            <Image source={{ uri: user.autoDetails.backAuto.uri }} style={styles.modalImageStyle} />
+                            {user.autoDetails && user.autoDetails.backAuto && <Image source={{ uri: user.autoDetails.backAuto.uri || '' }} style={styles.modalImageStyle} />}
                         </Modal>
+
                     </Portal>
                     <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
                         <View>
-                            <Surface elevation={2} style={user.activeStatus !== "Active" ? { alignItems: 'center', backgroundColor: "#EFF1F3", margin: 10, flexDirection: "row" } : { alignItems: 'center', backgroundColor: "#FEF5D8", margin: 10, flexDirection: "row" }}>
+                            <Surface elevation={2} style={user.activeStatus !== "active" ? { alignItems: 'center', backgroundColor: "#EFF1F3", margin: 10, flexDirection: "row" } : { alignItems: 'center', backgroundColor: "#FEF5D8", margin: 10, flexDirection: "row" }}>
                                 <View style={{ flex: 1 }}>
 
                                 </View>
@@ -100,63 +98,76 @@ export default function DriverDetails(props) {
                                 </View>
                                 <View style={{ flex: 1 }}>
                                     <View style={{ flex: 1, alignItems: "flex-end", paddingHorizontal: 10 }}>
-                                        <Text style={user.activeStatus == "Pending" ? { color: "red", fontSize: 15, fontWeight: "600" } : { color: "green", fontSize: 15, fontWeight: "600" }}>{user.activeStatus}</Text>
+                                        <Text style={user.activeStatus == "active" ? { color: "green", fontSize: 15, fontWeight: "600" } : { color: "red", fontSize: 15, fontWeight: "600" }}>{driverStatus[user.activeStatus].field}</Text>
                                     </View>
                                     <View style={{ flex: 1, alignItems: "flex-end", justifyContent: "flex-end", paddingHorizontal: 10 }}>
                                         <IconButton icon="phone-in-talk" mode="contained" onPress={() => Linking.openURL(`tel:${user.identityParameters.phoneNumber}`)} />
                                     </View>
                                 </View>
                             </Surface>
-                            <Surface elevation={2} style={{ height: 200, margin: 10 }}>
-                                {!deviceID ?
-                                    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}><ActivityIndicator animating={true} /></View> :
-                                    <MapService currentLocation={mqttData.currentLocation} locationHistory={mqttData.locationHistory} style={{ flex: 1 }} icon="circle-slice-8" />
-                                }
-                                {deviceID && mqttData.deviceID ?
-                                    <MapService currentLocation={mqttData.deviceID.currentLocation} locationHistory={mqttData.deviceID.locationHistory} style={{ flex: 1 }} icon="circle-slice-8" /> :
-                                    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}><Text>Trying to fetch the Location</Text></View>
-                                }
+                            {deviceID && user.activeStatus == "active" &&
+                                <Surface elevation={2} style={{ height: 200, margin: 10 }}>
+                                    {(mqttData.deviceID) && <MapService currentLocation={mqttData.deviceID.currentLocation} locationHistory={mqttData.deviceID.locationHistory} style={{ flex: 1 }} icon="circle-slice-8" />}
+                                    {(!mqttData.deviceID) && <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}><Text>Trying to fetch Driver's Location</Text></View>}
+                                </Surface>
+                            }
+                            {(deviceID && mqttData.deviceID) && <Surface elevation={2} style={{ height: 50, margin: 10, flexDirection: "column" }}>
+                                <View style={{ flex: 1, marginHorizontal: 5 }}>
+
+                                </View>
+                                <View style={{ flex: 1, marginHorizontal: 5 }}>
+
+                                </View>
+                                <View style={{ flex: 1, marginHorizontal: 5 }}>
+
+                                </View>
                             </Surface>
+                            }
                         </View>
-                        <Surface elevation={2} style={{ margin: 10 }}>
-                            <List.Subheader style={{ fontSize: 18 }}>
-                                {displayInfo.head.identityParameters}
-                            </List.Subheader>
-                            {Object.keys(displayInfo.body.identityParameters).map((key, index) => {
-                                return (
-                                    <List.Item key={index} title={displayInfo.body.identityParameters[key]} description={user.identityParameters[key]} />
-                                )
-                            })}
-                            <List.Item title={displayInfo.body.exceptions.identityParameters.aadhaar} description={user.identityParameters.aadhaar} right={props => <IconButton {...props} icon="smart-card" color="mediumblue" onPress={_showAadhaar} />} />
+                        {(user.identityParameters && Object.keys(user.identityParameters).length != 0) &&
+                            <Surface elevation={2} style={{ margin: 10 }}>
+                                <List.Subheader style={{ fontSize: 18 }}>
+                                    {displayInfo.head.identityParameters}
+                                </List.Subheader>
+                                {Object.keys(displayInfo.body.identityParameters).map((key, index) => {
+                                    return (
+                                        <List.Item key={index} title={displayInfo.body.identityParameters[key]} description={user.identityParameters[key]} />
+                                    )
+                                })}
+                                <List.Item title={displayInfo.body.exceptions.identityParameters.aadhaar} description={user.identityParameters.aadhaar} right={props => <IconButton {...props} icon="smart-card" color="mediumblue" onPress={_showAadhaar} />} />
 
-                            <List.Item title={displayInfo.body.exceptions.identityParameters.registerAddress} description={user.identityParameters.registerAddress.address} right={props => <IconButton {...props} icon="map-marker-check" color="mediumblue" onPress={_showAddress} />} />
-                        </Surface>
-                        <Surface elevation={2} style={{ margin: 10 }}>
-                            <List.Subheader style={{ fontSize: 18 }}>
-                                {displayInfo.head.bankingDetails}
-                            </List.Subheader>
-                            {Object.keys(displayInfo.body.bankingDetails).map((key, index) => {
-                                return (
-                                    < List.Item key={index} title={displayInfo.body.bankingDetails[key]} description={user.bankingDetails[key]} />
-                                )
-                            })}
-                        </Surface>
-                        <Surface elevation={2} style={{ margin: 10 }}>
-                            <List.Subheader style={{ fontSize: 18 }}>
-                                {displayInfo.head.autoDetails}
-                            </List.Subheader>
-                            {Object.keys(displayInfo.body.autoDetails).map((key, index) => {
-                                return (
-
-                                    <List.Item key={index} title={displayInfo.body.autoDetails[key]} description={user.autoDetails[key]} />
-                                )
-                            })}
-                            <List.Item title={displayInfo.body.exceptions.autoDetails.autoImages} />
-                            <View style={styles.inlineElement}>
-                                <Pressable onPress={_showAutoFront}><Image source={{ uri: user.autoDetails.frontAuto.uri }} style={styles.inlineImage} /></Pressable>
-                                <Pressable onPress={_showAutoBack}><Image source={{ uri: user.autoDetails.backAuto.uri }} style={styles.inlineImage} /></Pressable>
-                            </View>
-                        </Surface>
+                                <List.Item title={displayInfo.body.exceptions.identityParameters.registerAddress} description={user.identityParameters.registerAddress.address} right={props => <IconButton {...props} icon="map-marker-check" color="mediumblue" onPress={_showAddress} />} />
+                            </Surface>
+                        }
+                        {(user.bankingDetails && Object.keys(user.bankingDetails).length != 0) &&
+                            <Surface elevation={2} style={{ margin: 10 }}>
+                                <List.Subheader style={{ fontSize: 18 }}>
+                                    {displayInfo.head.bankingDetails}
+                                </List.Subheader>
+                                {Object.keys(displayInfo.body.bankingDetails).map((key, index) => {
+                                    return (
+                                        < List.Item key={index} title={displayInfo.body.bankingDetails[key]} description={user.bankingDetails[key]} />
+                                    )
+                                })}
+                            </Surface>
+                        }
+                        {(user.autoDetails && Object.keys(user.autoDetails).length != 0) &&
+                            <Surface elevation={2} style={{ margin: 10 }}>
+                                <List.Subheader style={{ fontSize: 18 }}>
+                                    {displayInfo.head.autoDetails}
+                                </List.Subheader>
+                                {Object.keys(displayInfo.body.autoDetails).map((key, index) => {
+                                    return (
+                                        <List.Item key={index} title={displayInfo.body.autoDetails[key]} description={user.autoDetails[key] || ''} />
+                                    )
+                                })}
+                                <List.Item title={displayInfo.body.exceptions.autoDetails.autoImages} />
+                                <View style={styles.inlineElement}>
+                                    <Pressable onPress={_showAutoFront}>{user.autoDetails.frontAuto && <Image source={{ uri: user.autoDetails.frontAuto.uri || '' }} style={styles.inlineImage} />}</Pressable>
+                                    <Pressable onPress={_showAutoBack}>{user.autoDetails.backAuto && <Image source={{ uri: user.autoDetails.backAuto.uri || '' }} style={styles.inlineImage} />}</Pressable>
+                                </View>
+                            </Surface>
+                        }
                         {user.creditPerformance && (
                             <Surface elevation={2} style={{ margin: 10 }}>
                                 <List.Subheader style={{ fontSize: 18 }}>

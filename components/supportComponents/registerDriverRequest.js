@@ -64,7 +64,7 @@ export default function registerDriverRequest() {
                 back: output.driver.backAadhaar,
                 number: output.driver.aadhaar
             },
-            activeStatus: "Pending",
+            activeStatus: "pending_auto_registeration",
             dateOfBirth: output.driver.dateOfBirth,
             dateOfOnboarding: output.driver.dateOfBirth,
             emailId: output.driver.emailId,

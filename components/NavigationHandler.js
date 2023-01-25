@@ -20,6 +20,10 @@ import { Amplify, PubSub } from 'aws-amplify';
 import { CONNECTION_STATE_CHANGE, ConnectionState } from '@aws-amplify/pubsub';
 import { Hub } from 'aws-amplify';
 
+//NavigationHandler consumes Provider Store, and Provides navigation inside the App, by using 2 Navigators, Drawer, and Stack
+//Stack Navigator has 3 screens and is used for registeration, and is called inside Drawer Navigator, which is the main navigator, with Top Bar Also
+//The Navigation Handler also, includes PubSub for MQTT Communication
+
 Amplify.addPluggable(new AWSIoTProvider({
     aws_pubsub_region: 'ap-south-1',
     aws_pubsub_endpoint: 'wss://ata8s3hvseeyg-ats.iot.ap-south-1.amazonaws.com/mqtt',
@@ -61,10 +65,13 @@ export default function NavigationHandler() {
                         drawerContent={({ state, navigation, descriptors }) => <DrawerSection state={state} navigation={navigation} descriptors={descriptors} />}
                     >
                         <Drawer.Screen name="List" component={DriverList} options={{ title: "Driver List", unmountOnBlur: true }} />
-                        <Drawer.Screen name="Register" component={Register} options={{ title: "Register Driver", unmountOnBlur: true }}
+                        <Drawer.Screen name="Register" component={DriverRegisteration} options={{ title: "Register Driver", unmountOnBlur: true }}
                             listeners={() => ({ blur: () => { dispatch(resetDriver()); } })}
                         />
                         <Drawer.Screen name="Details" component={DriverDetails} options={{ unmountOnBlur: true }} />
+                        <Drawer.Screen name="Auto" component={RegisterAuto} options={{ title: "Vehicle Details", unmountOnBlur: true }}
+                            listeners={() => ({ blur: () => { dispatch(resetDriver()); } })}
+                        />
                     </Drawer.Navigator>
                 </NavigationContainer>
                 <AccountSection />
@@ -74,12 +81,11 @@ export default function NavigationHandler() {
 }
 
 
-function Register() {
+function DriverRegisteration() {
     return (
         <RegisterStack.Navigator initialRouteName="Driver">
             <RegisterStack.Screen name="Driver" component={RegisterDriver} options={{ title: "Driver Details" }} />
             <RegisterStack.Screen name="Bank" component={RegisterBank} options={{ title: "Bank Details" }} />
-            <RegisterStack.Screen name="Auto" component={RegisterAuto} options={{ title: "Vehicle Details" }} />
         </RegisterStack.Navigator>
     )
 }
