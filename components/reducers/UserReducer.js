@@ -48,9 +48,40 @@ const userReducer = (state = initialState, action) => {
                 ...state, showAccountSection: !state.showAccountSection
             }
         case UPDATE_MQTT_DATA:
-            console.log(action.payload);
+            console.log(JSON.stringify(state.mqttData));
+            let mqttData = {};
+            if (state.mqttData.hasOwnProperty(action.payload.key)) {
+                console.log("True");
+                mqttData = {
+                    ...state.mqttData,
+                    [action.payload.key]: {
+                        currentLocation: action.payload.value.currentLocation,
+                        currentSpeed: action.payload.value.currentSpeed,
+                        RickshawStopped: action.payload.value.RickshawStopped,
+                        Batterylife: action.payload.value.Batterylife,
+                        currentTime: action.payload.value.currentTime,
+                        locationHistory: [...action.payload.value.locationHistory, state.mqttData[action.payload.key].currentLocation, ...state.mqttData[action.payload.key].locationHistory]
+                    }
+                }
+            }
+            else {
+                console.log("False");
+                mqttData = {
+                    ...state.mqttData,
+                    [action.payload.key]: {
+                        currentLocation: action.payload.value.currentLocation,
+                        currentSpeed: action.payload.value.currentSpeed,
+                        RickshawStopped: action.payload.value.RickshawStopped,
+                        Batterylife: action.payload.value.Batterylife,
+                        currentTime: action.payload.value.currentTime,
+                        locationHistory: action.payload.value.locationHistory
+                    }
+                }
+            }
+            console.log(JSON.stringify(mqttData));
+
             return {
-                ...state, mqttData: { ...mqttData, [action.payload.key]: action.payload.value }
+                ...state, mqttData
             }
         default:
             return state

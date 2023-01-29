@@ -7,6 +7,7 @@ import { useAuthenticator } from '@aws-amplify/ui-react-native';
 
 
 
+
 export default function AccountSection({ navigation }) {
 
     const showAccountSection = useSelector((store) => store.driver.showAccountSection);

@@ -14,7 +14,7 @@ export default function DriverList({ navigation }) {
     const [isLoading, setLoading] = useState(true)
     const [driverList, setDriverList] = useState([])
     const [showLocation, setShowLocation] = useState({})
-    const [devicesList, setDevicesList] = useState([]);
+    //const [topics, setTopics] = useState([])
 
     const dispatch = useDispatch();
     const mqttData = useSelector((store) => store.driver.mqttData);
@@ -27,6 +27,9 @@ export default function DriverList({ navigation }) {
                 (data) => {
                     setDriverList(data.body);
                     let tempDevicesList = _setDevicesList(data.body);
+                    let topics = tempDevicesList.map(element => "aws/deviceUpdate/" + element);
+                    //setTopics(topics);
+                    subscribeMqtt(topics);
                 }
             )
             .catch((error) => console.error(error))
@@ -38,13 +41,17 @@ export default function DriverList({ navigation }) {
 
     }
 
-    const subscribeMqtt = (devicesList) => {
-        let topics = devicesList.map(element => "aws/deviceUpdate/" + element);
+    const subscribeMqtt = (topics) => {
         PubSub.subscribe(topics).subscribe({
             next: data => _extractMQTTData(data),
-            error: error => console.error(error),
+            error: error => resubscribe(error, topics),
             complete: () => console.log('Done'),
         });
+    }
+
+    const resubscribe = (error, topics) => {
+        console.error(error);
+        subscribeMqtt(topics);
     }
 
     //Location, Speed, Rickshaw Running Status, Last Updated Time, Battery Life
@@ -63,46 +70,42 @@ export default function DriverList({ navigation }) {
 
         let locationHistory = [];
         let currentLocation = {}
-        let currentSpeed;
+        let currentSpeed = 0;
 
         if (Location != null) {
             Object.keys(Location).forEach((key, index) => {
                 if (Location[key] != null && checkRecentEvent(key, currentTime)) {
                     let unformattedLocationString = Location[key];
-                    let unformattedLocationArray = JSON.parse(unformattedLocationString.split(",")[1]);
+                    let formattedStringArray = ("[" + unformattedLocationString.replace(/[{}]/g, "").replace(/, /g, ",") + "]").replace(",]", "]");
+                    let formattedLocationArray = JSON.parse(formattedStringArray);
+                    //let unformattedLocationArray = JSON.parse(unformattedLocationString.split(",")[1]);
                     let location = {};
-                    location.latitude = unformattedLocationArray[0];
-                    location.longitude = unformattedLocationArray[1];
-                    currentSpeed = unformattedLocationArray[2];
-                    locationHistory = [location, ...locationHistory]
+                    location.latitude = formattedLocationArray[0];
+                    location.longitude = formattedLocationArray[1];
+                    currentSpeed = formattedLocationArray[2];
                     if (index == Object.keys(Location).length - 1) {
                         currentLocation = location;
+                    }
+                    else {
+                        locationHistory = [location, ...locationHistory]
                     }
                 }
             })
         }
 
-        if (mqttData[deviceId]) {
-            let deviceStore = mqttData[deviceId];
-            let tempDeviceStore = { ...deviceStore, locationHistory: [locationHistory, ...deviceStore.locationHistory], currentLocation, currentSpeed, RickshawStopped, Batterylife, currentTime };
-            let payload = {
-                key: deviceId,
-                value: tempDeviceStore
-            }
-            dispatch(updateMQTTdata(payload));
+        let tempDeviceStore = { locationHistory, currentLocation, currentSpeed, RickshawStopped, Batterylife, currentTime };
+
+        let payload = {
+            key: deviceId,
+            value: tempDeviceStore
         }
-        else {
-            let tempDeviceStore = { locationHistory, currentLocation, currentSpeed, RickshawStopped, Batterylife, currentTime };
-            let payload = {
-                key: deviceId,
-                value: tempDeviceStore
-            }
-            dispatch(updateMQTTdata(payload));
-        }
+
+        dispatch(updateMQTTdata(payload));
 
     }
 
     function checkRecentEvent(eventTime, IST_time) {
+        return true;
         let eventDate = new Date(eventTime);
         let timeDifference = IST_time.getTime() - eventDate.getTime();
         let oneMinute = 60000;
@@ -128,7 +131,6 @@ export default function DriverList({ navigation }) {
                 tempDevicesList = [...tempDevicesList, element.deviceId];
             }
         });
-        setDevicesList(tempDevicesList);
         return tempDevicesList;
     }
 
@@ -210,7 +212,8 @@ export default function DriverList({ navigation }) {
                                     }
                                     {(Object.keys(showLocation).includes(driver.driverId) && showLocation[driver.driverId] == true) &&
                                         <Surface elevation={2} style={{ height: 200, margin: 10, }}>
-                                            <MapService currentLocation={{ latitude: 28.539473, longitude: 77.188727 }} locationHistory={[{ latitude: 28.538529, longitude: 77.191254 }, { latitude: 28.537046, longitude: 77.195523 }]} style={{ flex: 1 }} icon="circle-slice-8" />
+                                            {(mqttData[driver.deviceId]) && <MapService currentLocation={mqttData[driver.deviceId].currentLocation} locationHistory={mqttData[driver.deviceId].locationHistory} style={{ flex: 1 }} icon="circle-slice-8" />}
+                                            {(!mqttData[driver.deviceId]) && <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}><Text>Trying to fetch Driver's Location</Text></View>}
                                             <IconButton icon="chevron-up" onPress={() => _setShowLocation(driver.driverId, false)} style={{ position: "absolute", right: 2, top: 2, backgroundColor: "white", borderWidth: 0.5 }} />
                                         </Surface>
                                     }

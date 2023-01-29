@@ -1,10 +1,14 @@
 import * as React from 'react'
-import { Surface, List, Portal, Modal, IconButton, ActivityIndicator } from 'react-native-paper'
+import { Surface, List, Portal, Modal, IconButton, ActivityIndicator, Button, TextInput, Dialog, Paragraph, ProgressBar } from 'react-native-paper'
 import { StyleSheet, ScrollView, Pressable, View, Text, Image } from 'react-native'
 import driverDetailsConfig from '../responses/driverDetailsConfig.json';
 import MapService from '../supportComponents/MapService';
 import { useSelector } from 'react-redux';
 import { driverStatus } from "../responses/driverStatus.json";
+import { OFFLINE_PAYMENT_API } from "@env";
+import { PubSub } from 'aws-amplify';
+import { Auth } from 'aws-amplify';
+
 
 
 export default function DriverDetails(props) {
@@ -15,8 +19,14 @@ export default function DriverDetails(props) {
     const [showAadhaar, setShowAadhaar] = React.useState(false)
     const [showAutoFront, setShowAutoFront] = React.useState(false)
     const [showAutoBack, setShowAutoBack] = React.useState(false)
-    const [isLoading, setLoading] = React.useState(true)
+    const [showLiveLocation, setShowLiveLocation] = React.useState(false)
+    const [paymentDialogBox, setPaymentDialogBox] = React.useState(false)
+    const [errorDialog, setErrorDialogBox] = React.useState(false);
+    const [errorMessage, setErrorMessage] = React.useState("");
+    const [isLoading, setLoading] = React.useState(true);
+    const [paymentLoading, setPaymentLoading] = React.useState(false);
     const [deviceID, setDeviceID] = React.useState();
+    const [paymentAmount, updatePaymentAmount] = React.useState("");
 
 
     const showModal = () => setImageVisible(true)
@@ -34,6 +44,9 @@ export default function DriverDetails(props) {
     const _showAutoBack = () => setShowAutoBack(true)
     const _hideAutoBack = () => setShowAutoBack(false)
 
+    const _showLiveLocation = () => setShowLiveLocation(true)
+    const _hideLiveLocation = () => setShowLiveLocation(false)
+
     const mqttData = useSelector((store) => store.driver.mqttData);
 
     const getUserDetails = (driverid) => {
@@ -42,7 +55,8 @@ export default function DriverDetails(props) {
             .then((json) => {
                 setUser(json)
                 setDeviceID(json.autoDetails.deviceID)
-                console.log(json)
+                updatePaymentAmount(json.creditPerformance.totalAmountPending.toString())
+                //console.log(json)
             })
             .catch((error) => console.error(error))
             .finally(() => setLoading(false));
@@ -52,12 +66,67 @@ export default function DriverDetails(props) {
         setStartCamera(!startCamera)
     }
 
+
+    const getCurrentState = async () => {
+        await PubSub.publish('aws/device/' + deviceID, { message: '"GET_CURRENT_STATE"' }, { provider: 'AWSIoTProvider' })
+            .then(response => console.log('Publish response:', response))
+            .catch(err => console.log('Publish Pub Err:', err));
+    }
+
+    const _updatePaymentAmount = (text) => {
+        const filteredText = text.replace(/[^0-9]/g, '');
+        updatePaymentAmount(filteredText);
+    }
+
+    async function collectPayment(partner_details, payment_amount, driverId) {
+        const apiUrl = OFFLINE_PAYMENT_API;
+
+        const data = {
+            partner_details,
+            payment_amount,
+            driverId
+        };
+
+        const options = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        };
+
+        try {
+            const response = await fetch(apiUrl, options);
+            await response.json();
+            setPaymentLoading(false);
+            props.navigation.reset({
+                index: 0,
+                routes: [{ name: 'List' }]
+            });
+        } catch (error) {
+            setErrorDialogBox(true);
+            setErrorMessage(error.toString()); //Handle 500 Error here
+            setPaymentLoading(false);
+        }
+    }
+
+    const recordPayment = () => {
+        setPaymentLoading(true);
+        Auth.currentAuthenticatedUser({
+            bypassCache: true
+        }).then(
+            partner => collectPayment(partner, parseInt(paymentAmount), user.driverId)
+        )
+
+    }
+
     //To fetch the API, pass the User ID
     React.useEffect(() => {
         setLoading(true);
         console.log(props.route.params.driverid)
         getUserDetails(props.route.params.driverid);
-        console.log(props.navigation.getState());
+        console.log(mqttData);
+        //console.log(props.navigation.getState());
     }, [])
 
     const displayInfo = driverDetailsConfig.displayInfo;
@@ -83,6 +152,29 @@ export default function DriverDetails(props) {
                         <Modal visible={showAutoBack} onDismiss={_hideAutoBack} contentContainerStyle={styles.containerStyle}>
                             {user.autoDetails && user.autoDetails.backAuto && <Image source={{ uri: user.autoDetails.backAuto.uri || '' }} style={styles.modalImageStyle} />}
                         </Modal>
+                        <Modal visible={showLiveLocation} onDismiss={_hideLiveLocation} contentContainerStyle={styles.containerStyle}>
+                            {(mqttData[deviceID] && mqttData[deviceID].currentLocation) && <MapService currentLocation={mqttData[deviceID].currentLocation} locationHistory={mqttData[deviceID].locationHistory} style={{ flex: 1 }} icon="circle-slice-8" />}
+                        </Modal>
+                        <Dialog visible={paymentDialogBox} onDismiss={() => { setPaymentDialogBox(false) }}>
+                            <Dialog.Content>
+                                <Paragraph style={{ fontSize: 16, fontWeight: "600" }}>Do you want to confirm collection of Rs. {paymentAmount}?</Paragraph>
+                                <Paragraph>By confirming, you confirm that the payment amount would be collected by Meetr from you on behalf of Driver.</Paragraph>
+                            </Dialog.Content>
+                            <Dialog.Actions>
+                                <Button onPress={() => { setPaymentDialogBox(false) }}>Deny</Button>
+                                <Button onPress={() => { recordPayment() }} loading={paymentLoading}>Confirm</Button>
+                            </Dialog.Actions>
+                        </Dialog>
+                        <Dialog visible={errorDialog} onDismiss={() => { setErrorDialogBox(false); setErrorMessage("") }}>
+                            <Dialog.Content>
+                                <Paragraph style={{ fontSize: 16, fontWeight: "600" }}>Payment Collection Failed</Paragraph>
+                                <Paragraph>{errorMessage}</Paragraph>
+                                <Paragraph>Currently, we are unable to record payment, retry later. Please contact support.</Paragraph>
+                            </Dialog.Content>
+                            <Dialog.Actions>
+                                <Button onPress={() => { setErrorDialogBox(false); setErrorMessage("") }}>Okay</Button>
+                            </Dialog.Actions>
+                        </Dialog>
 
                     </Portal>
                     <ScrollView showsVerticalScrollIndicator={false} showsHorizontalScrollIndicator={false}>
@@ -107,23 +199,53 @@ export default function DriverDetails(props) {
                             </Surface>
                             {deviceID && user.activeStatus == "active" &&
                                 <Surface elevation={2} style={{ height: 200, margin: 10 }}>
-                                    {(mqttData.deviceID) && <MapService currentLocation={mqttData.deviceID.currentLocation} locationHistory={mqttData.deviceID.locationHistory} style={{ flex: 1 }} icon="circle-slice-8" />}
-                                    {(!mqttData.deviceID) && <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}><Text>Trying to fetch Driver's Location</Text></View>}
+                                    {(mqttData[deviceID]) && <View style={{ flex: 1 }}>
+                                        <MapService currentLocation={mqttData[deviceID].currentLocation} locationHistory={mqttData[deviceID].locationHistory} style={{ flex: 1 }} icon="circle-slice-8" />
+                                        <IconButton icon="fullscreen" onPress={() => _showLiveLocation()} style={{ position: "absolute", right: 2, top: 2, backgroundColor: "white", borderWidth: 0.5 }} />
+                                        <Button onPress={() => getCurrentState()} style={{ position: "absolute", right: 2, bottom: 2, backgroundColor: "white", borderWidth: 0.5 }}>Get Current State</Button>
+                                    </View>}
+                                    {(!mqttData[deviceID]) && <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}><Text>Trying to fetch Driver's Location</Text></View>}
                                 </Surface>
                             }
-                            {(deviceID && mqttData.deviceID) && <Surface elevation={2} style={{ height: 50, margin: 10, flexDirection: "column" }}>
-                                <View style={{ flex: 1, marginHorizontal: 5 }}>
-
+                            {(deviceID && mqttData[deviceID]) && <Surface elevation={2} style={{ height: 50, margin: 10, flexDirection: "row" }}>
+                                <View style={{ flex: 1, marginHorizontal: 5, alignItems: "center", justifyContent: "center" }}>
+                                    <Text style={{ fontWeight: "500" }}>{parseFloat(mqttData[deviceID].Batterylife).toFixed(3) * 100} %</Text>
                                 </View>
-                                <View style={{ flex: 1, marginHorizontal: 5 }}>
-
+                                <View style={{ flex: 1, marginHorizontal: 5, alignItems: "center", justifyContent: "center" }}>
+                                    <Text style={{ fontWeight: "500" }}>{mqttData[deviceID].currentSpeed} Km/Hr</Text>
                                 </View>
-                                <View style={{ flex: 1, marginHorizontal: 5 }}>
-
+                                <View style={{ flex: 1, marginHorizontal: 5, alignItems: "center", justifyContent: "center" }}>
+                                    <Text style={mqttData[deviceID].RickshawStopped ? { color: "red", fontWeight: "500" } : { color: "green", fontWeight: "500" }}>{mqttData[deviceID].RickshawStopped ? "OFF" : "ON"}</Text>
                                 </View>
                             </Surface>
                             }
                         </View>
+
+                        {user.creditPerformance && (
+                            <Surface elevation={2} style={{ margin: 10 }}>
+                                <View style={{ flex: 1, flexDirection: "row", marginTop: 15, marginHorizontal: 15 }}>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={{ fontSize: 18, marginBottom: 5 }}>{displayInfo.body.creditPerformance.totalAmountPending}</Text>
+                                        <Text style={user.creditPerformance.totalAmountPending >= 600 ? { fontSize: 18, color: "red", fontWeight: "600" } : { fontSize: 18, color: "green", fontWeight: "600" }}>{user.creditPerformance.totalAmountPending}</Text>
+                                    </View>
+                                    <View style={{ flex: 1, alignItems: "flex-end", justifyContent: "center" }}>
+                                        <Button mode="contained" onPress={() => setPaymentDialogBox(true)}>Collect Payment</Button>
+                                    </View>
+                                </View>
+                                <View style={{ flex: 0.5, marginTop: 15, marginHorizontal: 15 }}>
+                                    <TextInput keyboardType="numeric" mode="outlined" value={paymentAmount} onChangeText={(text) => { _updatePaymentAmount(text) }} label="Collect Payment in Rs" />
+                                </View>
+                                <View style={{ flex: 0.5, marginTop: 15, marginHorizontal: 15 }}>
+                                    <Text style={{ fontSize: 18, marginBottom: 5 }}>{displayInfo.body.creditPerformance.creditScore}</Text>
+                                    <ProgressBar animatedValue={user.creditPerformance.creditScore / 100} color={user.creditPerformance.creditScore < 60 ? "red" : "blue"} />
+                                </View>
+                                <View style={{ flex: 0.5, margin: 15 }}>
+                                    <Text style={{ fontSize: 18, marginBottom: 5 }}>{displayInfo.body.creditPerformance.drivingScore}</Text>
+                                    <ProgressBar animatedValue={user.creditPerformance.drivingScore / 100} color={user.creditPerformance.drivingScore < 60 ? "red" : "blue"} />
+                                </View>
+                            </Surface>
+                        )}
+
                         {(user.identityParameters && Object.keys(user.identityParameters).length != 0) &&
                             <Surface elevation={2} style={{ margin: 10 }}>
                                 <List.Subheader style={{ fontSize: 18 }}>
@@ -168,18 +290,6 @@ export default function DriverDetails(props) {
                                 </View>
                             </Surface>
                         }
-                        {user.creditPerformance && (
-                            <Surface elevation={2} style={{ margin: 10 }}>
-                                <List.Subheader style={{ fontSize: 18 }}>
-                                    {displayInfo.head.creditPerformance}
-                                </List.Subheader>
-                                {Object.keys(displayInfo.body.creditPerformance).map((key, index) => {
-                                    return (
-                                        (<List.Item key={index} title={displayInfo.body.creditPerformance[key]} description={user.creditPerformance[key]} />)
-                                    )
-                                })}
-                            </Surface>
-                        )}
 
                     </ScrollView>
                 </Surface>

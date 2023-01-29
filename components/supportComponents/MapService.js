@@ -48,17 +48,17 @@ export default function MapService({ currentLocation, scale, icon, iconcolor, lo
                             }}
                 >
                     <Marker coordinate={{ latitude: currentLocation.latitude, longitude: currentLocation.longitude }} tracksViewChanges={false} anchor={icon && { x: 0.5, y: 0.5 }}>
-                        {icon ? <IconButton icon={icon} color={iconcolor ? iconcolor : "blue"} /> : <></>}
+                        {icon ? <IconButton icon={icon} iconColor={iconcolor ? iconcolor : "blue"} /> : <></>}
                     </Marker>
                     {locationHistory.map((item, index) => {
                         return (
                             <Marker key={index} coordinate={{ latitude: item.latitude, longitude: item.longitude }} tracksViewChanges={false} anchor={icon && { x: 0.5, y: 0.5 }}>
-                                {icon ? <IconButton icon={icon} color={iconcolor ? iconcolor : "lightskyblue"} /> : <></>}
+                                {icon ? <IconButton icon={icon} iconColor={iconcolor ? iconcolor : "lightskyblue"} /> : <></>}
                             </Marker>
                         )
                     })}
 
-                    <Polyline strokeWidth={3} strokeColor="lightskyblue" coordinates={[...locationHistory, currentLocation]} />
+                    <Polyline strokeWidth={3} strokeColor="lightskyblue" coordinates={[currentLocation, ...locationHistory]} />
                 </MapView >
             }
         </View >

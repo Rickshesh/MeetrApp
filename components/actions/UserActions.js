@@ -62,8 +62,9 @@ export function toggleAccountSection() {
     }
 }
 
-export function updateMQTTdata() {
+export function updateMQTTdata(location) {
     return {
-        type: UPDATE_MQTT_DATA
+        type: UPDATE_MQTT_DATA,
+        payload: location
     }
 }
