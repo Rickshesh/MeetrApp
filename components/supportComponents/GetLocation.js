@@ -83,7 +83,7 @@ export default function GetLocation({ _getAddress }) {
                 return;
             }
 
-            let { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest, timeInterval: 2000 });
+            let { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest, timeInterval: 1000 });
 
             console.log(coords);
 

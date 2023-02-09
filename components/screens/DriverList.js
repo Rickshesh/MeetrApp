@@ -26,6 +26,7 @@ export default function DriverList({ navigation }) {
             .then(
                 (data) => {
                     setDriverList(data.body);
+                    console.log(data.body);
                     let tempDevicesList = _setDevicesList(data.body);
                     let topics = tempDevicesList.map(element => "aws/deviceUpdate/" + element);
                     //setTopics(topics);

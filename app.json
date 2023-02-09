@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MeetrApp",
-    "slug": "MeetrApp",
+    "name": "Meetr RM",
+    "slug": "Meetr RM",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -22,7 +22,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFFFFF"
       },
       "config": {
