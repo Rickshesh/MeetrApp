@@ -60,6 +60,7 @@ export default function DriverList({ navigation }) {
             return;
         }
 
+
         let deviceId = data.value.DeviceId;
         let Location = data.value.Location;
         let RickshawStopped = data.value.RickshawStopped;
@@ -76,7 +77,8 @@ export default function DriverList({ navigation }) {
             Object.keys(Location).forEach((key, index) => {
                 if (Location[key] != null && checkRecentEvent(key, currentTime)) {
                     let unformattedLocationString = Location[key];
-                    let formattedStringArray = ("[" + unformattedLocationString.replace(/[{}]/g, "").replace(/, /g, ",") + "]").replace(",]", "]");
+                    let formattedStringArray = unformattedLocationString.replace("],", "]")
+                    //let formattedStringArray = ("[" + unformattedLocationString.replace(/[{}]/g, "").replace(/, /g, ",") + "]").replace(",]", "]");
                     let formattedLocationArray = JSON.parse(formattedStringArray);
                     //let unformattedLocationArray = JSON.parse(unformattedLocationString.split(",")[1]);
                     let location = {};

@@ -20,7 +20,7 @@ export default function DrawerSection({ state, navigation, descriptors }) {
 
     return (
         <>
-            <Drawer.Section title="Some title">
+            <Drawer.Section title="">
                 <Drawer.Item
                     label="Register Driver"
                     icon="account-plus"

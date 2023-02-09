@@ -9,6 +9,7 @@ export default function MapService({ currentLocation, scale, icon, iconcolor, lo
         <View style={{ flex: 1 }}>
             {!Array.isArray(locationHistory) ?
                 <MapView
+                    provider={PROVIDER_GOOGLE}
                     style={styles.map}
                     region={
                         scale ?
@@ -32,6 +33,7 @@ export default function MapService({ currentLocation, scale, icon, iconcolor, lo
                 :
                 <MapView
                     style={styles.map}
+                    provider={PROVIDER_GOOGLE}
                     region={
                         scale ?
                             {
@@ -47,9 +49,7 @@ export default function MapService({ currentLocation, scale, icon, iconcolor, lo
                                 longitudeDelta: 0.00421,
                             }}
                 >
-                    <Marker coordinate={{ latitude: currentLocation.latitude, longitude: currentLocation.longitude }} tracksViewChanges={false} anchor={icon && { x: 0.5, y: 0.5 }}>
-                        {icon ? <IconButton icon={icon} iconColor={iconcolor ? iconcolor : "blue"} /> : <></>}
-                    </Marker>
+
                     {locationHistory.map((item, index) => {
                         return (
                             <Marker key={index} coordinate={{ latitude: item.latitude, longitude: item.longitude }} tracksViewChanges={false} anchor={icon && { x: 0.5, y: 0.5 }}>
@@ -57,6 +57,9 @@ export default function MapService({ currentLocation, scale, icon, iconcolor, lo
                             </Marker>
                         )
                     })}
+                    <Marker coordinate={{ latitude: currentLocation.latitude, longitude: currentLocation.longitude }} tracksViewChanges={false} anchor={icon && { x: 0.5, y: 0.5 }}>
+                        {icon ? <IconButton icon={icon} iconColor={iconcolor ? iconcolor : "blue"} /> : <></>}
+                    </Marker>
 
                     <Polyline strokeWidth={3} strokeColor="lightskyblue" coordinates={[currentLocation, ...locationHistory]} />
                 </MapView >

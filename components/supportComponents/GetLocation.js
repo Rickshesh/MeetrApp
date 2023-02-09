@@ -43,12 +43,19 @@ export default function GetLocation({ _getAddress }) {
     }
 
     useEffect(() => {
-        CheckIfLocationEnabled();
-        GetCurrentLocation();
+        console.log("Inside GeoLocation");
+        const setCurrentLocation = async () => {
+            console.log("Setting Current Location");
+            await CheckIfLocationEnabled();
+            await GetCurrentLocation();
+        }
+        setCurrentLocation();
     }, []);
 
     const CheckIfLocationEnabled = async () => {
+        console.log("Checking Location Enable");
         let enabled = await Location.hasServicesEnabledAsync();
+
 
         if (!enabled) {
             Alert.alert(
@@ -64,15 +71,21 @@ export default function GetLocation({ _getAddress }) {
 
     const GetCurrentLocation = async () => {
 
+        console.log("Getting current Location");
+
         try {
             let { status } = await Location.requestForegroundPermissionsAsync();
+
+            console.log(status);
 
             if (status !== 'granted') {
                 setErrorMsg('Permission to access location was denied');
                 return;
             }
 
-            let { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest });
+            let { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest, timeInterval: 2000 });
+
+            console.log(coords);
 
             if (coords) {
                 const { latitude, longitude } = coords;
@@ -80,6 +93,8 @@ export default function GetLocation({ _getAddress }) {
                     latitude,
                     longitude
                 });
+
+                console.log(response);
 
                 setLocation({ latitude, longitude });
 

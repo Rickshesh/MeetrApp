@@ -54,7 +54,9 @@ export default function DriverDetails(props) {
             .then((response) => response.json())
             .then((json) => {
                 setUser(json)
-                setDeviceID(json.autoDetails.deviceID)
+                if (json.autoDetails.deviceID) {
+                    setDeviceID(json.autoDetails.deviceID)
+                }
                 updatePaymentAmount(json.creditPerformance.totalAmountPending.toString())
                 //console.log(json)
             })
@@ -68,7 +70,7 @@ export default function DriverDetails(props) {
 
 
     const getCurrentState = async () => {
-        await PubSub.publish('aws/device/' + deviceID, { message: '"GET_CURRENT_STATE"' }, { provider: 'AWSIoTProvider' })
+        await PubSub.publish('aws/device/' + deviceID, { message: "GET_CURRENT_STATE" }, { provider: 'AWSIoTProvider' })
             .then(response => console.log('Publish response:', response))
             .catch(err => console.log('Publish Pub Err:', err));
     }
@@ -123,9 +125,9 @@ export default function DriverDetails(props) {
     //To fetch the API, pass the User ID
     React.useEffect(() => {
         setLoading(true);
-        console.log(props.route.params.driverid)
+        //console.log(props.route.params.driverid)
         getUserDetails(props.route.params.driverid);
-        console.log(mqttData);
+        //console.log(mqttData);
         //console.log(props.navigation.getState());
     }, [])
 

@@ -5,6 +5,8 @@ import NavigationHandler from './NavigationHandler'; // Importing NavigationHand
 import { Amplify } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react-native';
 import awsExports from '../src/aws-exports';
+import { StatusBar } from 'expo-status-bar';
+
 
 //Main is the entry point of the App, and provides various functionalities, by importing Global Store, Amplify, Authentication Screen
 
@@ -27,6 +29,8 @@ const Main = () => {
                 }}
             >
                 <Provider store={store}>
+                    <StatusBar style="auto" />
+
                     {/* Wrapping NavigationHandler component with Provider component and passing the store as a prop */}
                     <NavigationHandler />
                 </Provider>

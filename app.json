@@ -24,10 +24,21 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCVmtfWHTtViW-e8XL6KxO_aH-3ob6Pb7o"
+        }
+      },
+      "package": "com.rickshesh.MeetrApp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "cafaad99-20a1-4ed1-9313-cc1be0749c46"
+      }
     }
   }
 }

@@ -48,13 +48,14 @@ const userReducer = (state = initialState, action) => {
                 ...state, showAccountSection: !state.showAccountSection
             }
         case UPDATE_MQTT_DATA:
-            console.log(JSON.stringify(state.mqttData));
+            //console.log(JSON.stringify(state.mqttData));
             let mqttData = {};
             if (state.mqttData.hasOwnProperty(action.payload.key)) {
                 console.log("True");
                 mqttData = {
                     ...state.mqttData,
                     [action.payload.key]: {
+                        payloadCount: state.mqttData[action.payload.key].payloadCount + 1,
                         currentLocation: action.payload.value.currentLocation,
                         currentSpeed: action.payload.value.currentSpeed,
                         RickshawStopped: action.payload.value.RickshawStopped,
@@ -69,6 +70,7 @@ const userReducer = (state = initialState, action) => {
                 mqttData = {
                     ...state.mqttData,
                     [action.payload.key]: {
+                        payloadCount: 1,
                         currentLocation: action.payload.value.currentLocation,
                         currentSpeed: action.payload.value.currentSpeed,
                         RickshawStopped: action.payload.value.RickshawStopped,
@@ -78,7 +80,8 @@ const userReducer = (state = initialState, action) => {
                     }
                 }
             }
-            console.log(JSON.stringify(mqttData));
+
+            console.log("Final State:" + JSON.stringify(mqttData));
 
             return {
                 ...state, mqttData

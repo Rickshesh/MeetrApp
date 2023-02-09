@@ -1,7 +1,8 @@
-import { StatusBar } from 'expo-status-bar'
+//import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, View, TouchableOpacity, Image } from 'react-native'
-import { Camera } from 'expo-camera'
+import { IconButton } from 'react-native-paper';
+import { Camera, CameraType } from 'expo-camera'
 import * as ImageManipulator from 'expo-image-manipulator';
 
 
@@ -11,6 +12,7 @@ export default function CameraModule({ _setPhoto, type }) {
     const [capturedImage, setCapturedImage] = useState(null)
     const [cameraPermission, setCameraPermission] = useState(null)
     const [camera, setCamera] = useState(null);
+    const [cameraType, setCameraType] = useState(CameraType.back);
 
     const permissionFunction = async () => {
         // here is how you can get the camera permission
@@ -27,6 +29,15 @@ export default function CameraModule({ _setPhoto, type }) {
         }
 
     };
+
+    const flipCamera = () => {
+        if (cameraType == CameraType.back) {
+            setCameraType(CameraType.front);
+        }
+        else {
+            setCameraType(CameraType.back);
+        }
+    }
 
 
     useEffect(() => {
@@ -53,6 +64,7 @@ export default function CameraModule({ _setPhoto, type }) {
                     <Camera
                         ref={(ref) => setCamera(ref)}
                         style={{ flex: 1, width: '100%' }}
+                        type={cameraType}
                     >
                         <View
                             style={{
@@ -77,19 +89,27 @@ export default function CameraModule({ _setPhoto, type }) {
                                     style={{
                                         alignSelf: 'center',
                                         flex: 1,
-                                        alignItems: 'center'
+                                        justifyContent: 'center',
+                                        flexDirection: "row",
+                                        alignItems: "center"
                                     }}
                                 >
-                                    <TouchableOpacity
-                                        onPress={__takePicture}
-                                        style={{
-                                            width: 70,
-                                            height: 70,
-                                            bottom: 0,
-                                            borderRadius: 50,
-                                            backgroundColor: '#fff'
-                                        }}
-                                    />
+                                    <View style={{ flex: 1 }}></View>
+                                    <View style={{ flex: 1, alignItems: "center" }}>
+                                        <TouchableOpacity
+                                            onPress={__takePicture}
+                                            style={{
+                                                width: 70,
+                                                height: 70,
+                                                bottom: 0,
+                                                borderRadius: 50,
+                                                backgroundColor: '#fff'
+                                            }}
+                                        />
+                                    </View>
+                                    <View style={{ flex: 1 }}>
+                                        <IconButton icon="camera-flip-outline" style={{ backgroundColor: "white" }} onPress={() => flipCamera()} />
+                                    </View>
                                 </View>
                             </View>
                         </View>
