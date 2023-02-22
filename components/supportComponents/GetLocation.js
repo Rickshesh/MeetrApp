@@ -83,7 +83,7 @@ export default function GetLocation({ _getAddress }) {
                 return;
             }
 
-            let { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest, timeInterval: 1000 });
+            let { coords } = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Highest, timeInterval: 2000 });
 
             console.log(coords);
 
@@ -99,7 +99,7 @@ export default function GetLocation({ _getAddress }) {
                 setLocation({ latitude, longitude });
 
                 for (let item of response) {
-                    let address = `${item.name}, ${item.street}, ${item.region}, ${item.postalCode}, ${item.city}`;
+                    let address = `${item.name != null ? item.name + ", " : ""}${item.streetNumber != null ? item.streetNumber + ", " : ""}${item.street != null ? item.street + ", " : ""}${item.district != null ? item.district + ", " : ""}${item.city != null ? item.city + ", " : ""}${item.region != null ? item.region + ", " : ""}${item.country != null ? item.country + ", " : ""}${item.isoCountryCode != null ? item.isoCountryCode : ""}`;
 
                     setDisplayCurrentAddress(address);
 

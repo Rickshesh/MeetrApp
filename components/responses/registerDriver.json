@@ -70,6 +70,11 @@
                         "regex": "",
                         "format": "number"
                     },
+                    "drivingLicense": {
+                        "label": "Driving License",
+                        "regex": "",
+                        "format": "string"
+                    },
                     "registerAddress": {
                         "label": "Registered Address",
                         "regex": "",

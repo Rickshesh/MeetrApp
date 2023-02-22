@@ -1,6 +1,6 @@
 import 'react-native-get-random-values';
 import { Surface, List, Portal, Modal, IconButton, TextInput, Button, Text } from 'react-native-paper'
-import { StyleSheet, ScrollView, Pressable, View, Image } from 'react-native'
+import { StyleSheet, ScrollView, Pressable, View, Image, Platform } from 'react-native'
 import registerDriver from '../responses/registerDriver.json';
 import React, { useEffect, useState } from 'react';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -18,13 +18,12 @@ import GetLocation from '../supportComponents/GetLocation';
 //It needs Camera for Driver, and Aadhaar Card Photo Capture
 //It also uses a GetLocation Component to collect the address of the Driver
 
-
-
 //Image Link
 
 const frontAadhaar = "frontAadhaar";
-const backAadhaar = "backAadhaar"
-
+const backAadhaar = "backAadhaar";
+const frontDrivingLicense = "frontDrivingLicense";
+const backDrivingLicense = "backDrivingLicense";
 
 export default function RegisterDriver({ navigation }) {
     const dispatch = useDispatch();
@@ -34,7 +33,7 @@ export default function RegisterDriver({ navigation }) {
     const [cameraType, setCameraType] = useState(null);
     const [location, setLocation] = useState(false);
 
-    const _getLocation = () => { setLocation(true) };
+    const _getLocation = () => { onLocationEnablePressed(); setLocation(true) };
 
     const _updateDriver = (key, value) => {
         dispatch(updateDriver({ key, value }))
@@ -80,6 +79,18 @@ export default function RegisterDriver({ navigation }) {
         let imageObj = { id: imageID, uri: file.uri }
         _updateDriver(type, imageObj)
     }
+
+    const onLocationEnablePressed = () => {
+        if (Platform.OS === 'android') {
+            RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({ interval: 10000, fastInterval: 5000 })
+                .then(data => {
+
+                }).catch(err => {
+                    onLocationEnablePressed();
+                });
+        }
+    }
+
 
 
     const _startCamera = (type) => { setCameraType(type) }
@@ -143,6 +154,27 @@ export default function RegisterDriver({ navigation }) {
                                             <Text variant="titleSmall">Aadhaar Back</Text>
                                         </> :
                                         <Pressable onPress={() => _startCamera(backAadhaar)}><Image source={{ uri: driver.identityParameters.backAadhaar.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
+                                    }
+                                </View>
+                            </View>
+                            <TextInput label={displayInfo.body.exceptions.identityParameters.drivingLicense.label} keyboardType={displayInfo.body.exceptions.identityParameters.drivingLicense.format == "number" ? "numeric" : "default"} style={{ backgroundColor: "#FBFEFB" }} mode="outlined" onChangeText={text => _updateDriver("drivingLicense", text)} />
+                            <View style={styles.inlineElement}>
+                                <View style={styles.inlineImage}>
+                                    {typeof driver.identityParameters.frontDrivingLicense === 'undefined' ?
+                                        <>
+                                            <IconButton size={24} icon="camera" style={styles.avatar} onPress={() => _startCamera(frontDrivingLicense)} />
+                                            <Text variant="titleSmall">Front Driving License</Text>
+                                        </> :
+                                        <Pressable onPress={() => _startCamera(frontDrivingLicense)}><Image source={{ uri: driver.identityParameters.frontDrivingLicense.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
+                                    }
+                                </View>
+                                <View style={styles.inlineImage}>
+                                    {typeof driver.identityParameters.backDrivingLicense === 'undefined' ?
+                                        <>
+                                            <IconButton size={24} icon="camera" style={styles.avatar} onPress={() => _startCamera(backDrivingLicense)} />
+                                            <Text variant="titleSmall">Back Driving License</Text>
+                                        </> :
+                                        <Pressable onPress={() => _startCamera(backDrivingLicense)}><Image source={{ uri: driver.identityParameters.backDrivingLicense.uri }} resizeMode="contain" style={{ width: 144, height: 144 }} /></Pressable>
                                     }
                                 </View>
                             </View>
