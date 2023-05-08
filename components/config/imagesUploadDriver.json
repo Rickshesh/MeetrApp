@@ -1,0 +1,9 @@
+{
+    "imageFields": {
+        "identityParameters": [
+            "backAadhaar",
+            "frontAadhaar",
+            "image"
+        ]
+    }
+}

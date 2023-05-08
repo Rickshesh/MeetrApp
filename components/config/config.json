@@ -1,0 +1,15 @@
+{
+    "displayInfo": {
+        "businessName": "Meetr Services",
+        "dailyPayment": 300
+    },
+    "paymentObject": {
+        "amount": 300,
+        "paymentPending": true,
+        "paymentDate": "16/12/2022"
+    },
+    "estimatedEarnings": {
+        "amount": 800,
+        "date": "16/12/2022"
+    }
+}

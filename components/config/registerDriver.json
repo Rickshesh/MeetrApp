@@ -1,0 +1,114 @@
+{
+  "displayInfo": {
+    "head": {
+      "identityParameters": "Driver Details",
+      "bankingDetails": "Bank Account Details",
+      "autoDetails": "Vehicle Details",
+      "creditPerformance": "Credit Details"
+    },
+    "body": {
+      "identityParameters": {
+        "firstName": {
+          "label": "First Name",
+          "regex": "",
+          "format": "string"
+        },
+        "lastName": {
+          "label": "Last Name",
+          "regex": "",
+          "format": "string"
+        },
+        "phoneNumber": {
+          "label": "Phone Number",
+          "regex": "",
+          "format": "number"
+        }
+      },
+      "bankingDetails": {
+        "bankAccountNumber": {
+          "label": "Bank Account Number",
+          "regex": "",
+          "format": "number"
+        },
+        "bankPhoneNumber": {
+          "label": "Bank Registered Phone Number",
+          "regex": "",
+          "format": "number"
+        },
+        "bankName": {
+          "label": "Bank Name",
+          "regex": "",
+          "format": "string"
+        },
+        "upiAddress": {
+          "label": "UPI Address",
+          "regex": "",
+          "format": "string"
+        }
+      },
+      "exceptions": {
+        "identityParameters": {
+          "aadhaar": {
+            "label": "Aadhaar Number",
+            "regex": "",
+            "format": "number"
+          },
+          "drivingLicense": {
+            "label": "Driving License Number",
+            "regex": "",
+            "format": "string"
+          },
+          "marriedStatus": {
+            "label": "Marriage Status",
+            "regex": ""
+          },
+          "registerAddress": {
+            "label": "Registered Address",
+            "regex": "",
+            "format": "string"
+          },
+          "dateOfBirth": {
+            "label": "Date of Birth",
+            "regex": "",
+            "format": "date"
+          },
+          "numberOfChildren": {
+            "label": "Number of Children",
+            "regex": "",
+            "format": "number"
+          },
+          "numberOfOtherDependents": {
+            "label": "Dependents (Parents, Siblings..)",
+            "regex": "",
+            "format": "number"
+          }
+        }
+      }
+    }
+  },
+  "checkList": {
+    "identityParameters": {
+      "firstName": {
+        "regex": "[A-Za-z]",
+        "errorMessage": "Please enter correct First Name"
+      },
+      "lastName": {
+        "regex": "[A-Za-z]",
+        "errorMessage": "Please enter correct Last Name"
+      },
+      "phoneNumber": {
+        "regex": "^(\\+91[\\-\\s]?)?[0]?(91)?[789]\\d{9}$",
+        "errorMessage": "Please enter correct Phone Number"
+      },
+      "emailId": {
+        "regex": "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$",
+        "errorMessage": "Please enter correct Email Id"
+      },
+      "aadhaar": {
+        "regex": "^[2-9]{1}[0-9]{3}(\\s?){1}[0-9]{4}(\\s?){1}[0-9]{4}$",
+        "errorMessage": "Please enter correct Aadhaar"
+      }
+    },
+    "bankingDetails": {}
+  }
+}
