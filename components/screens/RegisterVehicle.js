@@ -25,7 +25,7 @@ const backVehicleView = "backVehicleView";
 const leftVehicleView = "leftVehicleView";
 const rightVehicleView = "rightVehicleView";
 
-export default function RegisterAddress() {
+export default function RegisterAddress({ navigation }) {
   const [recordVideo, setRecordVideo] = useState(false);
   const driver = useSelector((store) => store.driver.driver);
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
@@ -63,7 +63,15 @@ export default function RegisterAddress() {
   };
 
   const onSubmit = () => {
-    console.log("Submitted");
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: "List",
+        },
+      ],
+    });
+    //console.log("Submitted");
   };
 
   const onSave = async () => {
@@ -497,7 +505,7 @@ export default function RegisterAddress() {
                 mode="contained"
                 onPress={onSubmit}
                 loading={submitLoading}
-                disabled={submitDisabled}
+                //disabled={submitDisabled}
               >
                 Submit
               </Button>

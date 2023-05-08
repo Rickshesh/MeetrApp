@@ -64,9 +64,10 @@ export default function RegisterDriver({ navigation }) {
   };
 
   const onSubmit = async () => {
-    let submitResponse = await createDriver(driver, REGISTER_DRIVER_AND_CHECK);
-    if (submitResponse) {
-      const registeration_status = submitResponse.registeration_status;
+    //let submitResponse = await createDriver(driver, REGISTER_DRIVER_AND_CHECK);
+    if (true) {
+      //const registeration_status = submitResponse.registeration_status;
+      const registeration_status = "registeration_success";
       if (registeration_status == "registeration_success") {
         navigation.reset({
           index: 0,
@@ -805,7 +806,7 @@ export default function RegisterDriver({ navigation }) {
                     mode="contained"
                     onPress={onSubmit}
                     loading={submitLoading}
-                    disabled={submitDisabled}
+                    //disabled={submitDisabled}
                   >
                     Next
                   </Button>

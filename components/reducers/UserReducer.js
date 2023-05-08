@@ -122,11 +122,7 @@ const userReducer = (state = initialState, action) => {
     case RESET_DRIVER:
       return {
         ...state,
-        driver: {
-          identityParameters: {},
-          bankingDetails: {},
-          autoDetails: {},
-        },
+        driver: initialState.driver,
       };
     case TOGGLE_ACCOUNT_SECTION:
       return {

@@ -30,9 +30,10 @@ const insideVideo = "insideVideo";
 const outsideVideo = "outsideVideo";
 const verificationVideo = "verificationVideo";
 
-export default function RegisterAddress() {
+export default function RegisterAddress({ navigation }) {
   const dispatch = useDispatch();
   const driver = useSelector((store) => store.driver.driver);
+  const store = useSelector((store) => store.driver);
   const [showHelperAddressVideo, setShowHelperAddressVideo] = useState(false);
   const [recordVideo, setRecordVideo] = useState(null);
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
@@ -42,12 +43,9 @@ export default function RegisterAddress() {
   const [showCityDropDown, setShowCityDropDown] = useState(false);
   const [showSecondReferenceDropDown, setShowSecondReferenceDropDown] =
     useState(false);
-  const [location, setLocation] = useState(null);
-  const [locationServiceEnabled, setLocationServiceEnabled] = useState(false);
-  const [addressCurrentLocation, setAddressCurrentLocation] = useState(null);
-  const [checked, setChecked] = useState("first");
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitDisabled, setSubmitDisabled] = useState(false);
+  const [updatingLocationLoading, setUpdatingLocationLoading] = useState(false);
 
   const secondReferenceList = [
     { value: "past_employer", label: "Past Employer" },
@@ -92,6 +90,7 @@ export default function RegisterAddress() {
   };
 
   const retrieveSavedData = async () => {
+    await getCurrentLocation();
     await retrieveGeoCities();
     try {
       let data = await AsyncStorage.getItem("address_id");
@@ -99,11 +98,9 @@ export default function RegisterAddress() {
         console.log("Retrieving Stored Details");
         dispatch(retrieveAddressDetails(JSON.parse(data)));
         console.log(data);
-      } else {
-        getCurrentLocation();
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   };
 
@@ -111,6 +108,7 @@ export default function RegisterAddress() {
     {
       if (
         !mockLocation &&
+        driver.addressDetails &&
         driver.addressDetails.verificationVideo &&
         driver.addressDetails.verificationVideo != {} &&
         driver.addressDetails.insideVideo &&
@@ -122,6 +120,7 @@ export default function RegisterAddress() {
         driver.addressDetails.userAddress &&
         driver.addressDetails.userAddress != {} &&
         driver.addressDetails.location &&
+        driver.referenceDetails &&
         driver.referenceDetails.pastEmployerName &&
         driver.referenceDetails.pastEmployerName != "" &&
         driver.referenceDetails.pastEmployerNumber &&
@@ -140,7 +139,18 @@ export default function RegisterAddress() {
   };
 
   const onSubmit = () => {
-    console.log("Submitted");
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: "Vehicle",
+          params: {
+            driverId: driver.driverId,
+          },
+        },
+      ],
+    });
+    //console.log("Submitted");
   };
 
   const onSave = async () => {
@@ -155,6 +165,7 @@ export default function RegisterAddress() {
   };
 
   const getCurrentLocation = async () => {
+    setUpdatingLocationLoading(true);
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
       console.log(status);
@@ -176,6 +187,7 @@ export default function RegisterAddress() {
     } catch (err) {
       console.log(err);
     }
+    setUpdatingLocationLoading(false);
   };
 
   const retrieveGeoCities = async () => {
@@ -192,12 +204,11 @@ export default function RegisterAddress() {
       console.log(response.data.cities);
       setGeoCities(response.data.cities);
     } catch (err) {
-      console.log(err);
       console.log(JSON.stringify(err));
     }
   };
 
-  const updateAddressDetails = async () => {
+  const addAddressDetails = async () => {
     setSubmitLoading(true);
 
     let insideVideoBase64 = await readBase64File(
@@ -272,7 +283,7 @@ export default function RegisterAddress() {
   }, []);
 
   useEffect(() => {
-    console.log(driver);
+    console.log(store);
     checkFields(driver);
   }, [driver]);
 
@@ -288,7 +299,6 @@ export default function RegisterAddress() {
             _setVideo={(file, type) => _captureVideo(file, type)}
             _hideVideo={_hideVideo}
             type={recordVideo}
-            timeToFinish={type == verificationVideo ? 3 : 15}
           />
         </Modal>
       </Portal>
@@ -303,41 +313,157 @@ export default function RegisterAddress() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ margin: 10 }}
         >
-          <View>
-            <Text style={{ fontWeight: "700", fontSize: 16 }}>
-              Address Details
-            </Text>
-          </View>
-          <View style={styles.topSection}>
-            <View style={{ flexDirection: "row" }}>
+          {driver.addressDetails && (
+            <>
+              <View>
+                <Text style={{ fontWeight: "700", fontSize: 16 }}>
+                  Address Details
+                </Text>
+              </View>
+              <View style={styles.topSection}>
+                <View style={{ flexDirection: "row" }}>
+                  <View
+                    style={{
+                      flex: 1,
+                      alignItems: "center",
+                    }}
+                  >
+                    {!driver.addressDetails.verificationVideo ? (
+                      <Pressable onPress={() => _startVideo(verificationVideo)}>
+                        <IconButton
+                          size={36}
+                          icon="video-account"
+                          style={styles.avatar}
+                        />
+                      </Pressable>
+                    ) : (
+                      <View style={styles.avatar}>
+                        <Pressable
+                          onPress={() => _startVideo(verificationVideo)}
+                        >
+                          <VideoThumbnail
+                            videoUri={
+                              driver.addressDetails.verificationVideo.uri
+                            }
+                          />
+                        </Pressable>
+                      </View>
+                    )}
+                  </View>
+                  <View style={{ flex: 2 }}></View>
+                </View>
+                <View>
+                  {!driver.addressDetails.video && (
+                    <View
+                      style={{
+                        marginVertical: 10,
+                        marginLeft: 10,
+                      }}
+                    >
+                      <Text style={{ fontWeight: "600" }}>
+                        Record a Short Video Capturing the Applicant
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
               <View
                 style={{
-                  flex: 1,
-                  alignItems: "center",
+                  marginVertical: 10,
+                  padding: 10,
+                  backgroundColor: "#FAF9F9",
+                  borderRadius: 10,
                 }}
               >
-                {!driver.addressDetails.verificationVideo ? (
-                  <Pressable onPress={() => _startVideo(verificationVideo)}>
-                    <IconButton
-                      size={36}
-                      icon="video-account"
-                      style={styles.avatar}
-                    />
-                  </Pressable>
-                ) : (
-                  <View style={styles.avatar}>
-                    <Pressable onPress={() => _startVideo(verificationVideo)}>
-                      <VideoThumbnail
-                        videoUri={driver.addressDetails.verificationVideo.uri}
-                      />
-                    </Pressable>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "center",
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <View style={{ alignItems: "center", marginTop: 5 }}>
+                      {driver.addressDetails.outsideVideo ? (
+                        <View
+                          style={{
+                            width: 96,
+                            height: 96,
+                            borderWidth: 2,
+                          }}
+                        >
+                          <Pressable onPress={() => _startVideo(outsideVideo)}>
+                            <VideoThumbnail
+                              videoUri={driver.addressDetails.outsideVideo.uri}
+                            />
+                          </Pressable>
+                        </View>
+                      ) : (
+                        <IconButton
+                          size={30}
+                          icon="video-account"
+                          style={styles.avatar}
+                          onPress={() => _startVideo(outsideVideo)}
+                        />
+                      )}
+                    </View>
+                    <View style={{ alignItems: "center", marginBottom: 5 }}>
+                      <Text style={{ fontWeight: "600" }}>Outside</Text>
+                    </View>
                   </View>
-                )}
-              </View>
-              <View style={{ flex: 2 }}></View>
-            </View>
-            <View>
-              {!driver.addressDetails.video && (
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <View style={{ alignItems: "center", marginTop: 5 }}>
+                      {driver.addressDetails.insideVideo ? (
+                        <View
+                          style={{
+                            width: 96,
+                            height: 96,
+                            borderWidth: 2,
+                          }}
+                        >
+                          <Pressable onPress={() => _startVideo(insideVideo)}>
+                            <VideoThumbnail
+                              videoUri={driver.addressDetails.insideVideo.uri}
+                            />
+                          </Pressable>
+                        </View>
+                      ) : (
+                        <IconButton
+                          size={30}
+                          icon="video-account"
+                          style={styles.avatar}
+                          onPress={() => _startVideo(insideVideo)}
+                        />
+                      )}
+                    </View>
+                    <View style={{ alignItems: "center", marginBottom: 5 }}>
+                      <Text style={{ fontWeight: "600" }}>Inside</Text>
+                    </View>
+                  </View>
+
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: "flex-end",
+                      alignItems: "flex-end",
+                    }}
+                  >
+                    <IconButton
+                      icon="help-box"
+                      size={30}
+                      onPress={() => console.log("Show Helper")}
+                    />
+                  </View>
+                </View>
                 <View
                   style={{
                     marginVertical: 10,
@@ -345,321 +471,234 @@ export default function RegisterAddress() {
                   }}
                 >
                   <Text style={{ fontWeight: "600" }}>
-                    Record a Short Video Capturing the Applicant
+                    Record Short Videos of the Home
                   </Text>
                 </View>
-              )}
-            </View>
-          </View>
-          <View
-            style={{
-              marginVertical: 10,
-              padding: 10,
-              backgroundColor: "#FAF9F9",
-              borderRadius: 10,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "center",
-              }}
-            >
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "space-between",
-                }}
-              >
-                <View style={{ alignItems: "center", marginTop: 5 }}>
-                  {driver.addressDetails.outsideVideo ? (
-                    <View
-                      style={{
-                        width: 96,
-                        height: 96,
-                        borderWidth: 2,
-                      }}
-                    >
-                      <Pressable onPress={() => _startVideo(outsideVideo)}>
-                        <VideoThumbnail
-                          videoUri={driver.addressDetails.outsideVideo.uri}
-                        />
-                      </Pressable>
-                    </View>
-                  ) : (
-                    <IconButton
-                      size={30}
-                      icon="video-account"
-                      style={styles.avatar}
-                      onPress={() => _startVideo(outsideVideo)}
-                    />
-                  )}
-                </View>
-                <View style={{ alignItems: "center", marginBottom: 5 }}>
-                  <Text style={{ fontWeight: "600" }}>Outside</Text>
-                </View>
               </View>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "space-between",
-                }}
-              >
-                <View style={{ alignItems: "center", marginTop: 5 }}>
-                  {driver.addressDetails.insideVideo ? (
-                    <View
-                      style={{
-                        width: 96,
-                        height: 96,
-                        borderWidth: 2,
-                      }}
-                    >
-                      <Pressable onPress={() => _startVideo(insideVideo)}>
-                        <VideoThumbnail
-                          videoUri={driver.addressDetails.insideVideo.uri}
-                        />
-                      </Pressable>
-                    </View>
-                  ) : (
-                    <IconButton
-                      size={30}
-                      icon="video-account"
-                      style={styles.avatar}
-                      onPress={() => _startVideo(insideVideo)}
-                    />
-                  )}
-                </View>
-                <View style={{ alignItems: "center", marginBottom: 5 }}>
-                  <Text style={{ fontWeight: "600" }}>Inside</Text>
-                </View>
-              </View>
-
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "flex-end",
-                  alignItems: "flex-end",
-                }}
-              >
-                <IconButton
-                  icon="help-box"
-                  size={30}
-                  onPress={() => console.log("Show Helper")}
-                />
-              </View>
-            </View>
-            <View
-              style={{
-                marginVertical: 10,
-                marginLeft: 10,
-              }}
-            >
-              <Text style={{ fontWeight: "600" }}>
-                Record Short Videos of the Home
-              </Text>
-            </View>
-          </View>
-          {!geoCities && (
-            <TextInput
-              label="Select City"
-              keyboardType="default"
-              style={{ flex: 1 }}
-              disabled={true}
-              mode="outlined"
-              onChangeText={(text) => {
-                console.log(text);
-              }}
-            />
-          )}
-          {geoCities && (
-            <View
-              style={{
-                justifyContent: "center",
-              }}
-            >
-              <View style={styles.spacerStyle}>
-                <DropDown
-                  label={"Select City"}
-                  mode={"outlined"}
-                  visible={showCityDropDown}
-                  dropDownItemStyle={{ height: 50 }}
-                  dropDownStyle={{
-                    height: (geoCities.length - 1) * 50 + 60,
-                  }}
-                  placeholder="Select City"
-                  showDropDown={() => setShowCityDropDown(true)}
-                  onDismiss={() => setShowCityDropDown(false)}
-                  value={driver.addressDetails.city}
-                  setValue={updateCity}
-                  list={geoCities}
-                />
-              </View>
-            </View>
-          )}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <TextInput
-              label="Complete Address with City and State"
-              keyboardType="default"
-              style={{ backgroundColor: "#FBFEFB", flex: 1 }}
-              mode="outlined"
-              value={driver.addressDetails.userAddress}
-              onChangeText={(text) => {
-                _updateAddress("userAddress", text);
-              }}
-            />
-          </View>
-          <View style={{ marginTop: 5 }}>
-            <View
-              style={{
-                padding: 10,
-                backgroundColor: "#FAF9F9",
-                borderRadius: 10,
-                height: 200,
-              }}
-            >
-              {driver.addressDetails.location ? (
-                <MapService
-                  currentLocation={{
-                    latitude: driver.addressDetails.location.coords.latitude,
-                    longitude: driver.addressDetails.location.coords.longitude,
-                  }}
+              {!geoCities && (
+                <TextInput
+                  label="Select City"
+                  keyboardType="default"
                   style={{ flex: 1 }}
+                  disabled={true}
+                  mode="outlined"
+                  onChangeText={(text) => {
+                    console.log(text);
+                  }}
                 />
-              ) : (
-                <Text variant="bodyMedium">Retrieving Location...</Text>
               )}
-            </View>
-          </View>
-          <View style={{ marginTop: 10 }}>
-            <Text style={{ fontWeight: "700", fontSize: 16 }}>
-              Reference Check Details
-            </Text>
-          </View>
-
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <TextInput
-              label="Past Employer Name"
-              keyboardType="default"
-              style={{ backgroundColor: "#FBFEFB", flex: 1 }}
-              mode="outlined"
-              value={driver.referenceDetails.pastEmployerName}
-              onChangeText={(text) => {
-                _updateReference("pastEmployerName", text);
-              }}
-            />
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <TextInput
-              label="Past Employer Number (+91-)"
-              keyboardType="numeric"
-              style={{ backgroundColor: "#FBFEFB", flex: 1 }}
-              mode="outlined"
-              value={driver.referenceDetails.pastEmployerNumber}
-              onChangeText={(text) => {
-                _updateReference("pastEmployerNumber", text);
-              }}
-            />
-          </View>
-          <View
-            style={{
-              justifyContent: "center",
-            }}
-          >
-            <View style={styles.spacerStyle}>
-              <DropDown
-                label={"Second Reference Type"}
-                mode={"outlined"}
-                visible={showSecondReferenceDropDown}
-                dropDownItemStyle={{ height: 50 }}
-                dropDownStyle={{
-                  height: (secondReferenceList.length - 1) * 50 + 60,
+              {geoCities && (
+                <View
+                  style={{
+                    justifyContent: "center",
+                  }}
+                >
+                  <View style={styles.spacerStyle}>
+                    <DropDown
+                      label={"Select City"}
+                      mode={"outlined"}
+                      visible={showCityDropDown}
+                      dropDownItemStyle={{ height: 50 }}
+                      dropDownStyle={{
+                        height: (geoCities.length - 1) * 50 + 60,
+                      }}
+                      placeholder="Select City"
+                      showDropDown={() => setShowCityDropDown(true)}
+                      onDismiss={() => setShowCityDropDown(false)}
+                      value={driver.addressDetails.city}
+                      setValue={updateCity}
+                      list={geoCities}
+                    />
+                  </View>
+                </View>
+              )}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
-                placeholder="Second Reference Type"
-                showDropDown={() => setShowSecondReferenceDropDown(true)}
-                onDismiss={() => setShowSecondReferenceDropDown(false)}
-                value={driver.referenceDetails.secondReferenceType}
-                setValue={updateSecondReference}
-                list={secondReferenceList}
-              />
-            </View>
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <TextInput
-              label="Second Reference Name"
-              keyboardType="default"
-              style={{ backgroundColor: "#FBFEFB", flex: 1 }}
-              mode="outlined"
-              value={driver.referenceDetails.secondReferenceName}
-              onChangeText={(text) => {
-                _updateReference("secondReferenceName", text);
-              }}
-            />
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <TextInput
-              label="Second Reference Number (+91-)"
-              keyboardType="numeric"
-              style={{ backgroundColor: "#FBFEFB", flex: 1 }}
-              mode="outlined"
-              value={driver.referenceDetails.secondReferenceNumber}
-              onChangeText={(text) => {
-                _updateReference("secondReferenceNumber", text);
-              }}
-            />
-          </View>
-          <View style={{ flex: 1, flexDirection: "row", marginVertical: 10 }}>
-            <View style={{ flex: 2, marginRight: 10 }}>
-              <Button
-                icon="content-save"
-                mode="contained"
-                onPress={onSave}
-                style={{ backgroundColor: "#805158" }}
               >
-                Save
-              </Button>
-            </View>
-            <View style={{ flex: 2 }}>
-              <Button
-                icon="step-forward"
-                mode="contained"
-                onPress={onSubmit}
-                loading={submitLoading}
-                disabled={submitDisabled}
+                <TextInput
+                  label="Complete Address with City and State"
+                  keyboardType="default"
+                  style={{ backgroundColor: "#FBFEFB", flex: 1 }}
+                  mode="outlined"
+                  value={driver.addressDetails.userAddress}
+                  onChangeText={(text) => {
+                    _updateAddress("userAddress", text);
+                  }}
+                />
+              </View>
+              <View style={{ marginTop: 5 }}>
+                <View
+                  style={{
+                    padding: 10,
+                    backgroundColor: "#FAF9F9",
+                    borderRadius: 10,
+                    height: 200,
+                  }}
+                >
+                  {driver.addressDetails.location ? (
+                    <MapService
+                      currentLocation={{
+                        latitude:
+                          driver.addressDetails.location.coords.latitude,
+                        longitude:
+                          driver.addressDetails.location.coords.longitude,
+                      }}
+                      style={{ flex: 1 }}
+                    />
+                  ) : (
+                    <Text variant="bodyMedium">Retrieving Location...</Text>
+                  )}
+                </View>
+                <View style={{ position: "absolute", right: 20, bottom: 20 }}>
+                  <Button
+                    icon="update"
+                    mode="contained"
+                    textColor="black"
+                    style={{ backgroundColor: "#ffffff" }}
+                    onPress={() => getCurrentLocation()}
+                    loading={updatingLocationLoading}
+                    disabled={updatingLocationLoading}
+                  >
+                    Update Location
+                  </Button>
+                </View>
+              </View>
+            </>
+          )}
+          {driver.referenceDetails && (
+            <>
+              <View style={{ marginTop: 10 }}>
+                <Text style={{ fontWeight: "700", fontSize: 16 }}>
+                  Reference Check Details
+                </Text>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
-                Submit
-              </Button>
-            </View>
-          </View>
+                <TextInput
+                  label="Past Employer Name"
+                  keyboardType="default"
+                  style={{ backgroundColor: "#FBFEFB", flex: 1 }}
+                  mode="outlined"
+                  value={driver.referenceDetails.pastEmployerName}
+                  onChangeText={(text) => {
+                    _updateReference("pastEmployerName", text);
+                  }}
+                />
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <TextInput
+                  label="Past Employer Number (+91-)"
+                  keyboardType="numeric"
+                  style={{ backgroundColor: "#FBFEFB", flex: 1 }}
+                  mode="outlined"
+                  value={driver.referenceDetails.pastEmployerNumber}
+                  onChangeText={(text) => {
+                    _updateReference("pastEmployerNumber", text);
+                  }}
+                />
+              </View>
+              <View
+                style={{
+                  justifyContent: "center",
+                }}
+              >
+                <View style={styles.spacerStyle}>
+                  <DropDown
+                    label={"Second Reference Type"}
+                    mode={"outlined"}
+                    visible={showSecondReferenceDropDown}
+                    dropDownItemStyle={{ height: 50 }}
+                    dropDownStyle={{
+                      height: (secondReferenceList.length - 1) * 50 + 60,
+                    }}
+                    placeholder="Second Reference Type"
+                    showDropDown={() => setShowSecondReferenceDropDown(true)}
+                    onDismiss={() => setShowSecondReferenceDropDown(false)}
+                    value={driver.referenceDetails.secondReferenceType}
+                    setValue={updateSecondReference}
+                    list={secondReferenceList}
+                  />
+                </View>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <TextInput
+                  label="Second Reference Name"
+                  keyboardType="default"
+                  style={{ backgroundColor: "#FBFEFB", flex: 1 }}
+                  mode="outlined"
+                  value={driver.referenceDetails.secondReferenceName}
+                  onChangeText={(text) => {
+                    _updateReference("secondReferenceName", text);
+                  }}
+                />
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <TextInput
+                  label="Second Reference Number (+91-)"
+                  keyboardType="numeric"
+                  style={{ backgroundColor: "#FBFEFB", flex: 1 }}
+                  mode="outlined"
+                  value={driver.referenceDetails.secondReferenceNumber}
+                  onChangeText={(text) => {
+                    _updateReference("secondReferenceNumber", text);
+                  }}
+                />
+              </View>
+              <View
+                style={{ flex: 1, flexDirection: "row", marginVertical: 10 }}
+              >
+                <View style={{ flex: 2, marginRight: 10 }}>
+                  <Button
+                    icon="content-save"
+                    mode="contained"
+                    onPress={onSave}
+                    style={{ backgroundColor: "#805158" }}
+                  >
+                    Save
+                  </Button>
+                </View>
+                <View style={{ flex: 2 }}>
+                  <Button
+                    icon="step-forward"
+                    mode="contained"
+                    onPress={onSubmit}
+                    loading={submitLoading}
+                    //disabled={submitDisabled}
+                  >
+                    Next
+                  </Button>
+                </View>
+              </View>
+            </>
+          )}
         </ScrollView>
       </Surface>
     </View>

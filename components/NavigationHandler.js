@@ -127,7 +127,12 @@ export default function NavigationHandler() {
 
 function DriverRegisteration() {
   return (
-    <RegisterStack.Navigator initialRouteName="Driver">
+    <RegisterStack.Navigator
+      initialRouteName="Driver"
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
       <RegisterStack.Screen
         name="Driver"
         component={RegisterQualificationScreen}

@@ -8,7 +8,7 @@ import { Audio } from "expo-av";
 const RecordVideo = ({ _setVideo, _hideVideo, type, timeToFinish }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [cameraPermission, setCameraPermission] = useState(null);
-  const [cameraType, setCameraType] = useState(CameraType.back);
+  const [cameraType, setCameraType] = useState(CameraType.front);
   const [camera, setCamera] = useState(null);
 
   const permissionFunction = async () => {
@@ -36,7 +36,7 @@ const RecordVideo = ({ _setVideo, _hideVideo, type, timeToFinish }) => {
         setIsRecording(true);
         const video = await camera.recordAsync({
           quality: Camera.Constants.VideoQuality["480p"],
-          maxDuration: timeToFinish ? timeToFinish : 20, // Set a max duration for the video, in seconds.
+          maxDuration: type == "verificationVideo" ? 3 : 15, // Set a max duration for the video, in seconds.
         });
         console.log("Video recorded: ", video.uri);
         const fileInfo = await FileSystem.getInfoAsync(video.uri);
