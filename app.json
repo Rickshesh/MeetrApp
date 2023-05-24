@@ -41,6 +41,7 @@
       "eas": {
         "projectId": "cafaad99-20a1-4ed1-9313-cc1be0749c46"
       }
-    }
+    },
+    "plugins": ["react-native-compressor", "expo-screen-orientation"]
   }
 }

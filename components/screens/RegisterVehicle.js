@@ -7,25 +7,46 @@ import {
   TextInput,
   Button,
 } from "react-native-paper";
-import { StyleSheet, ScrollView, Pressable, View, Image } from "react-native";
+import {
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  View,
+  Image,
+  BackHandler,
+} from "react-native";
 import RecordVideo from "../supportComponents/RecordVideo";
 import QRCodeScanner from "../supportComponents/QRCodeScanner";
 import { useSelector, useDispatch } from "react-redux";
 import React, { useEffect, useState } from "react";
 import ErrorDialog from "./ErrorDialog";
 import CameraModule from "../supportComponents/CameraModule";
-import { updateAutoDetails, retrieveAutoDetails } from "../actions/UserActions";
+import {
+  updateAutoDetails,
+  retrieveAutoDetails,
+  updateDriverAttribute,
+} from "../actions/UserActions";
 import { v4 as uuidv4 } from "uuid";
 import MapService from "../supportComponents/MapService";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SvgXml } from "react-native-svg";
+import QRCode from "qrcode";
+import {
+  ENCRYPT_SECRET_KEY,
+  UPDATE_VEHICLE_AND_CHECK,
+  CHECK_ACTIVE_STATUS,
+} from "@env";
+import CryptoJS from "crypto-js";
+import * as FileSystem from "expo-file-system";
+import axios from "axios";
 
 const frontVehicleView = "frontVehicleView";
 const backVehicleView = "backVehicleView";
-const leftVehicleView = "leftVehicleView";
 const rightVehicleView = "rightVehicleView";
+const numberPlateView = "numberPlateView";
 
-export default function RegisterAddress({ navigation }) {
+export default function RegisterVehicle({ navigation, route }) {
   const [recordVideo, setRecordVideo] = useState(false);
   const driver = useSelector((store) => store.driver.driver);
   const [errorDialogVisible, setErrorDialogVisible] = useState(false);
@@ -33,10 +54,33 @@ export default function RegisterAddress({ navigation }) {
   const [mockLocation, setMockLocation] = useState(false);
   const [cameraType, setCameraType] = useState(null);
   const [showQRScan, setShowQRScan] = useState(false);
+  const [nextLoading, setNextLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [submitDisabled, setSubmitDisabled] = useState(true);
+  const [nextDisabled, setNextDisabled] = useState(true);
   const [updatingLocationLoading, setUpdatingLocationLoading] = useState(false);
+  const [qr, setQr] = useState(null);
+  const [qrScreen, setQrScreen] = useState(null);
   const dispatch = useDispatch();
+
+  const generateQRCode = async (code) => {
+    try {
+      const qrSvg = await QRCode.toString(code, {
+        type: "svg",
+        color: {
+          dark: "#000", // QR Code color
+          light: "#0000", // Transparent background
+        },
+      });
+      setQr(qrSvg);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const encrypt = (data, key = ENCRYPT_SECRET_KEY) => {
+    const ciphertext = CryptoJS.AES.encrypt(data, key).toString();
+    return ciphertext;
+  };
 
   const _updateVehicle = (key, value) => {
     dispatch(updateAutoDetails({ key, value }));
@@ -62,25 +106,70 @@ export default function RegisterAddress({ navigation }) {
     setShowQRScan(false);
   };
 
-  const onSubmit = () => {
-    navigation.reset({
-      index: 0,
-      routes: [
-        {
-          name: "List",
-        },
-      ],
-    });
-    //console.log("Submitted");
+  const onSubmit = async () => {
+    setSubmitLoading(true);
+    console.log("Submitting the Request");
+    let data = {
+      driverId: route.params.driverId,
+    };
+
+    const activeStatusCheck = {
+      method: "post",
+      url: CHECK_ACTIVE_STATUS,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data,
+    };
+
+    const response = await axios(activeStatusCheck);
+    const isActive = response.data.active_status;
+
+    if (isActive) {
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: "List",
+          },
+        ],
+      });
+    } else {
+      setErrorMessage(
+        "Delivery not yet confirmed, Please scan the QR from Driver App"
+      );
+      setErrorDialogVisible(true);
+    }
+    setSubmitLoading(false);
   };
 
   const onSave = async () => {
-    try {
-      await AsyncStorage.setItem("auto_id", JSON.stringify(driver.autoDetails));
-      console.log("Data Saved");
-      console.log(driver.autoDetails);
-    } catch (err) {
-      console.log(err);
+    if (route.params && route.params.driverId) {
+      try {
+        await AsyncStorage.setItem(
+          route.params.driverId,
+          JSON.stringify(driver.autoDetails)
+        );
+        console.log("Data Saved");
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  };
+
+  const onBack = () => {
+    setQrScreen(null);
+  };
+
+  const onNext = async () => {
+    let submitResponse = await addVehicleDetails(
+      driver,
+      UPDATE_VEHICLE_AND_CHECK
+    );
+    if (submitResponse) {
+      const activationCode = submitResponse.activationCode;
+      generateQRCode(encrypt(activationCode));
+      setQrScreen(true);
     }
   };
 
@@ -105,10 +194,15 @@ export default function RegisterAddress({ navigation }) {
         return;
       }
 
-      let location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-        timeInterval: 2000,
-      });
+      let location = null;
+
+      do {
+        location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+          timeInterval: 2000,
+        });
+      } while (location == null);
+
       if (location) {
         _updateVehicle("location", location);
         setMockLocation(location.mocked);
@@ -119,15 +213,91 @@ export default function RegisterAddress({ navigation }) {
     setUpdatingLocationLoading(false);
   };
 
-  const retrieveSavedData = async () => {
+  const addVehicleDetails = async (driver, url = UPDATE_VEHICLE_AND_CHECK) => {
+    setNextLoading(true);
+
+    let frontVehicleViewBase64 = await readBase64File(
+      driver.autoDetails.frontVehicleView.uri,
+      "base64"
+    );
+
+    let backVehicleViewBase64 = await readBase64File(
+      driver.autoDetails.backVehicleView.uri,
+      "base64"
+    );
+
+    let rightVehicleViewBase64 = await readBase64File(
+      driver.autoDetails.rightVehicleView.uri,
+      "base64"
+    );
+
+    let numberPlateViewBase64 = await readBase64File(
+      driver.autoDetails.numberPlateView.uri,
+      "base64"
+    );
+
+    driver.autoDetails.frontVehicleView.file = frontVehicleViewBase64;
+    driver.autoDetails.backVehicleView.file = backVehicleViewBase64;
+    driver.autoDetails.rightVehicleView.file = rightVehicleViewBase64;
+    driver.autoDetails.numberPlateView.file = numberPlateViewBase64;
+
+    const data = {
+      driverId: driver.driverId,
+      autoDetails: driver.autoDetails,
+    };
+
+    console.log(data);
+
     try {
-      let data = await AsyncStorage.getItem("auto_id");
+      const driverConfig = {
+        method: "post",
+        url,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data,
+      };
+      const response = await axios(driverConfig);
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        console.log(error.response.data);
+        setErrorMessage(error.response.data.error);
+        setErrorDialogVisible(true);
+      } else if (error.request) {
+        console.log("The server did not respond:", error.message);
+        setErrorMessage(error.message);
+        setErrorDialogVisible(true);
+      } else {
+        console.log("Error:", error.message);
+        setErrorMessage("Something went Wrong");
+        setErrorDialogVisible(true);
+      }
+    } finally {
+      setNextLoading(false);
+    }
+  };
+
+  async function readBase64File(uri) {
+    try {
+      const base64Data = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      return base64Data;
+    } catch (error) {
+      console.error("Error reading file:", error);
+    }
+  }
+
+  const retrieveSavedData = async (driverId) => {
+    try {
+      let data = await AsyncStorage.getItem(driverId);
+      console.log(data);
       if (data) {
         console.log("Retrieving Stored Details");
         dispatch(retrieveAutoDetails(JSON.parse(data)));
-        console.log(data);
       } else {
-        getCurrentLocation();
+        //getCurrentLocation();
       }
     } catch (err) {
       console.log(err);
@@ -141,25 +311,72 @@ export default function RegisterAddress({ navigation }) {
         driver.autoDetails.frontVehicleView &&
         driver.autoDetails.rightVehicleView &&
         driver.autoDetails.backVehicleView &&
-        driver.autoDetails.leftVehicleView &&
+        driver.autoDetails.numberPlateView &&
         driver.autoDetails.vehicleRegisterationNumber &&
         driver.autoDetails.vehicleRegisterationNumber != "" &&
         driver.autoDetails.deviceId &&
+        driver.autoDetails.deviceId &&
         driver.autoDetails.location
       ) {
-        setSubmitDisabled(false);
+        setNextDisabled(false);
       } else {
-        setSubmitDisabled(true);
+        setNextDisabled(true);
       }
     }
   };
 
+  const ConfirmActivation = () => {
+    return (
+      <View style={{ flex: 1 }}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: 10,
+          }}
+        >
+          <SvgXml xml={qr} width="200" height="200" />
+        </View>
+        <View style={{ flex: 1, justifyContent: "center", marginBottom: 20 }}>
+          <Text style={{ fontWeight: "700", textAlign: "center" }}>
+            Scan the following QR to complete the delivery
+          </Text>
+        </View>
+        <View style={{ flex: 1, flexDirection: "row" }}>
+          <View style={{ flex: 2, marginRight: 10 }}>
+            <Button
+              icon="step-backward"
+              mode="contained"
+              onPress={onBack}
+              style={{ backgroundColor: "#8B2635" }}
+            >
+              Back
+            </Button>
+          </View>
+          <View style={{ flex: 2 }}>
+            <Button
+              icon="step-forward"
+              mode="contained"
+              onPress={onSubmit}
+              loading={submitLoading}
+            >
+              Submit
+            </Button>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
   useEffect(() => {
-    retrieveSavedData();
+    if (route.params && route.params.driverId) {
+      dispatch(updateDriverAttribute("driverId", route.params.driverId));
+      retrieveSavedData(route.params.driverId);
+    }
   }, []);
 
   useEffect(() => {
-    console.log(driver);
     checkFields(driver);
   }, [driver]);
 
@@ -209,308 +426,340 @@ export default function RegisterAddress({ navigation }) {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ margin: 10 }}
         >
-          <View>
-            <Text style={{ fontWeight: "700", fontSize: 16 }}>
-              Vehicle Details
-            </Text>
-          </View>
-          <View
-            style={{
-              marginVertical: 10,
-              padding: 10,
-              backgroundColor: "#FAF9F9",
-              borderRadius: 10,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "center",
-              }}
-            >
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "space-between",
-                }}
-              >
-                <View style={{ alignItems: "center", marginTop: 5 }}>
-                  {driver.autoDetails.frontVehicleView ? (
-                    <View
-                      style={{
-                        width: 72,
-                        height: 72,
-                        borderWidth: 2,
-                      }}
-                    >
-                      <Pressable onPress={() => _startCamera(frontVehicleView)}>
-                        <Image
-                          source={{
-                            uri: driver.autoDetails.frontVehicleView.uri,
-                          }}
-                          style={{ height: "100%" }}
-                          resizeMode="contain"
-                        />
-                      </Pressable>
-                    </View>
-                  ) : (
-                    <IconButton
-                      size={30}
-                      icon="camera-outline"
-                      style={styles.avatar}
-                      onPress={() => _startCamera(frontVehicleView)}
-                    />
-                  )}
-                </View>
-                <View style={{ alignItems: "center", marginBottom: 5 }}>
-                  <Text style={{ fontWeight: "600" }}>Front</Text>
-                </View>
-              </View>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "space-between",
-                }}
-              >
-                <View style={{ alignItems: "center", marginTop: 5 }}>
-                  {driver.autoDetails.rightVehicleView ? (
-                    <View
-                      style={{
-                        width: 72,
-                        height: 72,
-                        borderWidth: 2,
-                      }}
-                    >
-                      <Pressable onPress={() => _startCamera(rightVehicleView)}>
-                        <Image
-                          source={{
-                            uri: driver.autoDetails.rightVehicleView.uri,
-                          }}
-                          style={{ height: "100%" }}
-                          resizeMode="contain"
-                        />
-                      </Pressable>
-                    </View>
-                  ) : (
-                    <IconButton
-                      size={30}
-                      icon="camera-outline"
-                      style={styles.avatar}
-                      onPress={() => _startCamera(rightVehicleView)}
-                    />
-                  )}
-                </View>
-                <View style={{ alignItems: "center", marginBottom: 5 }}>
-                  <Text style={{ fontWeight: "600" }}>Right</Text>
-                </View>
-              </View>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "space-between",
-                }}
-              >
-                <View style={{ alignItems: "center", marginTop: 5 }}>
-                  {driver.autoDetails.backVehicleView ? (
-                    <View
-                      style={{
-                        width: 72,
-                        height: 72,
-                        borderWidth: 2,
-                      }}
-                    >
-                      <Pressable onPress={() => _startCamera(backVehicleView)}>
-                        <Image
-                          source={{
-                            uri: driver.autoDetails.backVehicleView.uri,
-                          }}
-                          style={{ height: "100%" }}
-                          resizeMode="contain"
-                        />
-                      </Pressable>
-                    </View>
-                  ) : (
-                    <IconButton
-                      size={30}
-                      icon="camera-outline"
-                      style={styles.avatar}
-                      onPress={() => _startCamera(backVehicleView)}
-                    />
-                  )}
-                </View>
-                <View style={{ alignItems: "center", marginBottom: 5 }}>
-                  <Text style={{ fontWeight: "600" }}>Back</Text>
-                </View>
-              </View>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "space-between",
-                }}
-              >
-                <View style={{ alignItems: "center", marginTop: 5 }}>
-                  {driver.autoDetails.leftVehicleView ? (
-                    <View
-                      style={{
-                        width: 72,
-                        height: 72,
-                        borderWidth: 2,
-                      }}
-                    >
-                      <Pressable onPress={() => _startCamera(leftVehicleView)}>
-                        <Image
-                          source={{
-                            uri: driver.autoDetails.leftVehicleView.uri,
-                          }}
-                          style={{ height: "100%" }}
-                          resizeMode="contain"
-                        />
-                      </Pressable>
-                    </View>
-                  ) : (
-                    <IconButton
-                      size={30}
-                      icon="camera-outline"
-                      style={styles.avatar}
-                      onPress={() => _startCamera(leftVehicleView)}
-                    />
-                  )}
-                </View>
-                <View style={{ alignItems: "center", marginBottom: 5 }}>
-                  <Text style={{ fontWeight: "600" }}>Left</Text>
-                </View>
-              </View>
-            </View>
-            <View
-              style={{
-                marginVertical: 10,
-                marginLeft: 10,
-                flexDirection: "row",
-                justifyContent: "space-between",
-              }}
-            >
-              <View style={{ justifyContent: "center" }}>
-                <Text style={{ fontWeight: "600" }}>
-                  Take pictures of vehicle from all sides
+          {!qrScreen ? (
+            <>
+              <View>
+                <Text style={{ fontWeight: "700", fontSize: 16 }}>
+                  Vehicle Details
                 </Text>
               </View>
-              <View>
-                <IconButton
-                  icon="help-box"
-                  size={30}
-                  style={{ margin: 0 }}
-                  onPress={() => console.log("Show Help Box")}
+              <View
+                style={{
+                  marginVertical: 10,
+                  padding: 10,
+                  backgroundColor: "#FAF9F9",
+                  borderRadius: 10,
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: "space-around",
+                    }}
+                  >
+                    <View style={{ alignItems: "center", marginTop: 5 }}>
+                      {driver.autoDetails.numberPlateView ? (
+                        <View
+                          style={{
+                            width: 72,
+                            height: 72,
+                            borderWidth: 2,
+                          }}
+                        >
+                          <Pressable
+                            onPress={() => _startCamera(numberPlateView)}
+                          >
+                            <Image
+                              source={{
+                                uri: driver.autoDetails.numberPlateView.uri,
+                              }}
+                              style={{ height: "100%" }}
+                              resizeMode="contain"
+                            />
+                          </Pressable>
+                        </View>
+                      ) : (
+                        <IconButton
+                          size={30}
+                          icon="camera-outline"
+                          style={styles.avatar}
+                          onPress={() => _startCamera(numberPlateView)}
+                        />
+                      )}
+                    </View>
+                    <View
+                      style={{
+                        alignItems: "center",
+                        marginBottom: 5,
+                      }}
+                    >
+                      <Text style={{ fontWeight: "600", textAlign: "center" }}>
+                        Number Plate
+                      </Text>
+                    </View>
+                  </View>
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: "space-around",
+                    }}
+                  >
+                    <View style={{ alignItems: "center", marginTop: 5 }}>
+                      {driver.autoDetails.frontVehicleView ? (
+                        <View
+                          style={{
+                            width: 72,
+                            height: 72,
+                            borderWidth: 2,
+                          }}
+                        >
+                          <Pressable
+                            onPress={() => _startCamera(frontVehicleView)}
+                          >
+                            <Image
+                              source={{
+                                uri: driver.autoDetails.frontVehicleView.uri,
+                              }}
+                              style={{ height: "100%" }}
+                              resizeMode="contain"
+                            />
+                          </Pressable>
+                        </View>
+                      ) : (
+                        <IconButton
+                          size={30}
+                          icon="camera-outline"
+                          style={styles.avatar}
+                          onPress={() => _startCamera(frontVehicleView)}
+                        />
+                      )}
+                    </View>
+                    <View
+                      style={{
+                        alignItems: "center",
+                        marginBottom: 5,
+                      }}
+                    >
+                      <Text style={{ fontWeight: "600", textAlign: "center" }}>
+                        Front
+                      </Text>
+                    </View>
+                  </View>
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: "space-around",
+                    }}
+                  >
+                    <View style={{ alignItems: "center", marginTop: 5 }}>
+                      {driver.autoDetails.rightVehicleView ? (
+                        <View
+                          style={{
+                            width: 72,
+                            height: 72,
+                            borderWidth: 2,
+                          }}
+                        >
+                          <Pressable
+                            onPress={() => _startCamera(rightVehicleView)}
+                          >
+                            <Image
+                              source={{
+                                uri: driver.autoDetails.rightVehicleView.uri,
+                              }}
+                              style={{ height: "100%" }}
+                              resizeMode="contain"
+                            />
+                          </Pressable>
+                        </View>
+                      ) : (
+                        <IconButton
+                          size={30}
+                          icon="camera-outline"
+                          style={styles.avatar}
+                          onPress={() => _startCamera(rightVehicleView)}
+                        />
+                      )}
+                    </View>
+                    <View style={{ alignItems: "center", marginBottom: 5 }}>
+                      <Text style={{ fontWeight: "600", textAlign: "center" }}>
+                        Right
+                      </Text>
+                    </View>
+                  </View>
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: "space-around",
+                    }}
+                  >
+                    <View style={{ alignItems: "center", marginTop: 5 }}>
+                      {driver.autoDetails.backVehicleView ? (
+                        <View
+                          style={{
+                            width: 72,
+                            height: 72,
+                            borderWidth: 2,
+                          }}
+                        >
+                          <Pressable
+                            onPress={() => _startCamera(backVehicleView)}
+                          >
+                            <Image
+                              source={{
+                                uri: driver.autoDetails.backVehicleView.uri,
+                              }}
+                              style={{ height: "100%" }}
+                              resizeMode="contain"
+                            />
+                          </Pressable>
+                        </View>
+                      ) : (
+                        <IconButton
+                          size={30}
+                          icon="camera-outline"
+                          style={styles.avatar}
+                          onPress={() => _startCamera(backVehicleView)}
+                        />
+                      )}
+                    </View>
+                    <View style={{ alignItems: "center", marginBottom: 5 }}>
+                      <Text style={{ fontWeight: "600", textAlign: "center" }}>
+                        Back
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    marginVertical: 10,
+                    marginLeft: 10,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <View style={{ justifyContent: "center" }}>
+                    <Text style={{ fontWeight: "600" }}>
+                      Take pictures of vehicle from all sides
+                    </Text>
+                  </View>
+                  <View>
+                    <IconButton
+                      icon="help-box"
+                      size={30}
+                      style={{ margin: 0 }}
+                      onPress={() => console.log("Show Help Box")}
+                    />
+                  </View>
+                </View>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <TextInput
+                  label="Vehicle Registeration Number"
+                  keyboardType="default"
+                  style={{ backgroundColor: "#FBFEFB", flex: 1 }}
+                  mode="outlined"
+                  value={driver.autoDetails.vehicleRegisterationNumber}
+                  onChangeText={(text) => {
+                    _updateVehicle("vehicleRegisterationNumber", text);
+                  }}
                 />
               </View>
-            </View>
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <TextInput
-              label="Vehicle Registeration Number"
-              keyboardType="default"
-              style={{ backgroundColor: "#FBFEFB", flex: 1 }}
-              mode="outlined"
-              value={driver.autoDetails.vehicleRegisterationNumber}
-              onChangeText={(text) => {
-                _updateVehicle("vehicleRegisterationNumber", text);
-              }}
-            />
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <TextInput
-              label="Vehicle Device Number"
-              keyboardType="default"
-              style={{ backgroundColor: "#FBFEFB", flex: 1 }}
-              mode="outlined"
-              disabled={true}
-              value={driver.autoDetails.deviceId}
-              onChangeText={(text) => {
-                _updateVehicle("vehicleRegisterationNumber", text);
-              }}
-            />
-            <IconButton
-              icon="qrcode-scan"
-              size={30}
-              style={{ margin: 10 }}
-              onPress={() => _startQRScan()}
-            />
-          </View>
-          <View style={{ marginTop: 5 }}>
-            <View
-              style={{
-                padding: 10,
-                backgroundColor: "#FAF9F9",
-                borderRadius: 10,
-                height: 200,
-              }}
-            >
-              {driver.autoDetails.location ? (
-                <MapService
-                  currentLocation={{
-                    latitude: driver.autoDetails.location.coords.latitude,
-                    longitude: driver.autoDetails.location.coords.longitude,
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <TextInput
+                  label="Vehicle Device Number"
+                  keyboardType="default"
+                  style={{ backgroundColor: "#FBFEFB", flex: 1 }}
+                  mode="outlined"
+                  disabled={true}
+                  value={driver.autoDetails.deviceId}
+                  onChangeText={(text) => {
+                    _updateVehicle("deviceId", text);
                   }}
-                  style={{ flex: 1 }}
                 />
-              ) : (
-                <Text variant="bodyMedium">Retrieving Location...</Text>
-              )}
-            </View>
-            <View style={{ position: "absolute", right: 20, bottom: 20 }}>
-              <Button
-                icon="update"
-                mode="contained"
-                textColor="black"
-                style={{ backgroundColor: "#ffffff" }}
-                onPress={() => getCurrentLocation()}
-                loading={updatingLocationLoading}
-                disabled={updatingLocationLoading}
+                <IconButton
+                  icon="qrcode-scan"
+                  size={30}
+                  style={{ margin: 10 }}
+                  onPress={() => _startQRScan()}
+                />
+              </View>
+              <View style={{ marginTop: 5 }}>
+                <View
+                  style={{
+                    padding: 10,
+                    backgroundColor: "#FAF9F9",
+                    borderRadius: 10,
+                    height: 200,
+                  }}
+                >
+                  {driver.autoDetails.location ? (
+                    <MapService
+                      currentLocation={{
+                        latitude: driver.autoDetails.location.coords.latitude,
+                        longitude: driver.autoDetails.location.coords.longitude,
+                      }}
+                      style={{ flex: 1 }}
+                    />
+                  ) : (
+                    <Text variant="bodyMedium">Retrieving Location...</Text>
+                  )}
+                </View>
+                <View style={{ position: "absolute", right: 20, bottom: 20 }}>
+                  <Button
+                    icon="update"
+                    mode="contained"
+                    textColor="black"
+                    style={{ backgroundColor: "#ffffff" }}
+                    onPress={() => getCurrentLocation()}
+                    loading={updatingLocationLoading}
+                    disabled={updatingLocationLoading}
+                  >
+                    Update Location
+                  </Button>
+                </View>
+              </View>
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  marginVertical: 10,
+                }}
               >
-                Update Location
-              </Button>
-            </View>
-          </View>
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              marginVertical: 10,
-            }}
-          >
-            <View style={{ flex: 2, marginRight: 10 }}>
-              <Button
-                icon="content-save"
-                mode="contained"
-                onPress={onSave}
-                style={{ backgroundColor: "#805158" }}
-              >
-                Save
-              </Button>
-            </View>
-            <View style={{ flex: 2 }}>
-              <Button
-                icon="step-forward"
-                mode="contained"
-                onPress={onSubmit}
-                loading={submitLoading}
-                //disabled={submitDisabled}
-              >
-                Submit
-              </Button>
-            </View>
-          </View>
+                <View style={{ flex: 2, marginRight: 10 }}>
+                  <Button
+                    icon="content-save"
+                    mode="contained"
+                    onPress={onSave}
+                    style={{ backgroundColor: "#8B2635" }}
+                  >
+                    Save
+                  </Button>
+                </View>
+                <View style={{ flex: 2 }}>
+                  <Button
+                    icon="step-forward"
+                    mode="contained"
+                    onPress={onNext}
+                    loading={nextLoading}
+                    disabled={nextDisabled}
+                  >
+                    Next
+                  </Button>
+                </View>
+              </View>
+            </>
+          ) : (
+            <ConfirmActivation />
+          )}
         </ScrollView>
       </Surface>
     </View>

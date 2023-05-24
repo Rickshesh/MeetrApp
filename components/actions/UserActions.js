@@ -34,7 +34,6 @@ export function updateAutoDetails(auto) {
 }
 
 export function updateAddressDetails(address) {
-  console.log(address);
   return {
     type: UPDATE_ADDRESS_DETAILS,
     payload: address,
@@ -42,7 +41,6 @@ export function updateAddressDetails(address) {
 }
 
 export function updateReferenceDetails(details) {
-  console.log(details);
   return {
     type: UPDATE_REFERENCE_DETAILS,
     payload: details,

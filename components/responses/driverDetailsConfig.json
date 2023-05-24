@@ -1,50 +1,60 @@
 {
-    "displayInfo": {
-        "head": {
-            "identityParameters": "Driver Details",
-            "bankingDetails": "Bank Account Details",
-            "autoDetails": "Vehicle Details",
-            "creditPerformance": "Credit Details"
+  "displayInfo": {
+    "head": {
+      "identityParameters": "Driver Details",
+      "bankingDetails": "Bank Account Details",
+      "autoDetails": "Vehicle Details",
+      "addressDetails": "Address Details",
+      "creditPerformance": "Credit Details",
+      "referenceCheckHeading": "Reference Check Completed"
+    },
+    "body": {
+      "identityParameters": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "phoneNumber": "Phone Number",
+        "dateOfOnboarding": "Date of Onboarding",
+        "dateOfRegisteration": "Date of Registeration",
+        "dateOfBirth": "Date of Birth",
+        "emailId": "Email Id"
+      },
+      "creditPerformance": {
+        "drivingScore": "Driving Score",
+        "creditScore": "Credit Score",
+        "totalAmountPending": "Total Pending Amount"
+      },
+      "bankingDetails": {
+        "bankAccountNumber": "Bank Account Number",
+        "bankPhoneNumber": "Bank Registered Phone Number",
+        "bankName": "Bank Name",
+        "upiAddress": "UPI Address"
+      },
+      "autoDetails": {
+        "deviceId": "Device Identity",
+        "autoNumber": "Vehicle Number",
+        "vehicleRegisterationNumber": "Vehicle Number"
+      },
+      "addressDetails": {
+        "registeredAddress": "Registered Address"
+      },
+      "exceptions": {
+        "activeStatus": "Status",
+        "identityParameters": {
+          "aadhaar": "Aadhaar Number",
+          "registerAddress": "Registered Address"
         },
-        "body": {
-            "identityParameters": {
-                "firstName": "First Name",
-                "lastName": "Last Name",
-                "phoneNumber": "Phone Number",
-                "dateOfOnboarding": "Date of Onboarding",
-                "dateOfRegisteration": "Date of Registeration",
-                "dateOfBirth": "Date of Birth",
-                "emailId": "Email Id"
-            },
-            "creditPerformance": {
-                "drivingScore": "Driving Score",
-                "creditScore": "Credit Score",
-                "totalAmountPending": "Total Pending Amount"
-            },
-            "bankingDetails": {
-                "bankAccountNumber": "Bank Account Number",
-                "bankPhoneNumber": "Bank Registered Phone Number",
-                "bankName": "Bank Name",
-                "upiAddress": "UPI Address"
-            },
-            "autoDetails": {
-                "deviceID": "Device Id",
-                "autoNumber": "Vehicle Number"
-            },
-            "exceptions": {
-                "activeStatus": "Status",
-                "identityParameters": {
-                    "aadhaar": "Aadhaar Number",
-                    "registerAddress": "Registered Address"
-                },
-                "creditPerformance": {
-                    "paymentsHistory": "Payments History",
-                    "esimtatedEarnings": "Estimated Earnings"
-                },
-                "autoDetails": {
-                    "autoImages": "Vehcile Images"
-                }
-            }
+        "creditPerformance": {
+          "paymentsHistory": "Payments History",
+          "esimtatedEarnings": "Estimated Earnings"
+        },
+        "autoDetails": {
+          "autoImages": "Vehicle Images",
+          "numberPlateView": "Number Plate",
+          "frontVehicleView": "Front Side",
+          "rightVehicleView": "Right Side",
+          "backVehicleView": "Back Side"
         }
+      }
     }
+  }
 }

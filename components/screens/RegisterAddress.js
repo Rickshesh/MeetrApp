@@ -14,23 +14,29 @@ import VideoThumbnail from "../supportComponents/VideoThumbnail";
 import ErrorDialog from "./ErrorDialog";
 import { v4 as uuidv4 } from "uuid";
 import { useDispatch, useSelector } from "react-redux";
-import { GEO_FENCE_CITIES } from "@env";
+import {
+  GEO_FENCE_CITIES,
+  UPDATE_ADDRESS_AND_CHECK,
+  S3_PRE_SIGNED_URI_LINK,
+} from "@env";
 import {
   retrieveAddressDetails,
   updateAddressDetails,
   updateReferenceDetails,
+  updateDriverAttribute,
 } from "../actions/UserActions";
 import axios from "axios";
 import DropDown from "react-native-paper-dropdown";
 import MapService from "../supportComponents/MapService";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as FileSystem from "expo-file-system";
 
 const insideVideo = "insideVideo";
 const outsideVideo = "outsideVideo";
 const verificationVideo = "verificationVideo";
 
-export default function RegisterAddress({ navigation }) {
+export default function RegisterAddress({ navigation, route }) {
   const dispatch = useDispatch();
   const driver = useSelector((store) => store.driver.driver);
   const store = useSelector((store) => store.driver);
@@ -80,12 +86,10 @@ export default function RegisterAddress({ navigation }) {
   };
 
   const updateCity = (city) => {
-    console.log(city);
     _updateAddress("city", city);
   };
 
   const updateSecondReference = (type) => {
-    console.log(type);
     _updateReference("secondReferenceType", type);
   };
 
@@ -95,9 +99,7 @@ export default function RegisterAddress({ navigation }) {
     try {
       let data = await AsyncStorage.getItem("address_id");
       if (data) {
-        console.log("Retrieving Stored Details");
         dispatch(retrieveAddressDetails(JSON.parse(data)));
-        console.log(data);
       }
     } catch (err) {
       console.error(err);
@@ -109,6 +111,7 @@ export default function RegisterAddress({ navigation }) {
       if (
         !mockLocation &&
         driver.addressDetails &&
+        driver.referenceDetails &&
         driver.addressDetails.verificationVideo &&
         driver.addressDetails.verificationVideo != {} &&
         driver.addressDetails.insideVideo &&
@@ -116,11 +119,9 @@ export default function RegisterAddress({ navigation }) {
         driver.addressDetails.outsideVideo &&
         driver.addressDetails.outsideVideo != {} &&
         driver.addressDetails.city &&
-        driver.addressDetails.locationAddress &&
         driver.addressDetails.userAddress &&
         driver.addressDetails.userAddress != {} &&
         driver.addressDetails.location &&
-        driver.referenceDetails &&
         driver.referenceDetails.pastEmployerName &&
         driver.referenceDetails.pastEmployerName != "" &&
         driver.referenceDetails.pastEmployerNumber &&
@@ -138,7 +139,33 @@ export default function RegisterAddress({ navigation }) {
     }
   };
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
+    //await getPresignedURL();
+    let submitResponse = await addAddressDetails(
+      driver,
+      UPDATE_ADDRESS_AND_CHECK
+    );
+
+    console.log(submitResponse);
+    /*
+    if (submitResponse) {
+      const registeration_status = submitResponse.registeration_status;
+      {
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "Status",
+              params: {
+                registeration_status,
+              },
+            },
+          ],
+        });
+      }
+    }
+/*
+    /*
     navigation.reset({
       index: 0,
       routes: [
@@ -150,6 +177,7 @@ export default function RegisterAddress({ navigation }) {
         },
       ],
     });
+    */
     //console.log("Submitted");
   };
 
@@ -175,13 +203,17 @@ export default function RegisterAddress({ navigation }) {
         return;
       }
 
-      let location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High,
-        timeInterval: 2000,
-      });
+      let location = null;
+
+      do {
+        location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+          timeInterval: 2000,
+        });
+      } while (location == null);
+
       if (location) {
         _updateAddress("location", location);
-        _updateAddress("locationAddress", location.locationAddress);
         setMockLocation(location.mocked);
       }
     } catch (err) {
@@ -208,57 +240,90 @@ export default function RegisterAddress({ navigation }) {
     }
   };
 
-  const addAddressDetails = async () => {
+  function getObjectSize(object) {
+    const objectString = JSON.stringify(object);
+    return new Blob([objectString]).size;
+  }
+
+  const getPresignedURL = async (fileName) => {
+    try {
+      const presignedConfig = {
+        method: "post",
+        url: S3_PRE_SIGNED_URI_LINK,
+        data: {
+          key: driver.driverId + "/" + fileName,
+        },
+      };
+
+      console.log("Pre Sign Config: ");
+      console.log(presignedConfig);
+
+      const response = await axios(presignedConfig);
+
+      console.log("Axios Response: ");
+      console.log(response.data);
+
+      return response.data.uploadUrl;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const addAddressDetails = async (driver, url = UPDATE_ADDRESS_AND_CHECK) => {
     setSubmitLoading(true);
 
-    let insideVideoBase64 = await readBase64File(
-      driver.addressDetails.insideVideo.uri,
-      "base64"
-    );
-
-    let outsideVideoBase64 = await readBase64File(
-      driver.addressDetails.outsideVideo.uri,
-      "base64"
-    );
-
-    let verificationVideoBase64 = await readBase64File(
-      driver.addressDetails.verificationVideo.uri,
-      "base64"
-    );
-
-    driver.addressDetails.insideVideo.file = insideVideoBase64;
-    driver.addressDetails.outsideVideo.file = outsideVideoBase64;
-    driver.addressDetails.verificationVideo.file = verificationVideoBase64;
-
-    const data = {
-      driverId: driver.driverId,
-      addressDetails: driver.addressDetails,
-      referenceDetails: driver.referenceDetails,
-    };
-
     try {
-      const driverConfig = {
-        method: "post",
-        url,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        data,
-      };
-      const response = await axios(driverConfig);
-      return response.data;
+      if (
+        (await uploadFile(
+          driver.addressDetails.insideVideo.uri,
+          "insideVideo"
+        )) &&
+        (await uploadFile(
+          driver.addressDetails.outsideVideo.uri,
+          "outsideVideo"
+        )) &&
+        (await uploadFile(
+          driver.addressDetails.verificationVideo.uri,
+          "verificationVideo"
+        ))
+      ) {
+        console.log("Files uploaded, registering the Driver");
+        const data = {
+          driverId: driver.driverId,
+          addressDetails: driver.addressDetails,
+          referenceDetails: driver.referenceDetails,
+        };
+
+        const driverConfig = {
+          method: "post",
+          url,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data,
+        };
+        const response = await axios(driverConfig);
+
+        console.log(response.data);
+
+        return response.data;
+      } else {
+        let error = new Error("File Upload Failed");
+        error.name = "ServiceUnavailable";
+        throw error;
+      }
     } catch (error) {
       if (error.response) {
-        console.log(error.response.data);
+        console.error(error.response.data);
         setErrorMessage(error.response.data.error);
         setErrorDialogVisible(true);
       } else if (error.request) {
-        console.log("The server did not respond:", error.message);
+        console.error("The server did not respond:", error.message);
         setErrorMessage(error.message);
         setErrorDialogVisible(true);
       } else {
-        console.log("Error:", error.message);
-        setErrorMessage("Something went Wrong");
+        console.error("Error:", error.message);
+        setErrorMessage(error.message);
         setErrorDialogVisible(true);
       }
     } finally {
@@ -266,24 +331,70 @@ export default function RegisterAddress({ navigation }) {
     }
   };
 
+  async function uploadFile(fileUri, fileName) {
+    try {
+      let presignedUrl = await getPresignedURL(fileName);
+
+      console.log(fileName);
+      console.log(presignedUrl);
+      console.log(fileUri);
+
+      const result = await FileSystem.uploadAsync(presignedUrl, fileUri, {
+        httpMethod: "PUT",
+        headers: {
+          "Content-Type": "video/mp4",
+        },
+        uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
+      });
+
+      //console.log(result.request.responseURL.split("?")[0]);
+      if (result.status === 200) {
+        console.log("File uploaded successfully!");
+        return true;
+      } else {
+        return false;
+        //console.log("File upload failed!");
+      }
+    } catch (err) {
+      throw err;
+      //console.log("An error occurred while uploading the file", err);
+    }
+  }
+
   async function readBase64File(uri) {
     try {
       const base64Data = await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
-      console.log("File contents (base64):", base64Data);
       return base64Data;
     } catch (error) {
       console.error("Error reading file:", error);
     }
   }
 
+  async function deleteFile(uri) {
+    try {
+      await FileSystem.deleteAsync(uri, { idempotent: true });
+      console.log("File has been successfully deleted");
+    } catch (err) {
+      console.log("An error occurred while deleting the file: ", err);
+    }
+  }
+
   useEffect(() => {
+    if (route.params && route.params.driverId) {
+      console.log(route.params.driverId);
+      dispatch(updateDriverAttribute("driverId", route.params.driverId));
+    }
     retrieveSavedData();
   }, []);
 
   useEffect(() => {
-    console.log(store);
+    //console.log(driver);
+    console.log("Address Details: ");
+    console.log(driver.addressDetails);
+    console.log("Reference Details: ");
+    console.log(driver.referenceDetails);
     checkFields(driver);
   }, [driver]);
 
@@ -337,17 +448,12 @@ export default function RegisterAddress({ navigation }) {
                         />
                       </Pressable>
                     ) : (
-                      <View style={styles.avatar}>
-                        <Pressable
-                          onPress={() => _startVideo(verificationVideo)}
-                        >
-                          <VideoThumbnail
-                            videoUri={
-                              driver.addressDetails.verificationVideo.uri
-                            }
-                          />
-                        </Pressable>
-                      </View>
+                      <Pressable onPress={() => _startVideo(verificationVideo)}>
+                        <VideoThumbnail
+                          videoUri={driver.addressDetails.verificationVideo.uri}
+                          customStyle={styles.avatar}
+                        />
+                      </Pressable>
                     )}
                   </View>
                   <View style={{ flex: 2 }}></View>
@@ -389,19 +495,12 @@ export default function RegisterAddress({ navigation }) {
                   >
                     <View style={{ alignItems: "center", marginTop: 5 }}>
                       {driver.addressDetails.outsideVideo ? (
-                        <View
-                          style={{
-                            width: 96,
-                            height: 96,
-                            borderWidth: 2,
-                          }}
-                        >
-                          <Pressable onPress={() => _startVideo(outsideVideo)}>
-                            <VideoThumbnail
-                              videoUri={driver.addressDetails.outsideVideo.uri}
-                            />
-                          </Pressable>
-                        </View>
+                        <Pressable onPress={() => _startVideo(outsideVideo)}>
+                          <VideoThumbnail
+                            videoUri={driver.addressDetails.outsideVideo.uri}
+                            customStyle={styles.avatar}
+                          />
+                        </Pressable>
                       ) : (
                         <IconButton
                           size={30}
@@ -423,19 +522,12 @@ export default function RegisterAddress({ navigation }) {
                   >
                     <View style={{ alignItems: "center", marginTop: 5 }}>
                       {driver.addressDetails.insideVideo ? (
-                        <View
-                          style={{
-                            width: 96,
-                            height: 96,
-                            borderWidth: 2,
-                          }}
-                        >
-                          <Pressable onPress={() => _startVideo(insideVideo)}>
-                            <VideoThumbnail
-                              videoUri={driver.addressDetails.insideVideo.uri}
-                            />
-                          </Pressable>
-                        </View>
+                        <Pressable onPress={() => _startVideo(insideVideo)}>
+                          <VideoThumbnail
+                            videoUri={driver.addressDetails.insideVideo.uri}
+                            customStyle={styles.avatar}
+                          />
+                        </Pressable>
                       ) : (
                         <IconButton
                           size={30}
@@ -539,7 +631,7 @@ export default function RegisterAddress({ navigation }) {
                     height: 200,
                   }}
                 >
-                  {driver.addressDetails.location ? (
+                  {driver.addressDetails.location && (
                     <MapService
                       currentLocation={{
                         latitude:
@@ -549,8 +641,6 @@ export default function RegisterAddress({ navigation }) {
                       }}
                       style={{ flex: 1 }}
                     />
-                  ) : (
-                    <Text variant="bodyMedium">Retrieving Location...</Text>
                   )}
                 </View>
                 <View style={{ position: "absolute", right: 20, bottom: 20 }}>
@@ -675,16 +765,7 @@ export default function RegisterAddress({ navigation }) {
               <View
                 style={{ flex: 1, flexDirection: "row", marginVertical: 10 }}
               >
-                <View style={{ flex: 2, marginRight: 10 }}>
-                  <Button
-                    icon="content-save"
-                    mode="contained"
-                    onPress={onSave}
-                    style={{ backgroundColor: "#805158" }}
-                  >
-                    Save
-                  </Button>
-                </View>
+                <View style={{ flex: 2, marginRight: 10 }}></View>
                 <View style={{ flex: 2 }}>
                   <Button
                     icon="step-forward"
@@ -737,6 +818,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 96,
     height: 96,
+    borderRadius: 96 / 4,
     borderColor: "#4C243B",
     borderWidth: 2,
   },

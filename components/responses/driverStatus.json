@@ -1,25 +1,31 @@
 {
-    "driverStatus": {
-        "active": {
-            "field": "Account Activated"
-        },
-        "pending_auto_registeration": {
-            "field": "Pending Auto Registeration"
-        },
-        "pending_driver_registeration": {
-            "field": "Pending Driver Registeration"
-        },
-        "inactive": {
-            "field": "Inactive"
-        },
-        "blacklist": {
-            "field": "Blacklisted Account"
-        },
-        "pending_confirmation": {
-            "field": "Pending Confirmation"
-        },
-        "rejected": {
-            "field": "Rejected"
-        }
+  "driverStatus": {
+    "active": {
+      "field": "Account Activated"
+    },
+    "pending_auto_registeration": {
+      "field": "Pending Auto Registeration"
+    },
+    "pending_driver_registeration": {
+      "field": "Complete Address Registeration"
+    },
+    "pending_vehicle_registeration": {
+      "field": "Complete Vehicle Registeration"
+    },
+    "pending_activation": {
+      "field": "Complete Vehicle Registeration"
+    },
+    "inactive": {
+      "field": "Inactive"
+    },
+    "blacklist": {
+      "field": "Blacklisted Account"
+    },
+    "pending_confirmation": {
+      "field": "Pending Confirmation"
+    },
+    "rejected": {
+      "field": "Rejected"
     }
+  }
 }

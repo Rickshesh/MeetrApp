@@ -1,16 +1,17 @@
-import React, {useState, useEffect} from 'react';
-import {View, Image, Text} from 'react-native';
-import * as VideoThumbnails from 'expo-video-thumbnails';
+import React, { useState, useEffect } from "react";
+import { View, Image, Text } from "react-native";
+import * as VideoThumbnails from "expo-video-thumbnails";
 
-const VideoThumbnail = ({videoUri}) => {
+const VideoThumbnail = ({ videoUri, customStyle }) => {
   const [thumbnailUri, setThumbnailUri] = useState(null);
 
   useEffect(() => {
     const generateThumbnail = async () => {
       try {
-        const {uri} = await VideoThumbnails.getThumbnailAsync(videoUri, {
+        const { uri } = await VideoThumbnails.getThumbnailAsync(videoUri, {
           time: 1000,
         });
+        console.log(uri);
         setThumbnailUri(uri);
       } catch (e) {
         console.warn(e);
@@ -29,12 +30,11 @@ const VideoThumbnail = ({videoUri}) => {
   }
 
   return (
-    <View>
-      <Image
-        source={{uri: thumbnailUri}}
-        style={{width: '100%', height: '100%'}}
-      />
-    </View>
+    <Image
+      source={{ uri: thumbnailUri }}
+      resizeMode="contain"
+      style={customStyle}
+    />
   );
 };
 

@@ -63,9 +63,9 @@ export default function RegisterationStatusSubmission({ errorMessage }) {
         setIconColor("green");
         break;
       case "pending_vehicle_registeration":
-        setMessage1("Congratulations, your physical verification is complete.");
+        setMessage1("Congratulations, physical verification is complete.");
         setMessage2(
-          "Our representative will reach out to shortly for vehicle onboarding"
+          "Our representative will reach out shortly for vehicle onboarding"
         );
         setIcon("map-marker");
         setIconColor("green");
@@ -75,11 +75,19 @@ export default function RegisterationStatusSubmission({ errorMessage }) {
 
   function checkInitialRoute() {
     const { registeration_status } = route.params;
-    console.log(registeration_status);
     if (registeration_status) {
       if (registeration_status == "registeration_success") {
         setStatus("pending_driver_registeration");
         displayStatus("pending_driver_registeration");
+      } else if (registeration_status == "registeration_fail") {
+        setStatus("rejected");
+        displayStatus("rejected");
+      } else if (registeration_status == "registeration_address_success") {
+        setStatus("pending_vehicle_registeration");
+        displayStatus("pending_vehicle_registeration");
+      } else if (registeration_status == "registeration_vehicle_success") {
+        setStatus("pending_vehicle_registeration");
+        displayStatus("pending_vehicle_registeration");
       } else {
         setStatus("rejected");
         displayStatus("rejected");

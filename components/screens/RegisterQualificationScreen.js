@@ -63,11 +63,26 @@ export default function RegisterDriver({ navigation }) {
     dispatch(updateDriver({ key, value }));
   };
 
+  /*
   const onSubmit = async () => {
-    //let submitResponse = await createDriver(driver, REGISTER_DRIVER_AND_CHECK);
-    if (true) {
-      //const registeration_status = submitResponse.registeration_status;
-      const registeration_status = "registeration_success";
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: "Address",
+          params: {
+            driverId: driver.driverId,
+          },
+        },
+      ],
+    });
+  };
+*/
+
+  const onSubmit = async () => {
+    let submitResponse = await createDriver(driver, REGISTER_DRIVER_AND_CHECK);
+    if (submitResponse) {
+      const registeration_status = submitResponse.registeration_status;
       if (registeration_status == "registeration_success") {
         navigation.reset({
           index: 0,
@@ -76,6 +91,7 @@ export default function RegisterDriver({ navigation }) {
               name: "Address",
               params: {
                 driverId: driver.driverId,
+                registeration_status,
               },
             },
           ],
@@ -87,7 +103,7 @@ export default function RegisterDriver({ navigation }) {
             {
               name: "Status",
               params: {
-                registeration_status: submitResponse.registeration_status,
+                registeration_status,
               },
             },
           ],
@@ -806,7 +822,7 @@ export default function RegisterDriver({ navigation }) {
                     mode="contained"
                     onPress={onSubmit}
                     loading={submitLoading}
-                    //disabled={submitDisabled}
+                    disabled={submitDisabled}
                   >
                     Next
                   </Button>

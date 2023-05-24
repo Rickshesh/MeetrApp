@@ -10,6 +10,11 @@
       "StackName": "amplify-meetrapp-dev-92232",
       "StackId": "arn:aws:cloudformation:ap-south-1:971095065425:stack/amplify-meetrapp-dev-92232/12848f90-7387-11ed-a372-0a29a03a5300",
       "AmplifyAppId": "d3vak3j4he23ko"
+    },
+    "categories": {
+      "auth": {
+        "meetrappeba380cf": {}
+      }
     }
   }
 }

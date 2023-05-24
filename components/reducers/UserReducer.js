@@ -48,7 +48,6 @@ const userReducer = (state = initialState, action) => {
         },
       };
     case UPDATE_ADDRESS_DETAILS:
-      console.log(state);
       return {
         ...state,
         driver: {
@@ -60,7 +59,8 @@ const userReducer = (state = initialState, action) => {
         },
       };
     case UPDATE_REFERENCE_DETAILS:
-      console.log(state);
+      console.log(action);
+      //console.log(state);
       return {
         ...state,
         driver: {
@@ -130,10 +130,8 @@ const userReducer = (state = initialState, action) => {
         showAccountSection: !state.showAccountSection,
       };
     case UPDATE_MQTT_DATA:
-      //console.log(JSON.stringify(state.mqttData));
       let mqttData = {};
       if (state.mqttData.hasOwnProperty(action.payload.key)) {
-        console.log("True");
         mqttData = {
           ...state.mqttData,
           [action.payload.key]: {
@@ -151,7 +149,6 @@ const userReducer = (state = initialState, action) => {
           },
         };
       } else {
-        console.log("False");
         mqttData = {
           ...state.mqttData,
           [action.payload.key]: {
@@ -165,8 +162,6 @@ const userReducer = (state = initialState, action) => {
           },
         };
       }
-
-      console.log("Final State:" + JSON.stringify(mqttData));
 
       return {
         ...state,

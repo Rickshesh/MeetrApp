@@ -4,11 +4,12 @@ import { IconButton, Text } from "react-native-paper";
 import { Camera, CameraType } from "expo-camera";
 import * as FileSystem from "expo-file-system";
 import { Audio } from "expo-av";
+import { Video } from "react-native-compressor";
 
 const RecordVideo = ({ _setVideo, _hideVideo, type, timeToFinish }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [cameraPermission, setCameraPermission] = useState(null);
-  const [cameraType, setCameraType] = useState(CameraType.front);
+  const [cameraType, setCameraType] = useState(CameraType.back);
   const [camera, setCamera] = useState(null);
 
   const permissionFunction = async () => {
@@ -34,9 +35,13 @@ const RecordVideo = ({ _setVideo, _hideVideo, type, timeToFinish }) => {
     if (camera) {
       try {
         setIsRecording(true);
+        console.log(Camera.Constants.VideoQuality);
         const video = await camera.recordAsync({
           quality: Camera.Constants.VideoQuality["480p"],
-          maxDuration: type == "verificationVideo" ? 3 : 15, // Set a max duration for the video, in seconds.
+          mute: true,
+          maxVideoSize: 2000000,
+          maxDuration:
+            type == "verificationVideo" ? 3 : timeToFinish ? timeToFinish : 10, // Set a max duration for the video, in seconds.
         });
         console.log("Video recorded: ", video.uri);
         const fileInfo = await FileSystem.getInfoAsync(video.uri);
@@ -48,6 +53,23 @@ const RecordVideo = ({ _setVideo, _hideVideo, type, timeToFinish }) => {
       }
     }
   };
+
+  async function compressVideo(uri) {
+    const result = await Video.compress(
+      uri,
+      {
+        compressionMethod: "auto",
+      },
+      (progress) => {
+        if (backgroundMode) {
+          console.log("Compression Progress: ", progress);
+        } else {
+          setCompressingProgress(progress);
+        }
+      }
+    );
+    return result;
+  }
 
   function stopRecording() {
     if (camera) {

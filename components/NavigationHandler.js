@@ -17,7 +17,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { useDispatch, useSelector } from "react-redux";
 import { resetDriver, toggleAccountSection } from "./actions/UserActions";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import DrawerSection from "./screens/DrawerSection";
 import { AWSIoTProvider } from "@aws-amplify/pubsub";
 import { Amplify, PubSub } from "aws-amplify";
@@ -125,7 +125,7 @@ export default function NavigationHandler() {
   );
 }
 
-function DriverRegisteration() {
+function DriverRegisteration({}) {
   return (
     <RegisterStack.Navigator
       initialRouteName="Driver"

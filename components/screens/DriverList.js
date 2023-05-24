@@ -21,6 +21,7 @@ import { updateMQTTdata } from "../actions/UserActions";
 import { useSelector, useDispatch } from "react-redux";
 import { GET_USER_LIST } from "@env";
 import { driverStatus } from "../responses/driverStatus.json";
+import VideoThumbnail from "../supportComponents/VideoThumbnail";
 
 export default function DriverList({ navigation }) {
   const [isLoading, setLoading] = useState(true);
@@ -123,7 +124,6 @@ export default function DriverList({ navigation }) {
   };
 
   function checkRecentEvent(eventTime, IST_time) {
-    return true;
     let eventDate = new Date(eventTime);
     let timeDifference = IST_time.getTime() - eventDate.getTime();
     let oneMinute = 60000;
@@ -196,7 +196,7 @@ export default function DriverList({ navigation }) {
                               paddingHorizontal: 10,
                               margin: 10,
                               flexDirection: "row",
-                              backgroundColor: "#FEF5D8",
+                              backgroundColor: "#FFFFFF",
                             }
                       }
                       elevation={2}
@@ -214,7 +214,12 @@ export default function DriverList({ navigation }) {
                           }}
                         ></View>
                       )}
-                      <View style={{ flex: 1, margin: 5 }}>
+                      <View
+                        style={{
+                          flex: 1,
+                          margin: 5,
+                        }}
+                      >
                         <View
                           style={{
                             flex: 1,
@@ -222,11 +227,20 @@ export default function DriverList({ navigation }) {
                             justifyContent: "center",
                           }}
                         >
-                          <Image
-                            resizeMode="contain"
-                            style={styles.avatar}
-                            source={{ uri: driver.image.uri }}
-                          />
+                          {driver.image && driver.image.uri && (
+                            <Image
+                              resizeMode="contain"
+                              style={styles.avatar}
+                              source={{ uri: driver.image.uri }}
+                            />
+                          )}
+
+                          {driver && driver.video.uri && (
+                            <VideoThumbnail
+                              videoUri={driver.video.uri}
+                              customStyle={styles.avatar}
+                            />
+                          )}
                         </View>
                       </View>
                       <View style={{ flex: 2, margin: 5 }}>
@@ -246,9 +260,13 @@ export default function DriverList({ navigation }) {
                             <View
                               style={{ flex: 1, justifyContent: "flex-end" }}
                             >
-                              <Text style={{ fontWeight: "300", fontSize: 15 }}>
-                                Rs {driver.totalAmountPending} Pending
-                              </Text>
+                              {driver.totalAmountPending != 0 && (
+                                <Text
+                                  style={{ fontWeight: "300", fontSize: 15 }}
+                                >
+                                  Rs {driver.totalAmountPending} Pending
+                                </Text>
+                              )}
                             </View>
                           )}
                         </View>
@@ -301,39 +319,38 @@ export default function DriverList({ navigation }) {
                         marginHorizontal: 10,
                         marginTop: -10,
                         flexDirection: "row",
+                        justifyContent: "space-around",
                       }}
                     >
                       <View
                         style={{
-                          flex: 2,
                           justifyContent: "center",
-                          marginHorizontal: 10,
+                          marginHorizontal: 5,
                         }}
                       >
-                        <Text style={{ fontWeight: "500", fontSize: 15 }}>
+                        <Text style={{ fontWeight: "400", fontSize: 13 }}>
                           {driverStatus[driver.activeStatus].field}
                         </Text>
                       </View>
                       <View
                         style={{
-                          flex: 1,
                           justifyContent: "center",
-                          marginHorizontal: 10,
                         }}
                       >
-                        {driver.activeStatus ==
-                          "pending_auto_registeration" && (
+                        {(driver.activeStatus ==
+                          "pending_vehicle_registeration" ||
+                          driver.activeStatus == "pending_activation") && (
                           <TouchableOpacity
                             style={{
                               alignItems: "center",
                               justifyContent: "center",
                               backgroundColor: "#674FA3",
-                              borderRadius: 5,
-                              padding: 5,
+                              padding: 10,
                             }}
                             onPress={() =>
-                              navigation.navigate("Auto", {
-                                driverid: driver.driverId,
+                              navigation.navigate("Register", {
+                                screen: "Vehicle",
+                                params: { driverId: driver.driverId },
                               })
                             }
                           >
@@ -341,11 +358,40 @@ export default function DriverList({ navigation }) {
                               <Text
                                 style={{
                                   fontWeight: "400",
-                                  fontSize: 15,
+                                  fontSize: 13,
                                   color: "white",
                                 }}
                               >
-                                Register Auto
+                                Register Vehicle
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        )}
+                        {driver.activeStatus ==
+                          "pending_driver_registeration" && (
+                          <TouchableOpacity
+                            style={{
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: "#674FA3",
+                              padding: 10,
+                            }}
+                            onPress={() =>
+                              navigation.navigate("Register", {
+                                screen: "Address",
+                                params: { driverId: driver.driverId },
+                              })
+                            }
+                          >
+                            <View>
+                              <Text
+                                style={{
+                                  fontWeight: "400",
+                                  fontSize: 13,
+                                  color: "white",
+                                }}
+                              >
+                                Register Address
                               </Text>
                             </View>
                           </TouchableOpacity>
@@ -433,7 +479,7 @@ const styles = StyleSheet.create({
   avatar: {
     height: 72,
     width: 72,
-    borderRadius: 72 / 2,
+    borderRadius: 72 / 4,
   },
   paddingHorizontal: {
     paddingHorizontal: 10,
