@@ -6,7 +6,8 @@ import NavigationHandler from "./NavigationHandler"; // Importing NavigationHand
 import { Amplify } from "aws-amplify";
 import { Authenticator } from "@aws-amplify/ui-react-native";
 import awsExports from "../src/aws-exports";
-import DummyAccelerometer from "../components/screens/DummyAccelerometer";
+import PartnerRegisteration from "./screens/PartnerRegisteration";
+import PartnerBankRegisteration from "./screens/PartnerBankRegisteration";
 //Main is the entry point of the App, and provides various functionalities, by importing Global Store, Amplify, Authentication Screen
 
 // Configuring the Amplify library with the settings defined in the aws-exports.js file
@@ -25,7 +26,7 @@ const Main = () => {
       >
         <Provider store={store}>
           <PaperProvider>
-            <NavigationHandler />
+            <PartnerRegisteration />
           </PaperProvider>
         </Provider>
       </Authenticator>

@@ -10,6 +10,8 @@ import { UPDATE_ADDRESS_DETAILS } from "../actions/UserActions";
 import { UPDATE_REFERENCE_DETAILS } from "../actions/UserActions";
 import { RETRIEVE_AUTO_DETAILS } from "../actions/UserActions";
 import { RETRIEVE_ADDRESS_DETAILS } from "../actions/UserActions";
+import { UPDATE_PARTNER } from "../actions/UserActions";
+import { UPDATE_BANK_PARTNER } from "../actions/UserActions";
 
 const initialState = {
   driver: {
@@ -17,6 +19,9 @@ const initialState = {
     addressDetails: {},
     autoDetails: {},
     referenceDetails: {},
+  },
+  partner: {
+    bankDetails: {},
   },
   showAccountSection: false,
   mqttData: {},
@@ -102,6 +107,25 @@ const userReducer = (state = initialState, action) => {
       return {
         ...state,
         driver: { ...state.driver, [action.payload.key]: action.payload.value },
+      };
+    case UPDATE_PARTNER:
+      return {
+        ...state,
+        partner: {
+          ...state.partner,
+          [action.payload.key]: action.payload.value,
+        },
+      };
+    case UPDATE_BANK_PARTNER:
+      return {
+        ...state,
+        partner: {
+          ...state.partner,
+          bankDetails: {
+            ...state.partner.bankDetails,
+            [action.payload.key]: action.payload.value,
+          },
+        },
       };
     case UPDATE_IMAGES:
       const { [action.payload.keyobject]: parentValue, ...remainingFields } =

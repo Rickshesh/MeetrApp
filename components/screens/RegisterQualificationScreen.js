@@ -489,6 +489,7 @@ export default function RegisterDriver({ navigation }) {
                         ? "numeric"
                         : "default"
                     }
+                    autoCapitalize="characters"
                     style={{ backgroundColor: "#FBFEFB", flex: 1 }}
                     mode="outlined"
                     value={driver.identityParameters.drivingLicense}

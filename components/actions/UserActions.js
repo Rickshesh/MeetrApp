@@ -1,4 +1,5 @@
 export const UPDATE_DRIVER = "UPDATE_DRIVER";
+export const UPDATE_PARTNER = "UPDATE_PARTNER";
 export const UPDATE_BANK_DETAILS = "UPDATE_BANK_DETAILS";
 export const UPDATE_AUTO_DETAILS = "UPDATE_AUTO_DETAILS";
 export const UPDATE_DRIVER_ATTRIBUTE = "UPDATE_DRIVER_ATTRIBUTE";
@@ -11,11 +12,26 @@ export const UPDATE_ADDRESS_DETAILS = "UPDATE_ADDRESS_DETAILS";
 export const UPDATE_REFERENCE_DETAILS = "UPDATE_REFERENCE_DETAILS";
 export const RETRIEVE_ADDRESS_DETAILS = "RETRIEVE_ADDRESS_DETAILS";
 export const RETRIEVE_AUTO_DETAILS = "RETRIEVE_AUTO_DETAILS";
+export const UPDATE_BANK_PARTNER = "UPDATE_BANK_PARTNER";
 
 export function updateDriver(driver) {
   return {
     type: UPDATE_DRIVER,
     payload: driver,
+  };
+}
+
+export function updatePartner(partner) {
+  return {
+    type: UPDATE_PARTNER,
+    payload: partner,
+  };
+}
+
+export function updatePartnerBank(bankDetails) {
+  return {
+    type: UPDATE_BANK_PARTNER,
+    payload: bankDetails,
   };
 }
 

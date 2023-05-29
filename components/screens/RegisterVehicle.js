@@ -661,6 +661,7 @@ export default function RegisterVehicle({ navigation, route }) {
                   keyboardType="default"
                   style={{ backgroundColor: "#FBFEFB", flex: 1 }}
                   mode="outlined"
+                  autoCapitalize="characters"
                   value={driver.autoDetails.vehicleRegisterationNumber}
                   onChangeText={(text) => {
                     _updateVehicle("vehicleRegisterationNumber", text);
